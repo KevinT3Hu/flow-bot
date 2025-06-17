@@ -290,10 +290,10 @@ impl FlowBot {
 
     fn check_is_echo(msg: &str) -> Option<String> {
         let msg = serde_json::from_str::<serde_json::Value>(msg).unwrap();
-        if let serde_json::Value::Object(obj) = msg {
-            if let Some(serde_json::Value::String(echo)) = obj.get("echo") {
-                return Some(echo.clone());
-            }
+        if let serde_json::Value::Object(obj) = msg
+            && let Some(serde_json::Value::String(echo)) = obj.get("echo")
+        {
+            return Some(echo.clone());
         }
         None
     }

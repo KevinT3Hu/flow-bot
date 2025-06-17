@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use serde::Deserialize;
 use serde_json::Value;
 
+use crate::impl_from_event;
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct GroupFile {
     pub id: String,
@@ -115,3 +117,21 @@ pub enum Notice {
         data: HashMap<String, Value>,
     },
 }
+
+impl_from_event!(Notice);
+
+impl_from_event!(Notice, GroupUpload);
+
+impl_from_event!(Notice, GroupAdmin);
+
+impl_from_event!(Notice, GroupDecrease);
+
+impl_from_event!(Notice, GroupIncrease);
+
+impl_from_event!(Notice, GroupBan);
+
+impl_from_event!(Notice, FriendAdd);
+
+impl_from_event!(Notice, GroupRecall);
+
+impl_from_event!(Notice, FriendRecall);
