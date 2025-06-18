@@ -1,5 +1,9 @@
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+use crate::base::context::BotContext;
+use crate::base::extract::FromEvent;
+use crate::event::{BotEvent, TypedEvent};
 use crate::message::{
     self, IntoMessage,
     segments::{ReplySegment, Segment},
@@ -109,5 +113,44 @@ impl Message {
 
         ret.extend(message.into_message());
         ret
+    }
+}
+
+#[async_trait]
+impl FromEvent for Message {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        if let TypedEvent::Message(message) = &event.event {
+            Some((**message).clone())
+        } else {
+            None
+        }
+    }
+}
+
+#[async_trait]
+impl FromEvent for PrivateMessageInfo {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        if let TypedEvent::Message(ref msg) = event.event {
+            match &msg.info {
+                TypedMessageInfo::Private(info) => Some(info.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+}
+
+#[async_trait]
+impl FromEvent for GroupMessageInfo {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        if let TypedEvent::Message(ref msg) = event.event {
+            match &msg.info {
+                TypedMessageInfo::Group(info) => Some(info.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
     }
 }

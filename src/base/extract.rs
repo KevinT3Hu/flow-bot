@@ -39,13 +39,13 @@ where
 }
 
 /// Extractor for message event.
-pub struct Message {
+pub struct MessageBody {
     pub message: message::Message,
 }
 
 #[async_trait]
-impl FromEvent for Message {
-    async fn from_event(_: BotContext, event: BotEvent) -> Option<Message> {
+impl FromEvent for MessageBody {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<MessageBody> {
         match event.event {
             crate::event::TypedEvent::Message(ref msg) => Some(Self {
                 message: msg.message.clone(),
@@ -55,8 +55,8 @@ impl FromEvent for Message {
     }
 }
 
-unsafe impl Send for Message {}
-unsafe impl Sync for Message {}
+unsafe impl Send for MessageBody {}
+unsafe impl Sync for MessageBody {}
 
 pub struct BasicSenderInfo {
     pub user_id: Option<i64>,

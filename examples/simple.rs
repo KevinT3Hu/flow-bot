@@ -1,9 +1,9 @@
 use flow_bot::{
     FlowBotBuilder,
-    base::{connect::ReverseConnectionConfig, extract::Message, handler::HandlerControl},
+    base::{connect::ReverseConnectionConfig, extract::MessageBody, handler::HandlerControl},
 };
 
-async fn on_message(msg: Message) -> HandlerControl {
+async fn on_message(msg: MessageBody) -> HandlerControl {
     println!("{:?}", msg.message);
     HandlerControl::Continue
 }
