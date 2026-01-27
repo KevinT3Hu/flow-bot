@@ -1,4 +1,6 @@
 #![feature(try_trait_v2)]
+#![feature(adt_const_params)]
+#![feature(unsized_const_params)]
 
 //! An onebot-11 SDK that simplifies bot creation.
 //!
