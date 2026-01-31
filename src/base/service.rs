@@ -10,4 +10,7 @@ pub trait Service: Send + Sync {
     ///
     /// [`FromEvent::from_event`]: crate::base::extract::FromEvent::from_event
     async fn serve(&self, context: BotContext, event: BotEvent) -> HandlerControl;
+
+    #[allow(unused_variables)]
+    async fn init(&self, bot: BotContext) {}
 }

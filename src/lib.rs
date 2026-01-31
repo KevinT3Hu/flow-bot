@@ -220,6 +220,7 @@ impl FlowBot {
 
         self.set_sink(write).await;
         self.run_msg_loop(read).await?;
+        self.init_services().await;
 
         Ok(())
     }
@@ -264,6 +265,14 @@ impl FlowBot {
             }
         }
         Ok(())
+    }
+
+    async fn init_services(&self) {
+        for handler in self.handlers.deref() {
+            if let HandlerOrService::Service(service) = handler {
+                service.init(self.context.clone()).await;
+            }
+        }
     }
 
     fn handle_event(&self, text: Utf8Bytes) -> Result<(), FlowError> {
