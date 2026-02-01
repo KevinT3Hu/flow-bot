@@ -9,13 +9,31 @@ pub trait IntoMessage {
     fn into_message(self) -> Message;
 }
 
-impl<T> IntoMessage for T
-where
-    T: AsRef<str>,
-{
+impl IntoMessage for String {
+    fn into_message(self) -> Message {
+        vec![segments::Segment::Text(TextSegment { text: self })]
+    }
+}
+
+impl IntoMessage for &str {
     fn into_message(self) -> Message {
         vec![segments::Segment::Text(TextSegment {
-            text: self.as_ref().to_string(),
+            text: self.to_string(),
         })]
+    }
+}
+
+impl IntoMessage for &String {
+    fn into_message(self) -> Message {
+        vec![segments::Segment::Text(TextSegment { text: self.clone() })]
+    }
+}
+
+impl<T> IntoMessage for Vec<T>
+where
+    T: Into<segments::Segment>,
+{
+    fn into_message(self) -> Message {
+        self.into_iter().map(|s| s.into()).collect()
     }
 }
