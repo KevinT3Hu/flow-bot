@@ -141,6 +141,9 @@ pub mod error;
 pub mod event;
 pub mod message;
 
+#[cfg(feature = "macros")]
+pub use flow_bot_macros::flow_service;
+
 enum HandlerOrService {
     Handler(Box<dyn ErasedHandler>),
     Service(Box<dyn Service>),

@@ -7,6 +7,10 @@ description = "An onebot-11 SDK that simplifies bot creation."
 repository = "https://github.com/KevinT3Hu/flow-bot.git"
 license = "AGPL-3.0-only"
 
+[workspace]
+resolver = "3"
+members = ["flow-bot-macros"]
+
 [dependencies]
 async-trait = "0.1.89"
 clap = { version = "4.5.54", features = ["derive"], optional = true }
@@ -20,9 +24,12 @@ tokio-tungstenite = "0.28.0"
 tracing = "0.1.44"
 uuid = { version = "1.20.0", features = ["v4"] }
 
+flow-bot-macros = { path = "./flow-bot-macros", optional = true }
+
 [dev-dependencies]
 tokio = { version = "1.49.0", features = ["rt"] }
 
 [features]
 command = ["clap/derive"]
-default = ["command"]
+macros = ["dep:flow-bot-macros"]
+default = ["command","macros"]
