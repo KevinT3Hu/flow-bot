@@ -32,4 +32,4 @@ tokio = { version = "1.49.0", features = ["rt"] }
 [features]
 command = ["clap/derive"]
 macros = ["dep:flow-bot-macros"]
-default = ["command","macros"]
+default = ["command"]

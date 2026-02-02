@@ -222,8 +222,8 @@ impl FlowBot {
         let (write, read) = self.connect().await?;
 
         self.set_sink(write).await;
-        self.run_msg_loop(read).await?;
         self.init_services().await;
+        self.run_msg_loop(read).await?;
 
         Ok(())
     }
