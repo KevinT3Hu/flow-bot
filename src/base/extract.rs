@@ -55,9 +55,6 @@ impl FromEvent for MessageBody {
     }
 }
 
-unsafe impl Send for MessageBody {}
-unsafe impl Sync for MessageBody {}
-
 pub struct BasicSenderInfo {
     pub user_id: Option<i64>,
     pub nickname: Option<String>,
@@ -111,9 +108,6 @@ impl FromEvent for Sender {
     }
 }
 
-unsafe impl Send for Sender {}
-unsafe impl Sync for Sender {}
-
 pub struct At {
     pub user_id: String,
 }
@@ -133,9 +127,6 @@ impl FromEvent for At {
         }
     }
 }
-
-unsafe impl Send for At {}
-unsafe impl Sync for At {}
 
 pub struct GroupId {
     pub group_id: i64,
@@ -160,9 +151,6 @@ impl FromEvent for GroupId {
     }
 }
 
-unsafe impl Send for GroupId {}
-unsafe impl Sync for GroupId {}
-
 pub struct SenderId {
     pub user_id: i64,
 }
@@ -180,9 +168,6 @@ impl FromEvent for SenderId {
     }
 }
 
-unsafe impl Send for SenderId {}
-unsafe impl Sync for SenderId {}
-
 pub struct MatchGroupId<const ID: i64>;
 
 #[async_trait]
@@ -195,9 +180,6 @@ impl<const ID: i64> FromEvent for MatchGroupId<ID> {
         if group_id == ID { Some(Self) } else { None }
     }
 }
-
-unsafe impl<const ID: i64> Send for MatchGroupId<ID> {}
-unsafe impl<const ID: i64> Sync for MatchGroupId<ID> {}
 
 pub struct Reply {
     pub reply: message::Message,
