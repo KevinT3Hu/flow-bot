@@ -6,7 +6,9 @@ use crate::{
     api::api_ext::ApiExt,
     event::{
         BotEvent, TypedEvent,
-        message::{GroupSenderInfo, PrivateSenderInfo, SenderSex, TypedMessageInfo},
+        message::{
+            GroupSenderInfo, GroupSenderRole, PrivateSenderInfo, SenderSex, TypedMessageInfo,
+        },
     },
     message::{self, message_ext::MessageExt, segments::Segment},
 };
@@ -44,6 +46,45 @@ impl FromEvent for MessageBody {
     async fn from_event(_: BotContext, event: BotEvent) -> Option<MessageBody> {
         match event.event {
             TypedEvent::Message(ref msg) => Some(Self(msg.message.clone())),
+            _ => None,
+        }
+    }
+}
+
+#[async_trait]
+impl FromEvent for GroupSenderRole {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        match event.event {
+            TypedEvent::Message(ref msg) => match &msg.info {
+                TypedMessageInfo::Group(info) => info.sender.role.clone(),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+}
+
+#[async_trait]
+impl FromEvent for GroupSenderInfo {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        match event.event {
+            TypedEvent::Message(ref msg) => match &msg.info {
+                TypedMessageInfo::Group(info) => Some(info.sender.clone()),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+}
+
+#[async_trait]
+impl FromEvent for PrivateSenderInfo {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        match event.event {
+            TypedEvent::Message(ref msg) => match &msg.info {
+                TypedMessageInfo::Private(info) => Some(info.sender.clone()),
+                _ => None,
+            },
             _ => None,
         }
     }

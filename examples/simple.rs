@@ -3,8 +3,8 @@ use flow_bot::{
     base::{connect::ReverseConnectionConfig, extract::MessageBody, handler::HandlerControl},
 };
 
-async fn on_message(msg: MessageBody) -> HandlerControl {
-    println!("{:?}", msg.message);
+async fn on_message(MessageBody(msg): MessageBody) -> HandlerControl {
+    println!("{:?}", msg);
     HandlerControl::Continue
 }
 
