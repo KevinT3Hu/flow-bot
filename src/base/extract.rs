@@ -6,7 +6,7 @@ use crate::{
     api::api_ext::ApiExt,
     event::{
         BotEvent, TypedEvent,
-        message::{GroupSenderInfo, PrivateSenderInfo, SenderSex},
+        message::{GroupSenderInfo, PrivateSenderInfo, SenderSex, TypedMessageInfo},
     },
     message::{self, message_ext::MessageExt, segments::Segment},
 };
@@ -23,9 +23,7 @@ pub trait FromEvent {
 
 /// State extractor, extract the state from BotContext.
 /// If the required state is not found, the handler will be skipped.
-pub struct State<S> {
-    pub state: Arc<S>,
-}
+pub struct State<S>(pub Arc<S>);
 
 #[async_trait]
 impl<S> FromEvent for State<S>
@@ -34,22 +32,18 @@ where
 {
     async fn from_event(context: BotContext, _: BotEvent) -> Option<Self> {
         let state = context.state.get::<S>()?;
-        Some(Self { state })
+        Some(Self(state))
     }
 }
 
 /// Extractor for message event.
-pub struct MessageBody {
-    pub message: message::Message,
-}
+pub struct MessageBody(pub message::Message);
 
 #[async_trait]
 impl FromEvent for MessageBody {
     async fn from_event(_: BotContext, event: BotEvent) -> Option<MessageBody> {
         match event.event {
-            crate::event::TypedEvent::Message(ref msg) => Some(Self {
-                message: msg.message.clone(),
-            }),
+            TypedEvent::Message(ref msg) => Some(Self(msg.message.clone())),
             _ => None,
         }
     }
@@ -84,9 +78,7 @@ impl From<GroupSenderInfo> for BasicSenderInfo {
     }
 }
 
-pub struct Sender {
-    pub info: BasicSenderInfo,
-}
+pub struct Sender(pub BasicSenderInfo);
 
 #[async_trait]
 impl FromEvent for Sender {
@@ -94,32 +86,24 @@ impl FromEvent for Sender {
         match event.event {
             TypedEvent::Message(ref msg) => {
                 let info = match &msg.info {
-                    crate::event::message::TypedMessageInfo::Private(info) => {
-                        info.sender.clone().into()
-                    }
-                    crate::event::message::TypedMessageInfo::Group(info) => {
-                        info.sender.clone().into()
-                    }
+                    TypedMessageInfo::Private(info) => info.sender.clone().into(),
+                    TypedMessageInfo::Group(info) => info.sender.clone().into(),
                 };
-                Some(Self { info })
+                Some(Self(info))
             }
             _ => None,
         }
     }
 }
 
-pub struct At {
-    pub user_id: String,
-}
+pub struct At(pub String);
 
 #[async_trait]
 impl FromEvent for At {
     async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
         if let TypedEvent::Message(ref msg) = event.event {
             msg.message.iter().find_map(|seg| match seg {
-                Segment::At(at) => Some(Self {
-                    user_id: at.qq.clone(),
-                }),
+                Segment::At(at) => Some(Self(at.qq.clone())),
                 _ => None,
             })
         } else {
@@ -128,9 +112,7 @@ impl FromEvent for At {
     }
 }
 
-pub struct GroupId {
-    pub group_id: i64,
-}
+pub struct GroupId(pub i64);
 
 #[async_trait]
 impl FromEvent for GroupId {
@@ -140,9 +122,7 @@ impl FromEvent for GroupId {
     {
         if let TypedEvent::Message(ref msg) = event.event {
             match &msg.info {
-                crate::event::message::TypedMessageInfo::Group(info) => Some(Self {
-                    group_id: info.group_id,
-                }),
+                TypedMessageInfo::Group(info) => Some(Self(info.group_id)),
                 _ => None,
             }
         } else {
@@ -151,9 +131,7 @@ impl FromEvent for GroupId {
     }
 }
 
-pub struct SenderId {
-    pub user_id: i64,
-}
+pub struct SenderId(pub i64);
 
 #[async_trait]
 impl FromEvent for SenderId {
@@ -162,9 +140,7 @@ impl FromEvent for SenderId {
         Self: Sized,
     {
         let sender_info = Sender::from_event(context, event).await?;
-        Some(Self {
-            user_id: sender_info.info.user_id?,
-        })
+        Some(Self(sender_info.0.user_id?))
     }
 }
 
@@ -176,14 +152,12 @@ impl<const ID: i64> FromEvent for MatchGroupId<ID> {
     where
         Self: Sized,
     {
-        let group_id = GroupId::from_event(context, event).await?.group_id;
+        let group_id = GroupId::from_event(context, event).await?.0;
         if group_id == ID { Some(Self) } else { None }
     }
 }
 
-pub struct Reply {
-    pub reply: message::Message,
-}
+pub struct Reply(pub message::Message);
 
 #[async_trait]
 impl FromEvent for Reply {
@@ -200,7 +174,7 @@ impl FromEvent for Reply {
                         .await
                         .map(|msg| msg.message.clone())
                         .ok()?;
-                    return Some(Self { reply: message });
+                    return Some(Self(message));
                 }
             }
         }
@@ -222,7 +196,7 @@ where
         Self: Sized,
     {
         let message_body = MessageBody::from_event(context, event).await?;
-        let plain_text = message_body.message.extract_if_plain_text()?;
+        let plain_text = message_body.0.extract_if_plain_text()?;
         let trimmed = plain_text.trim();
 
         if trimmed.split_whitespace().next() != Some(PREFIX) {
