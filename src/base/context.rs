@@ -97,23 +97,13 @@ impl StateMap {
         }
     }
 
-    pub(crate) fn insert<T: 'static + Any + Send + Sync>(&mut self, state: T) {
+    pub(crate) fn insert<T: Any + Send + Sync>(&mut self, state: T) {
         self.map.insert(TypeId::of::<T>(), Arc::new(state));
     }
 
-    pub(crate) fn get<T: Any>(&self) -> Option<Arc<T>> {
+    pub(crate) fn get<T: Any + Send + Sync>(&self) -> Option<Arc<T>> {
         self.map
             .get(&TypeId::of::<T>())
-            .and_then(|state| downcast_arc::<T>(state.clone()))
-    }
-}
-
-fn downcast_arc<T: Any>(arc: Arc<dyn Any>) -> Option<Arc<T>> {
-    if arc.is::<T>() {
-        let ptr = Arc::into_raw(arc) as *const T;
-        let arc = unsafe { Arc::from_raw(ptr) };
-        Some(arc)
-    } else {
-        None
+            .and_then(|state| Arc::clone(state).downcast::<T>().ok())
     }
 }
