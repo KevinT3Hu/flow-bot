@@ -20,6 +20,9 @@ pub enum FlowError {
     #[error("No response")]
     NoResponse,
 
+    #[error("Request timeout after {0}ms")]
+    Timeout(u64),
+
     #[error("Reconnection failed after {0} attempts")]
     ReconnectionFailed(u32),
 }

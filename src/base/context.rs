@@ -5,9 +5,12 @@ use std::{
 };
 
 use async_trait::async_trait;
-use futures::{SinkExt, lock::Mutex, stream::SplitSink};
+use futures::{SinkExt, stream::SplitSink};
 use serde_json::json;
-use tokio::{net::TcpStream, sync::broadcast::Sender};
+use tokio::{
+    net::TcpStream,
+    sync::{Mutex, oneshot},
+};
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 
 use crate::{
@@ -20,16 +23,15 @@ use super::extract::FromEvent;
 
 pub struct Context {
     pub(crate) sink: Mutex<Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
-    sender: Sender<(String, String)>,
+    pending_requests: Arc<Mutex<HashMap<String, oneshot::Sender<String>>>>,
     pub(crate) state: StateMap,
 }
 
 impl Context {
     pub(crate) fn new(states: StateMap) -> Self {
-        let (sender, _) = tokio::sync::broadcast::channel(10);
         Self {
             sink: Mutex::new(None),
-            sender,
+            pending_requests: Arc::new(Mutex::new(HashMap::new())),
             state: states,
         }
     }
@@ -45,8 +47,19 @@ impl Context {
         T: serde::Serialize,
         R: for<'de> serde::Deserialize<'de>,
     {
-        // generate random echo string
+        // Generate random echo string
         let echo = uuid::Uuid::new_v4().to_string();
+
+        // Create oneshot channel for this specific request
+        let (tx, rx) = oneshot::channel();
+
+        // Register the request BEFORE sending
+        {
+            let mut pending = self.pending_requests.lock().await;
+            pending.insert(echo.clone(), tx);
+        }
+
+        // Build and send the message
         let msg = json!({
             "action": action,
             "params": obj,
@@ -54,21 +67,38 @@ impl Context {
         });
         let text = serde_json::to_string(&msg)?;
         let msg = Message::Text(text.into());
-        let mut sink = self.sink.lock().await;
-        let sink = sink.as_mut().ok_or(FlowError::NoConnection)?;
-        sink.send(msg).await?;
 
-        let mut recv = self.sender.subscribe();
-        while let Ok((e, r)) = recv.recv().await {
-            if e == echo {
-                return Ok(serde_json::from_str(&r)?);
+        // Send message and release lock immediately
+        {
+            let mut sink = self.sink.lock().await;
+            let sink = sink.as_mut().ok_or(FlowError::NoConnection)?;
+            sink.send(msg).await?;
+        }
+
+        // Wait for response with timeout
+        let response = tokio::time::timeout(std::time::Duration::from_secs(30), rx).await;
+
+        match response {
+            Ok(Ok(data)) => Ok(serde_json::from_str(&data)?),
+            Ok(Err(_)) => Err(FlowError::NoResponse), // Sender dropped
+            Err(_) => {
+                // Timeout occurred, clean up the pending request
+                let mut pending = self.pending_requests.lock().await;
+                pending.remove(&echo);
+                Err(FlowError::Timeout(30000))
             }
         }
-        Err(FlowError::NoResponse)
     }
 
     pub(crate) fn on_recv_echo(&self, echo: String, data: String) {
-        let _ = self.sender.send((echo, data));
+        let pending_requests = self.pending_requests.clone();
+        tokio::spawn(async move {
+            let mut pending = pending_requests.lock().await;
+            if let Some(tx) = pending.remove(&echo) {
+                let _ = tx.send(data); // Ignore error if receiver dropped
+            }
+            // If echo not found, response arrived after timeout - silently ignore
+        });
     }
 
     pub async fn get_self_id(&self) -> Result<i64, FlowError> {
