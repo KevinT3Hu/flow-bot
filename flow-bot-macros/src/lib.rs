@@ -29,8 +29,25 @@ pub fn flow_service(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
+    // Collect the init function if it exists
+    let init_fn = item.items.iter().find_map(|it| {
+        let ImplItem::Fn(fn_item) = it else {
+            return None;
+        };
+        if fn_item.sig.ident == "init" {
+            Some(fn_item)
+        } else {
+            None
+        }
+    });
+
     let methods = item.items.iter().filter_map(|it| {
         let ImplItem::Fn(fn_item) = it else { return None };
+
+        // Skip the "init" function as it's part of the Service trait
+        if fn_item.sig.ident == "init" {
+            return None;
+        }
 
         let param_decls = fn_item.sig.inputs.iter().filter_map(|arg| {
             let FnArg::Typed(pat_type) = arg else { return None };
@@ -62,6 +79,8 @@ pub fn flow_service(_attr: TokenStream, item: TokenStream) -> TokenStream {
     quote::quote! {
         #[::async_trait::async_trait]
         impl #trt for #struct_name {
+            #init_fn
+
             async fn serve(&self, context: ::flow_bot::base::context::BotContext, event: ::flow_bot::event::BotEvent) -> ::flow_bot::base::handler::HandlerControl {
                 #(#methods)*
                 ::flow_bot::base::handler::HandlerControl::Continue
