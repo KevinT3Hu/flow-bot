@@ -115,7 +115,14 @@
 //!
 //! [`Service`]: crate::base::service::Service
 //! [`with_service`]: crate::FlowBotBuilder::with_service
-use std::{any::Any, ops::Deref, sync::Arc};
+use std::{
+    any::Any,
+    ops::Deref,
+    sync::{
+        Arc,
+        atomic::{AtomicU32, Ordering},
+    },
+};
 
 use base::{
     connect::ReverseConnectionConfig,
@@ -153,6 +160,7 @@ pub struct FlowBot {
     handlers: Arc<Vec<HandlerOrService>>,
     context: BotContext,
     connection: ReverseConnectionConfig,
+    reconnect_attempt: AtomicU32,
 }
 
 pub struct FlowBotBuilder {
@@ -210,6 +218,7 @@ impl FlowBotBuilder {
             handlers: Arc::new(self.handlers),
             context: BotContext::new(Context::new(self.states)),
             connection: self.connection,
+            reconnect_attempt: AtomicU32::new(0),
         }
     }
 }
@@ -217,15 +226,104 @@ impl FlowBotBuilder {
 impl FlowBot {
     /// Run the bot.
     /// This will connect to the server and start processing events.
-    /// This method will never return unless an error occurs.
+    /// This method will never return unless an error occurs or reconnection attempts are exhausted.
     pub async fn run(&self) -> Result<(), FlowError> {
+        use base::connect::ReconnectionStrategy;
+
+        match &self.connection.reconnection {
+            ReconnectionStrategy::None => self.run_once().await,
+            ReconnectionStrategy::Infinite {
+                initial_delay_ms,
+                max_delay_ms,
+            } => {
+                self.run_with_infinite_reconnect(*initial_delay_ms, *max_delay_ms)
+                    .await
+            }
+            ReconnectionStrategy::Limited {
+                max_attempts,
+                initial_delay_ms,
+                max_delay_ms,
+            } => {
+                self.run_with_limited_reconnect(*max_attempts, *initial_delay_ms, *max_delay_ms)
+                    .await
+            }
+        }
+    }
+
+    async fn run_once(&self) -> Result<(), FlowError> {
         let (write, read) = self.connect().await?;
+
+        // Connection established successfully, reset attempt counter
+        self.reconnect_attempt.store(0, Ordering::Relaxed);
 
         self.set_sink(write).await;
         self.init_services().await;
         self.run_msg_loop(read).await?;
 
         Ok(())
+    }
+
+    async fn run_with_infinite_reconnect(
+        &self,
+        initial_delay_ms: u64,
+        max_delay_ms: u64,
+    ) -> Result<(), FlowError> {
+        loop {
+            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
+            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+
+            match self.run_once().await {
+                Ok(_) => {
+                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Connection error: {}. Reconnecting in {}ms...",
+                        e, current_delay
+                    );
+                }
+            }
+
+            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
+            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+        }
+    }
+
+    async fn run_with_limited_reconnect(
+        &self,
+        max_attempts: u32,
+        initial_delay_ms: u64,
+        max_delay_ms: u64,
+    ) -> Result<(), FlowError> {
+        loop {
+            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
+
+            if attempt >= max_attempts {
+                return Err(FlowError::ReconnectionFailed(max_attempts));
+            }
+
+            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+
+            match self.run_once().await {
+                Ok(_) => {
+                    // Connection was successful and has now closed
+                    // Counter was already reset to 0 in run_once
+                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Connection error: {}. Reconnecting in {}ms... (attempt {}/{})",
+                        e,
+                        current_delay,
+                        attempt + 1,
+                        max_attempts
+                    );
+                }
+            }
+
+            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
+            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+        }
     }
 
     async fn connect(

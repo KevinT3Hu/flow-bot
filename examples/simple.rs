@@ -1,6 +1,10 @@
 use flow_bot::{
     FlowBotBuilder,
-    base::{connect::ReverseConnectionConfig, extract::MessageBody, handler::HandlerControl},
+    base::{
+        connect::{ReconnectionStrategy, ReverseConnectionConfig},
+        extract::MessageBody,
+        handler::HandlerControl,
+    },
 };
 
 async fn on_message(MessageBody(msg): MessageBody) -> HandlerControl {
@@ -13,6 +17,7 @@ async fn main() {
     let bot = FlowBotBuilder::new(ReverseConnectionConfig {
         target: "ws://localhost:19999".to_string(),
         auth: None,
+        reconnection: ReconnectionStrategy::None,
     })
     .with_state(())
     .with_handler(on_message)
