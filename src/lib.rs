@@ -146,6 +146,7 @@ pub mod api;
 pub mod base;
 pub mod error;
 pub mod event;
+pub mod extensions;
 pub mod message;
 
 #[cfg(feature = "macros")]

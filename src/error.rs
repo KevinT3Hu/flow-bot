@@ -25,4 +25,8 @@ pub enum FlowError {
 
     #[error("Reconnection failed after {0} attempts")]
     ReconnectionFailed(u32),
+
+    #[cfg(feature = "turso")]
+    #[error("Turso error: {0}")]
+    TursoError(#[from] turso::Error),
 }

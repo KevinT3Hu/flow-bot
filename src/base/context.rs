@@ -29,7 +29,13 @@ pub struct Context {
 }
 
 impl Context {
-    pub(crate) fn new(states: StateMap) -> Self {
+    pub(crate) fn new(mut states: StateMap) -> Self {
+        #[cfg(feature = "turso")]
+        {
+            use crate::extensions::turso::TursoDispatcher;
+            states.insert(TursoDispatcher::new());
+        }
+
         Self {
             sink: Mutex::new(None),
             pending_requests: Arc::new(DashMap::new()),

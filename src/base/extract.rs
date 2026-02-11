@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 
@@ -35,6 +35,14 @@ where
     async fn from_event(context: BotContext, _: BotEvent) -> Option<Self> {
         let state = context.state.get::<S>()?;
         Some(Self(state))
+    }
+}
+
+impl<S> Deref for State<S> {
+    type Target = Arc<S>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 

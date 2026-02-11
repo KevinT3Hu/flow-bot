@@ -17,6 +17,7 @@ clap = { version = "4.5.54", features = ["derive"], optional = true }
 dashmap = "6.1"
 futures = "0.3.31"
 reqwest = { version = "0.13.1", features = ["json"] }
+turso = { version = "0.4", optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"
@@ -33,4 +34,5 @@ tokio = { version = "1.49.0", features = ["rt"] }
 [features]
 command = ["clap/derive"]
 macros = ["dep:flow-bot-macros"]
+turso = ["dep:turso"]
 default = ["command"]
