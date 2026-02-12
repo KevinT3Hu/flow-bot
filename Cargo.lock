@@ -656,7 +656,7 @@ checksum = "8591b0bcc8a98a64310a2fae1bb3e9b8564dd10e381e6e28010fde8e8e8568db"
 
 [[package]]
 name = "flow-bot"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "async-trait",
  "clap",

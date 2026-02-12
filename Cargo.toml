@@ -1,6 +1,6 @@
 [package]
 name = "flow-bot"
-version = "0.2.4"
+version = "0.2.5"
 edition = "2024"
 authors = ["KevinT3Hu"]
 description = "An onebot-11 SDK that simplifies bot creation."
