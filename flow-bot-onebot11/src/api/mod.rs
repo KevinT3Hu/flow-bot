@@ -168,7 +168,7 @@ pub struct GetFileResponse {
     pub file: String,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum RecordFormat {
     Mp3,

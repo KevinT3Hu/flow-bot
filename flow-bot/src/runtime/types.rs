@@ -5,7 +5,7 @@
 //! defined in the flow-bot-onebot11 crate.
 
 use crate::runtime::flow_bot::onebot11::types as wit;
-use flow_bot_onebot11::{api, event::message, message::message_ext::MessageExt};
+use flow_bot_onebot11::{api, event::message};
 
 // ============================================================================
 // Macros for Bidirectional Conversions
@@ -206,24 +206,24 @@ impl From<wit::GetMessageType> for api::GetMessageType {
     }
 }
 
-// GetMessageResponse has a custom field (message uses extract_plain_text)
+// GetMessageResponse has a custom field (message uses JSON serialization to preserve formatting)
 impl From<api::GetMessageResponse> for wit::GetMessageResponse {
     fn from(response: api::GetMessageResponse) -> Self {
         Self {
             time: response.time,
             message_id: response.message_id,
             real_id: response.real_id,
-            message: response.message.extract_plain_text(),
+            message: serde_json::to_string(&response.message).unwrap_or_default(),
             msg_type: response.ty.into(),
         }
     }
 }
 
-// GetForwardResponse has a custom field (message uses extract_plain_text)
+// GetForwardResponse has a custom field (message uses JSON serialization to preserve formatting)
 impl From<api::GetForwardResponse> for wit::GetForwardResponse {
     fn from(response: api::GetForwardResponse) -> Self {
         Self {
-            message: response.message.extract_plain_text(),
+            message: serde_json::to_string(&response.message).unwrap_or_default(),
         }
     }
 }

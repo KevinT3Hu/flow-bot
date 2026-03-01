@@ -10,8 +10,7 @@ use crate::base::context::BotContext;
 use crate::runtime::flow_bot::onebot11::api::Host;
 use crate::runtime::flow_bot::onebot11::types as wit;
 use crate::runtime::flow_bot::onebot11::types::Host as TypesHost;
-use flow_bot_onebot11::api::GroupMemberInfo;
-use serde_json::json;
+
 use wasmtime::component::ResourceTable;
 use wasmtime_wasi::{WasiCtx, WasiCtxView, WasiView};
 
@@ -338,34 +337,20 @@ impl Host for PluginState {
         user_id: i64,
         no_cache: Option<bool>,
     ) -> Result<wit::GroupMemberInfo, String> {
-        // Call send_obj directly because ApiExt has wrong return type
-        let params_json = json!({
-            "group_id": group_id,
-            "user_id": user_id,
-            "no_cache": no_cache,
-        });
-        let result: Result<GroupMemberInfo, _> = self
-            .context
-            .send_obj("get_group_member_info".to_string(), params_json)
+        self.context
+            .get_group_member_info(group_id, user_id, no_cache)
             .await
-            .map(|r| r.data);
-        result.map(Into::into).map_err(|e| e.to_string())
+            .map(Into::into)
+            .map_err(|e| e.to_string())
     }
 
     async fn get_group_member_list(
         &mut self,
         group_id: i64,
     ) -> Result<Vec<wit::GroupMemberInfo>, String> {
-        // Call send_obj directly because ApiExt has wrong return type
-        let params_json = json!({
-            "group_id": group_id,
-        });
-        let result: Result<Vec<GroupMemberInfo>, _> = self
-            .context
-            .send_obj("get_group_member_list".to_string(), params_json)
+        self.context
+            .get_group_member_list(group_id)
             .await
-            .map(|r| r.data);
-        result
             .map(|list| list.into_iter().map(Into::into).collect())
             .map_err(|e| e.to_string())
     }
