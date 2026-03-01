@@ -53,6 +53,15 @@ pub struct RuntimeConfig {
 
     /// Enable WASI preview2 support
     pub enable_wasi: bool,
+
+    /// WASM stack size in bytes
+    pub wasm_stack_bytes: usize,
+
+    /// Request timeout in seconds
+    pub request_timeout_secs: u64,
+
+    /// Maximum concurrent plugin tasks
+    pub max_concurrent_plugin_tasks: usize,
 }
 
 impl Default for RuntimeConfig {
@@ -64,6 +73,9 @@ impl Default for RuntimeConfig {
             max_memory_bytes: config::default_max_memory_bytes(),
             max_execution_time_ms: config::default_max_execution_time_ms(),
             enable_wasi: config::default_true(),
+            wasm_stack_bytes: config::default_wasm_stack_bytes(),
+            request_timeout_secs: config::default_request_timeout_secs(),
+            max_concurrent_plugin_tasks: config::default_max_concurrent_plugin_tasks(),
         }
     }
 }
@@ -159,7 +171,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_runtime_creation() {
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let config = RuntimeConfig {
             plugin_dir: PathBuf::from("/tmp/test_plugins"),
             hot_reload: false,

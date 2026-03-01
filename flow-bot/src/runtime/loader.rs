@@ -34,14 +34,14 @@ impl PluginLoader {
     }
 
     /// Create a configured WASM engine
-    fn create_engine(_config: &RuntimeConfig) -> Result<Engine> {
+    fn create_engine(config: &RuntimeConfig) -> Result<Engine> {
         let mut wasm_config = Config::new();
 
         // Enable component model
         wasm_config.wasm_component_model(true);
 
-        // Set memory limits
-        wasm_config.max_wasm_stack(1024 * 1024); // 1MB stack
+        // Set memory limits from configuration
+        wasm_config.max_wasm_stack(config.wasm_stack_bytes as usize);
 
         // Enable optimizations
         wasm_config.cranelift_opt_level(wasmtime::OptLevel::Speed);
@@ -254,7 +254,7 @@ mod tests {
     #[tokio::test]
     async fn test_loader_creation() {
         let config = RuntimeConfig::default();
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let loader = PluginLoader::new(config, context);
         assert!(loader.is_ok());
     }
@@ -265,7 +265,7 @@ mod tests {
             plugin_dir: PathBuf::from("/nonexistent/path"),
             ..Default::default()
         };
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let loader = PluginLoader::new(config, context).unwrap();
         let result = loader.scan_plugin_directory();
         assert!(result.is_ok());

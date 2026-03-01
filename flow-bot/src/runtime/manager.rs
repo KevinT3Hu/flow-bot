@@ -13,7 +13,7 @@ use notify_debouncer_mini::{
     DebouncedEvent, DebouncedEventKind, Debouncer, new_debouncer,
     notify::{Error as NotifyError, RecommendedWatcher, RecursiveMode},
 };
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, Semaphore};
 
 use crate::base::context::BotContext;
 use crate::runtime::RuntimeConfig;
@@ -166,6 +166,7 @@ impl PluginManager {
     }
 
     /// Handle an event by dispatching it to all loaded plugins
+    /// Uses a semaphore to limit concurrent plugin execution and prevent resource exhaustion
     pub async fn handle_event(&self, event: &[u8]) -> Result<()> {
         if self.plugins.is_empty() {
             tracing::debug!("No plugins loaded, skipping event");
@@ -174,14 +175,22 @@ impl PluginManager {
 
         tracing::debug!("Dispatching event to {} plugins", self.plugins.len());
 
+        // Create a semaphore to limit concurrent plugin tasks
+        let semaphore = Arc::new(Semaphore::new(self.config.max_concurrent_plugin_tasks));
         let mut handles = Vec::new();
 
-        // Collect all plugins and spawn concurrent tasks
+        // Collect all plugins and spawn concurrent tasks with semaphore limiting
         for entry in self.plugins.iter() {
             let plugin_arc = entry.value().clone();
             let event_data = event.to_vec();
+            let sem = semaphore.clone();
 
             let handle = tokio::spawn(async move {
+                // Acquire permit to limit concurrency
+                let _permit = sem.acquire().await.map_err(|e| {
+                    anyhow::anyhow!("Failed to acquire semaphore permit: {}", e)
+                })?;
+
                 let mut plugin = plugin_arc.lock().await;
                 let plugin_name = plugin.name.clone();
 
@@ -380,7 +389,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_manager_creation() {
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let config = RuntimeConfig {
             plugin_dir: PathBuf::from("/tmp/test_plugins"),
             hot_reload: false,
@@ -393,7 +402,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_plugin_count() {
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let config = RuntimeConfig {
             plugin_dir: PathBuf::from("/tmp/test_plugins"),
             hot_reload: false,
@@ -407,7 +416,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_load_all_plugins_empty_dir() {
-        let context = Arc::new(Context::new());
+        let context = Arc::new(Context::default());
         let config = RuntimeConfig {
             plugin_dir: PathBuf::from("/nonexistent/plugins"),
             hot_reload: false,

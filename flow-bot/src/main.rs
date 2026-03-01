@@ -202,6 +202,18 @@ struct RuntimeConfigWrapper {
     /// Enable WASI support
     #[serde(default = "flow_bot::runtime::config::default_true")]
     enable_wasi: bool,
+
+    /// WASM stack size in bytes
+    #[serde(default = "flow_bot::runtime::config::default_wasm_stack_bytes")]
+    wasm_stack_bytes: usize,
+
+    /// Request timeout in seconds
+    #[serde(default = "flow_bot::runtime::config::default_request_timeout_secs")]
+    request_timeout_secs: u64,
+
+    /// Maximum concurrent plugin tasks
+    #[serde(default = "flow_bot::runtime::config::default_max_concurrent_plugin_tasks")]
+    max_concurrent_plugin_tasks: usize,
 }
 
 impl Default for RuntimeConfigWrapper {
@@ -214,6 +226,9 @@ impl Default for RuntimeConfigWrapper {
             max_memory_bytes: flow_bot::runtime::config::default_max_memory_bytes(),
             max_execution_time_ms: flow_bot::runtime::config::default_max_execution_time_ms(),
             enable_wasi: flow_bot::runtime::config::default_true(),
+            wasm_stack_bytes: flow_bot::runtime::config::default_wasm_stack_bytes(),
+            request_timeout_secs: flow_bot::runtime::config::default_request_timeout_secs(),
+            max_concurrent_plugin_tasks: flow_bot::runtime::config::default_max_concurrent_plugin_tasks(),
         }
     }
 }
@@ -227,6 +242,9 @@ impl From<RuntimeConfigWrapper> for RuntimeConfig {
             max_memory_bytes: config.max_memory_bytes,
             max_execution_time_ms: config.max_execution_time_ms,
             enable_wasi: config.enable_wasi,
+            wasm_stack_bytes: config.wasm_stack_bytes,
+            request_timeout_secs: config.request_timeout_secs,
+            max_concurrent_plugin_tasks: config.max_concurrent_plugin_tasks,
         }
     }
 }

@@ -100,7 +100,7 @@ impl FlowBotBuilder {
         Self {
             connection: connection.into(),
             runtime: None,
-            context: BotContext::new(Context::new()),
+            context: BotContext::new(Context::default()),
         }
     }
 
@@ -110,7 +110,7 @@ impl FlowBotBuilder {
         Self {
             connection: ConnectionMode::Server(config),
             runtime: None,
-            context: BotContext::new(Context::new()),
+            context: BotContext::new(Context::default()),
         }
     }
 
@@ -120,7 +120,7 @@ impl FlowBotBuilder {
         Self {
             connection: ConnectionMode::Client(config),
             runtime: None,
-            context: BotContext::new(Context::new()),
+            context: BotContext::new(Context::default()),
         }
     }
 
@@ -222,14 +222,21 @@ impl FlowBot {
         }
     }
 
+    /// Calculate exponential backoff delay with overflow protection
+    fn calculate_backoff(&self, initial_delay_ms: u64, max_delay_ms: u64) -> u64 {
+        let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
+        // Use saturating operations to prevent overflow
+        let multiplier = 2_u64.saturating_pow(attempt.min(32)); // Cap exponent at 32 to prevent huge values
+        initial_delay_ms.saturating_mul(multiplier).min(max_delay_ms)
+    }
+
     async fn run_with_infinite_reconnect(
         &self,
         initial_delay_ms: u64,
         max_delay_ms: u64,
     ) -> Result<(), FlowError> {
         loop {
-            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
-            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+            let current_delay = self.calculate_backoff(initial_delay_ms, max_delay_ms);
 
             match self.run_once().await {
                 Ok(_) => {
@@ -261,7 +268,7 @@ impl FlowBot {
                 return Err(FlowError::ReconnectionFailed(max_attempts));
             }
 
-            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+            let current_delay = self.calculate_backoff(initial_delay_ms, max_delay_ms);
 
             match self.run_once().await {
                 Ok(_) => {

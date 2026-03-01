@@ -29,3 +29,18 @@ pub fn default_max_memory_bytes() -> usize {
 pub fn default_max_execution_time_ms() -> u64 {
     5000
 }
+
+/// Default WASM stack size in bytes (1 MB)
+pub fn default_wasm_stack_bytes() -> usize {
+    1024 * 1024
+}
+
+/// Default request timeout in seconds (30 seconds)
+pub fn default_request_timeout_secs() -> u64 {
+    30
+}
+
+/// Default maximum concurrent plugin tasks (10)
+pub fn default_max_concurrent_plugin_tasks() -> usize {
+    10
+}

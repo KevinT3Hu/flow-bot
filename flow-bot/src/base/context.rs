@@ -73,14 +73,23 @@ impl WebSocketSink {
 pub struct Context {
     pub(crate) sink: Mutex<Option<WebSocketSink>>,
     pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
+    request_timeout_secs: u64,
 }
 
 impl Context {
-    pub(crate) fn new() -> Self {
+    /// Create a new context with custom timeout setting
+    pub(crate) fn new(request_timeout_secs: u64) -> Self {
         Self {
             sink: Mutex::new(None),
             pending_requests: Arc::new(DashMap::new()),
+            request_timeout_secs,
         }
+    }
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Self::new(30)
     }
 }
 
@@ -129,8 +138,12 @@ impl Context {
             sink.send(msg).await?;
         }
 
-        // Wait for response with timeout
-        let response = tokio::time::timeout(std::time::Duration::from_secs(30), rx).await;
+        // Wait for response with configurable timeout
+        let response = tokio::time::timeout(
+            std::time::Duration::from_secs(self.request_timeout_secs),
+            rx,
+        )
+        .await;
 
         match response {
             Ok(Ok(data)) => {
@@ -144,7 +157,7 @@ impl Context {
             }
             Err(_) => {
                 // Timeout: let guard clean up the entry
-                Err(FlowError::Timeout(30000))
+                Err(FlowError::Timeout(self.request_timeout_secs * 1000))
             }
         }
     }

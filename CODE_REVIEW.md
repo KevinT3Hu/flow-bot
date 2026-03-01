@@ -17,28 +17,6 @@
 | `flow-bot/src/base/context.rs:97` | Fixed 30-second timeout | Low | Make timeout configurable via `RuntimeConfig` |
 | `flow-bot/src/runtime/loader.rs:44` | 1MB WASM stack hardcoded | Low | Move to configuration |
 
-### 1.2 Code Style Improvements
-
-~~**Duplicate Default Values**: The main binary (`main.rs`) and `runtime/mod.rs` both define identical default functions:~~ **(Fixed)**
-
-~~```rust~~
-~~// main.rs:251-289~~
-~~fn default_true() -> bool { true }~~
-~~fn default_plugin_dir() -> PathBuf { PathBuf::from("plugins") }~~
-~~// ... etc~~
-~~```~~
-
-~~**Recommendation**: Move all default value functions to a shared `config` module.~~
-
-**Fix Applied**: Created `flow-bot/src/runtime/config.rs` with shared default value functions:
-- `default_true()`
-- `default_plugin_dir()`
-- `default_reload_debounce_ms()`
-- `default_max_memory_bytes()`
-- `default_max_execution_time_ms()`
-
-`RuntimeConfig::default()` in `runtime/mod.rs` and `RuntimeConfigWrapper` in `main.rs` now both use these shared functions.
-
 ---
 
 ## 2. Potential Bugs
