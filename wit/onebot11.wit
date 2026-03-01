@@ -1,0 +1,461 @@
+package flow-bot:onebot11@0.1.0;
+
+/// OneBot-11 API definitions for bot interactions
+interface types {
+    /// API response status
+    enum api-ret-status {
+        ok,
+        %async,
+        failed,
+    }
+
+    /// Generic API response wrapper
+    record api-response {
+        status: api-ret-status,
+        retcode: s32,
+        echo: option<string>,
+    }
+
+    /// Bot status information
+    record bot-status {
+        online: option<bool>,
+        good: bool,
+        extra-data: list<tuple<string, string>>,
+    }
+
+    /// Response from sending a message
+    record send-message-response {
+        message-id: s64,
+    }
+
+    /// Gender/sex of a user
+    enum sender-sex {
+        male,
+        female,
+        unknown,
+    }
+
+    /// Private message sender information
+    record private-sender-info {
+        user-id: option<s64>,
+        nickname: option<string>,
+        sex: option<sender-sex>,
+        age: option<s32>,
+    }
+
+    /// Group member role
+    enum group-sender-role {
+        owner,
+        admin,
+        member,
+    }
+
+    /// Group message sender information
+    record group-sender-info {
+        user-id: option<s64>,
+        nickname: option<string>,
+        card: option<string>,
+        sex: option<sender-sex>,
+        age: option<s32>,
+        area: option<string>,
+        level: option<string>,
+        role: option<group-sender-role>,
+        title: option<string>,
+    }
+
+    /// Anonymous user information in group
+    record group-anonymous-info {
+        id: s64,
+        name: string,
+        flag: string,
+    }
+
+    /// Message type in get-message response
+    variant get-message-type {
+        private(private-sender-info),
+        group(group-sender-info),
+    }
+
+    /// Response from getting a message
+    record get-message-response {
+        time: s32,
+        message-id: s32,
+        real-id: s32,
+        message: string,
+        msg-type: get-message-type,
+    }
+
+    /// Response from getting a forward message
+    record get-forward-response {
+        message: string,
+    }
+
+    /// Bot login information
+    record login-info {
+        user-id: s64,
+        nickname: string,
+    }
+
+    /// Stranger information
+    record stranger-info {
+        user-id: s64,
+        nickname: string,
+        sex: sender-sex,
+        age: s32,
+    }
+
+    /// Friend information
+    record friend-info {
+        user-id: s64,
+        nickname: string,
+        remark: string,
+    }
+
+    /// Group information
+    record group-info-response {
+        group-id: s64,
+        group-name: string,
+        member-count: s32,
+        max-member-count: s32,
+    }
+
+    /// Group member detailed information
+    record group-member-info {
+        group-id: s64,
+        user-id: s64,
+        nickname: string,
+        card: string,
+        sex: sender-sex,
+        age: s32,
+        area: option<string>,
+        join-time: s32,
+        last-sent-time: s32,
+        level: string,
+        role: group-sender-role,
+        unfriendly: bool,
+        title: option<string>,
+        title-expire-time: s32,
+        card-changeable: bool,
+    }
+
+    /// Most talkative user information
+    record talkative-info {
+        user-id: s64,
+        nickname: string,
+        avatar: string,
+        day-count: s32,
+    }
+
+    /// Honor information
+    record honor-info {
+        user-id: s64,
+        nickname: string,
+        avatar: string,
+        description: string,
+    }
+
+    /// Group honor information
+    record group-honor-info {
+        group-id: s64,
+        current-talkative: option<talkative-info>,
+        talkative-list: option<list<honor-info>>,
+        performer-list: option<list<honor-info>>,
+        legend-list: option<list<honor-info>>,
+        strong-newbie-list: option<list<honor-info>>,
+        emotion-list: option<list<honor-info>>,
+    }
+
+    /// Type of group honor
+    enum group-honor-type {
+        talkative,
+        performer,
+        legend,
+        strong-newbie,
+        emotion,
+        all,
+    }
+
+    /// Response containing cookies
+    record get-cookies-response {
+        cookies: string,
+    }
+
+    /// Response containing CSRF token
+    record get-csrf-token-response {
+        token: s32,
+    }
+
+    /// Response containing credentials
+    record get-credentials-response {
+        cookies: string,
+        csrf-token: s32,
+    }
+
+    /// Response containing file path/data
+    record get-file-response {
+        file: string,
+    }
+
+    /// Audio record format
+    enum record-format {
+        mp3,
+        amr,
+        wma,
+        m4a,
+        spx,
+        ogg,
+        wav,
+        flac,
+    }
+
+    /// Response indicating capability
+    record can-send-response {
+        yes: bool,
+    }
+
+    /// Version information
+    record version-info {
+        app-name: string,
+        app-version: string,
+        protocol-version: string,
+        extra-data: list<tuple<string, string>>,
+    }
+
+    /// Group request subtype
+    enum group-request-sub-type {
+        add,
+        invite,
+    }
+}
+
+/// OneBot-11 API interface for bot operations
+interface api {
+    use types.{
+        send-message-response,
+        get-message-response,
+        get-forward-response,
+        login-info,
+        stranger-info,
+        friend-info,
+        group-info-response,
+        group-member-info,
+        group-honor-info,
+        group-honor-type,
+        get-cookies-response,
+        get-csrf-token-response,
+        get-credentials-response,
+        get-file-response,
+        record-format,
+        can-send-response,
+        bot-status,
+        version-info,
+        group-anonymous-info,
+        group-request-sub-type,
+    };
+
+    /// Send a private message to a user
+    send-private-message: func(
+        user-id: s64,
+        message: string,
+        auto-escape: option<bool>,
+    ) -> result<send-message-response, string>;
+
+    /// Send a message to a group
+    send-group-message: func(
+        group-id: s64,
+        message: string,
+        auto-escape: option<bool>,
+    ) -> result<send-message-response, string>;
+
+    /// Delete a message by ID
+    delete-message: func(message-id: s64) -> result<_, string>;
+
+    /// Get a message by ID
+    get-message: func(message-id: s64) -> result<get-message-response, string>;
+
+    /// Get a forwarded message by ID
+    get-forward-message: func(message-id: s64) -> result<get-forward-response, string>;
+
+    /// Send a like to a user's profile
+    send-like: func(user-id: s64, times: option<s32>) -> result<_, string>;
+
+    /// Kick a user from a group
+    set-group-kick: func(
+        group-id: s64,
+        user-id: s64,
+        reject-add-request: option<bool>,
+    ) -> result<_, string>;
+
+    /// Ban a user in a group (0 duration = unban)
+    set-group-ban: func(
+        group-id: s64,
+        user-id: s64,
+        duration: option<s64>,
+    ) -> result<_, string>;
+
+    /// Ban an anonymous user in a group
+    set-group-anonymous-ban: func(
+        group-id: s64,
+        anonymous: option<group-anonymous-info>,
+        flag: option<string>,
+        duration: option<s64>,
+    ) -> result<_, string>;
+
+    /// Enable or disable group-wide ban
+    set-whole-group-ban: func(
+        group-id: s64,
+        enable: option<bool>,
+    ) -> result<_, string>;
+
+    /// Set or remove a user as group admin
+    set-group-admin: func(
+        group-id: s64,
+        user-id: s64,
+        enable: option<bool>,
+    ) -> result<_, string>;
+
+    /// Enable or disable anonymous chat in a group
+    set-group-anonymous: func(
+        group-id: s64,
+        enable: option<bool>,
+    ) -> result<_, string>;
+
+    /// Set a user's group card (nickname in group)
+    set-group-card: func(
+        group-id: s64,
+        user-id: s64,
+        card: option<string>,
+    ) -> result<_, string>;
+
+    /// Set the group name
+    set-group-name: func(
+        group-id: s64,
+        group-name: string,
+    ) -> result<_, string>;
+
+    /// Leave a group (optionally dismiss if owner)
+    set-group-leave: func(
+        group-id: s64,
+        is-dismiss: option<bool>,
+    ) -> result<_, string>;
+
+    /// Set a user's special title in a group
+    set-group-special-title: func(
+        group-id: s64,
+        user-id: s64,
+        special-title: option<string>,
+        duration: option<s64>,
+    ) -> result<_, string>;
+
+    /// Process a friend add request
+    set-friend-add-request: func(
+        flag: string,
+        approve: option<bool>,
+        remark: option<string>,
+    ) -> result<_, string>;
+
+    /// Process a group add request
+    set-group-add-request: func(
+        flag: string,
+        sub-type: group-request-sub-type,
+        approve: option<bool>,
+        reason: option<string>,
+    ) -> result<_, string>;
+
+    /// Get bot's login information
+    get-login-info: func() -> result<login-info, string>;
+
+    /// Get stranger information by user ID
+    get-stranger-info: func(
+        user-id: s64,
+        no-cache: option<bool>,
+    ) -> result<stranger-info, string>;
+
+    /// Get the bot's friend list
+    get-friend-list: func() -> result<list<friend-info>, string>;
+
+    /// Get group information
+    get-group-info: func(
+        group-id: s64,
+        no-cache: option<bool>,
+    ) -> result<group-info-response, string>;
+
+    /// Get the bot's group list
+    get-group-list: func() -> result<list<group-info-response>, string>;
+
+    /// Get group member information
+    get-group-member-info: func(
+        group-id: s64,
+        user-id: s64,
+        no-cache: option<bool>,
+    ) -> result<group-member-info, string>;
+
+    /// Get group member list
+    get-group-member-list: func(
+        group-id: s64,
+    ) -> result<list<group-member-info>, string>;
+
+    /// Get group honor information
+    get-group-honor-info: func(
+        group-id: s64,
+        honor-type: group-honor-type,
+    ) -> result<group-honor-info, string>;
+
+    /// Get cookies for a domain
+    get-cookies: func(domain: option<string>) -> result<get-cookies-response, string>;
+
+    /// Get CSRF token
+    get-csrf-token: func() -> result<get-csrf-token-response, string>;
+
+    /// Get credentials (cookies + CSRF token)
+    get-credentials: func(domain: option<string>) -> result<get-credentials-response, string>;
+
+    /// Get a voice record file
+    get-record: func(
+        file: string,
+        out-format: record-format,
+    ) -> result<get-file-response, string>;
+
+    /// Get an image file
+    get-image: func(file: string) -> result<get-file-response, string>;
+
+    /// Check if the bot can send images
+    can-send-image: func() -> result<can-send-response, string>;
+
+    /// Check if the bot can send voice records
+    can-send-record: func() -> result<can-send-response, string>;
+
+    /// Get bot status
+    get-status: func() -> result<bot-status, string>;
+
+    /// Get version information
+    get-version-info: func() -> result<version-info, string>;
+
+    /// Restart the bot with optional delay in milliseconds
+    set-restart: func(delay: option<s32>) -> result<_, string>;
+
+    /// Clean cache
+    clean-cache: func() -> result<_, string>;
+}
+
+/// Event handler interface for plugins
+interface event-handler {
+
+    /// Handle an incoming OneBot event
+    handle-event: func(event: list<u8>) -> result<_, string>;
+
+    plugin-name: func() -> string;
+
+    plugin-version: func() -> string;
+
+    plugin-desc: func() -> string;
+}
+
+/// Plugin world for event handlers
+world onebot11-plugin {
+    /// Import API to call bot functions
+    import api;
+
+    /// Export event handler for plugin implementation
+    export event-handler;
+}

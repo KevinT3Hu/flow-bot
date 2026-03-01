@@ -1,3 +1,33 @@
 /target
+/xtask/target
 
 .wakatime
+
+# Rust
+*.rs.bk
+*.pdb
+*.prof
+*.profraw
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Plugin system
+plugins/*.wasm
+plugins/*.json

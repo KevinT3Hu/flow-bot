@@ -1,38 +1,9 @@
-[package]
-name = "flow-bot"
-version = "0.2.5"
-edition = "2024"
-authors = ["KevinT3Hu"]
-description = "An onebot-11 SDK that simplifies bot creation."
-repository = "https://github.com/KevinT3Hu/flow-bot.git"
-license = "AGPL-3.0-only"
-
 [workspace]
 resolver = "3"
-members = ["flow-bot-macros"]
-
-[dependencies]
-async-trait = "0.1.89"
-clap = { version = "4.5.54", features = ["derive"], optional = true }
-dashmap = "6.1"
-futures = "0.3.31"
-reqwest = { version = "0.13.1", features = ["json"] }
-turso = { version = "0.4", optional = true }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
-thiserror = "2.0.18"
-tokio = { version = "1.49.0", features = ["macros", "sync", "time"] }
-tokio-tungstenite = "0.28.0"
-tracing = "0.1.44"
-uuid = { version = "1.20.0", features = ["v4"] }
-
-flow-bot-macros = { path = "./flow-bot-macros", version = "0.1.0", optional = true }
-
-[dev-dependencies]
-tokio = { version = "1.49.0", features = ["rt"] }
-
-[features]
-command = ["clap/derive"]
-macros = ["dep:flow-bot-macros"]
-turso = ["dep:turso"]
-default = ["command"]
+members = [
+    "flow-bot-onebot11",
+    "flow-bot-extractor",
+    "flow-bot-plugin-sdk",
+    "flow-bot",
+]
+exclude = ["xtask"]

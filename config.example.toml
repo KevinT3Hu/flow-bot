@@ -1,0 +1,79 @@
+# Flow-Bot Configuration File
+# Copy this file to config.toml and customize as needed
+
+[connection]
+# Connection mode: "server" or "client"
+# - server: Bot acts as a WebSocket server waiting for connections
+# - client: Bot connects to OneBot server as a client (default)
+mode = "client"
+
+# WebSocket target URL (required)
+# - In server mode: The address to bind for incoming connections (e.g., "0.0.0.0:3001")
+# - In client mode: The OneBot server URL to connect to (e.g., "ws://localhost:3001")
+target = "ws://localhost:6700"
+
+# Optional authentication token
+# Uncomment and set if your OneBot implementation requires authentication
+# auth = "your-auth-token-here"
+
+# Reconnection strategy configuration
+[connection.reconnection]
+# Strategy options:
+#   "infinite" - Reconnect forever with exponential backoff
+#   "limited"  - Reconnect for a limited number of attempts
+#   "none"     - Do not reconnect on disconnect
+strategy = "infinite"
+
+# Initial delay in milliseconds before first reconnection attempt
+initial_delay_ms = 1000
+
+# Maximum delay in milliseconds (exponential backoff cap)
+# Delay doubles after each attempt: 1s → 2s → 4s → 8s → ... → max_delay_ms
+max_delay_ms = 60000
+
+# Maximum reconnection attempts (only used when strategy = "limited")
+# Uncomment when using "limited" strategy
+# max_attempts = 10
+
+[runtime]
+# Enable WASM plugin runtime
+# Set to false to run without plugin support
+enabled = true
+
+# Directory containing plugin WASM files (.wasm)
+# Plugins will be automatically loaded from this directory
+plugin_dir = "plugins-dist"
+
+# Enable hot reloading of plugins
+# When true, plugins are automatically reloaded when their files change
+hot_reload = true
+
+# Debounce delay in milliseconds for file system events
+# Prevents multiple reloads when a file is being written
+reload_debounce_ms = 500
+
+# Maximum memory per plugin instance (in bytes)
+# Default: 134217728 (128 MB)
+# Adjust based on your plugins' memory requirements
+max_memory_bytes = 134217728
+
+# Maximum execution time per event handler (in milliseconds)
+# Plugins that exceed this time will be terminated
+# Default: 5000 (5 seconds)
+max_execution_time_ms = 5000
+
+# Enable WASI preview2 support
+# Required for plugins that need system access (filesystem, network, etc.)
+enable_wasi = true
+
+[logging]
+# Log level: trace, debug, info, warn, error
+# - trace: Very detailed logging (includes all debug info)
+# - debug: Detailed logging for debugging
+# - info:  General information (recommended for production)
+# - warn:  Warnings and errors
+# - error: Errors only
+level = "info"
+
+# You can also set log level via environment variable:
+# RUST_LOG=debug cargo run

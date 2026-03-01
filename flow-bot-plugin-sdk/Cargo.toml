@@ -1,0 +1,23 @@
+[package]
+name = "flow-bot-plugin-sdk"
+version = "0.1.0"
+edition = "2024"
+authors = ["KevinT3Hu"]
+description = "Thin wrapper SDK for building Flow-Bot WASM plugins"
+repository = "https://github.com/KevinT3Hu/flow-bot.git"
+license = "AGPL-3.0-only"
+keywords = ["onebot", "bot", "wasm", "plugin"]
+categories = ["api-bindings", "wasm"]
+
+[dependencies]
+async-trait = "0.1.89"
+flow-bot-extractor = { path = "../flow-bot-extractor" }
+flow-bot-onebot11 = { path = "../flow-bot-onebot11" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wit-bindgen = "0.53.1"
+[build-dependencies]
+# Not needed yet, but reserved for future use if we want to pregenerate at build time
+
+[features]
+default = []

@@ -1,0 +1,17 @@
+[package]
+name = "flow-bot-onebot11"
+version = "0.1.0"
+edition = "2024"
+authors = ["KevinT3Hu"]
+description = "OneBot-11 protocol type definitions for flow-bot"
+repository = "https://github.com/KevinT3Hu/flow-bot.git"
+license = "AGPL-3.0-only"
+
+[features]
+api = ["dep:async-trait"]
+
+[dependencies]
+async-trait = { version = "0.1", optional = true }
+
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
