@@ -8,32 +8,89 @@ use crate::runtime::flow_bot::onebot11::types as wit;
 use flow_bot_onebot11::{api, event::message, message::message_ext::MessageExt};
 
 // ============================================================================
+// Macros for Bidirectional Conversions
+// ============================================================================
+
+/// Macro to implement bidirectional `From` for types with identical field names.
+/// Simple fields are passed directly; Option<T> fields use `.map(Into::into)`.
+macro_rules! impl_bidirectional_simple {
+    ($native:ty, $wit:ty, $($field:ident),+ $(,)?) => {
+        impl From<$native> for $wit {
+            fn from(value: $native) -> Self {
+                Self {
+                    $($field: value.$field),*
+                }
+            }
+        }
+
+        impl From<$wit> for $native {
+            fn from(value: $wit) -> Self {
+                Self {
+                    $($field: value.$field),*
+                }
+            }
+        }
+    };
+}
+
+/// Macro to implement bidirectional `From` for types with optional fields that need mapping.
+macro_rules! impl_bidirectional_option {
+    ($native:ty, $wit:ty, $($field:ident),+ $(,)?) => {
+        impl From<$native> for $wit {
+            fn from(value: $native) -> Self {
+                Self {
+                    $($field: value.$field.map(Into::into)),*
+                }
+            }
+        }
+
+        impl From<$wit> for $native {
+            fn from(value: $wit) -> Self {
+                Self {
+                    $($field: value.$field.map(Into::into)),*
+                }
+            }
+        }
+    };
+}
+
+/// Macro to implement bidirectional `From` for enums with identical variants.
+macro_rules! impl_bidirectional_enum {
+    ($native:ty, $wit:ty, $($variant:ident),+ $(,)?) => {
+        impl From<$native> for $wit {
+            fn from(value: $native) -> Self {
+                match value {
+                    $(<$native>::$variant => <$wit>::$variant),*
+                }
+            }
+        }
+
+        impl From<$wit> for $native {
+            fn from(value: $wit) -> Self {
+                match value {
+                    $(<$wit>::$variant => <$native>::$variant),*
+                }
+            }
+        }
+    };
+}
+
+// ============================================================================
 // API Response Types
 // ============================================================================
 
-impl From<api::ApiRetStatus> for wit::ApiRetStatus {
-    fn from(status: api::ApiRetStatus) -> Self {
-        match status {
-            api::ApiRetStatus::Ok => wit::ApiRetStatus::Ok,
-            api::ApiRetStatus::Async => wit::ApiRetStatus::Async,
-            api::ApiRetStatus::Failed => wit::ApiRetStatus::Failed,
-        }
-    }
-}
+impl_bidirectional_enum!(
+    api::ApiRetStatus,
+    wit::ApiRetStatus,
+    Ok,
+    Async,
+    Failed,
+);
 
-impl From<wit::ApiRetStatus> for api::ApiRetStatus {
-    fn from(status: wit::ApiRetStatus) -> Self {
-        match status {
-            wit::ApiRetStatus::Ok => api::ApiRetStatus::Ok,
-            wit::ApiRetStatus::Async => api::ApiRetStatus::Async,
-            wit::ApiRetStatus::Failed => api::ApiRetStatus::Failed,
-        }
-    }
-}
-
+// BotStatus has a renamed field (data <-> extra_data)
 impl From<api::BotStatus> for wit::BotStatus {
     fn from(status: api::BotStatus) -> Self {
-        wit::BotStatus {
+        Self {
             online: status.online,
             good: status.good,
             extra_data: status.data.into_iter().collect(),
@@ -43,7 +100,7 @@ impl From<api::BotStatus> for wit::BotStatus {
 
 impl From<wit::BotStatus> for api::BotStatus {
     fn from(status: wit::BotStatus) -> Self {
-        api::BotStatus {
+        Self {
             online: status.online,
             good: status.good,
             data: status.extra_data.into_iter().collect(),
@@ -51,91 +108,44 @@ impl From<wit::BotStatus> for api::BotStatus {
     }
 }
 
-impl From<api::SendMessageResponse> for wit::SendMessageResponse {
-    fn from(response: api::SendMessageResponse) -> Self {
-        wit::SendMessageResponse {
-            message_id: response.message_id,
-        }
-    }
-}
-
-impl From<wit::SendMessageResponse> for api::SendMessageResponse {
-    fn from(response: wit::SendMessageResponse) -> Self {
-        api::SendMessageResponse {
-            message_id: response.message_id,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::SendMessageResponse,
+    wit::SendMessageResponse,
+    message_id,
+);
 
 // ============================================================================
 // Sender Types
 // ============================================================================
 
-impl From<message::SenderSex> for wit::SenderSex {
-    fn from(sex: message::SenderSex) -> Self {
-        match sex {
-            message::SenderSex::Male => wit::SenderSex::Male,
-            message::SenderSex::Female => wit::SenderSex::Female,
-            message::SenderSex::Unknown => wit::SenderSex::Unknown,
-        }
-    }
-}
+impl_bidirectional_enum!(
+    message::SenderSex,
+    wit::SenderSex,
+    Male,
+    Female,
+    Unknown,
+);
 
-impl From<wit::SenderSex> for message::SenderSex {
-    fn from(sex: wit::SenderSex) -> Self {
-        match sex {
-            wit::SenderSex::Male => message::SenderSex::Male,
-            wit::SenderSex::Female => message::SenderSex::Female,
-            wit::SenderSex::Unknown => message::SenderSex::Unknown,
-        }
-    }
-}
+impl_bidirectional_option!(
+    message::PrivateSenderInfo,
+    wit::PrivateSenderInfo,
+    user_id,
+    nickname,
+    sex,
+    age,
+);
 
-impl From<message::PrivateSenderInfo> for wit::PrivateSenderInfo {
-    fn from(info: message::PrivateSenderInfo) -> Self {
-        wit::PrivateSenderInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            sex: info.sex.map(Into::into),
-            age: info.age,
-        }
-    }
-}
-
-impl From<wit::PrivateSenderInfo> for message::PrivateSenderInfo {
-    fn from(info: wit::PrivateSenderInfo) -> Self {
-        message::PrivateSenderInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            sex: info.sex.map(Into::into),
-            age: info.age,
-        }
-    }
-}
-
-impl From<message::GroupSenderRole> for wit::GroupSenderRole {
-    fn from(role: message::GroupSenderRole) -> Self {
-        match role {
-            message::GroupSenderRole::Owner => wit::GroupSenderRole::Owner,
-            message::GroupSenderRole::Admin => wit::GroupSenderRole::Admin,
-            message::GroupSenderRole::Member => wit::GroupSenderRole::Member,
-        }
-    }
-}
-
-impl From<wit::GroupSenderRole> for message::GroupSenderRole {
-    fn from(role: wit::GroupSenderRole) -> Self {
-        match role {
-            wit::GroupSenderRole::Owner => message::GroupSenderRole::Owner,
-            wit::GroupSenderRole::Admin => message::GroupSenderRole::Admin,
-            wit::GroupSenderRole::Member => message::GroupSenderRole::Member,
-        }
-    }
-}
+impl_bidirectional_enum!(
+    message::GroupSenderRole,
+    wit::GroupSenderRole,
+    Owner,
+    Admin,
+    Member,
+);
 
 impl From<message::GroupSenderInfo> for wit::GroupSenderInfo {
     fn from(info: message::GroupSenderInfo) -> Self {
-        wit::GroupSenderInfo {
+        Self {
             user_id: info.user_id,
             nickname: info.nickname,
             card: info.card,
@@ -151,7 +161,7 @@ impl From<message::GroupSenderInfo> for wit::GroupSenderInfo {
 
 impl From<wit::GroupSenderInfo> for message::GroupSenderInfo {
     fn from(info: wit::GroupSenderInfo) -> Self {
-        message::GroupSenderInfo {
+        Self {
             user_id: info.user_id,
             nickname: info.nickname,
             card: info.card,
@@ -165,35 +175,24 @@ impl From<wit::GroupSenderInfo> for message::GroupSenderInfo {
     }
 }
 
-impl From<message::GroupAnonymousInfo> for wit::GroupAnonymousInfo {
-    fn from(info: message::GroupAnonymousInfo) -> Self {
-        wit::GroupAnonymousInfo {
-            id: info.id,
-            name: info.name,
-            flag: info.flag,
-        }
-    }
-}
-
-impl From<wit::GroupAnonymousInfo> for message::GroupAnonymousInfo {
-    fn from(info: wit::GroupAnonymousInfo) -> Self {
-        message::GroupAnonymousInfo {
-            id: info.id,
-            name: info.name,
-            flag: info.flag,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    message::GroupAnonymousInfo,
+    wit::GroupAnonymousInfo,
+    id,
+    name,
+    flag,
+);
 
 // ============================================================================
 // Get Message Response Types
 // ============================================================================
 
+// GetMessageType has complex enum variants - keep manual implementation
 impl From<api::GetMessageType> for wit::GetMessageType {
     fn from(ty: api::GetMessageType) -> Self {
         match ty {
-            api::GetMessageType::Private { sender } => wit::GetMessageType::Private(sender.into()),
-            api::GetMessageType::Group { sender } => wit::GetMessageType::Group(sender.into()),
+            api::GetMessageType::Private { sender } => Self::Private(sender.into()),
+            api::GetMessageType::Group { sender } => Self::Group(sender.into()),
         }
     }
 }
@@ -201,19 +200,16 @@ impl From<api::GetMessageType> for wit::GetMessageType {
 impl From<wit::GetMessageType> for api::GetMessageType {
     fn from(ty: wit::GetMessageType) -> Self {
         match ty {
-            wit::GetMessageType::Private(sender) => api::GetMessageType::Private {
-                sender: sender.into(),
-            },
-            wit::GetMessageType::Group(sender) => api::GetMessageType::Group {
-                sender: sender.into(),
-            },
+            wit::GetMessageType::Private(sender) => Self::Private { sender: sender.into() },
+            wit::GetMessageType::Group(sender) => Self::Group { sender: sender.into() },
         }
     }
 }
 
+// GetMessageResponse has a custom field (message uses extract_plain_text)
 impl From<api::GetMessageResponse> for wit::GetMessageResponse {
     fn from(response: api::GetMessageResponse) -> Self {
-        wit::GetMessageResponse {
+        Self {
             time: response.time,
             message_id: response.message_id,
             real_id: response.real_id,
@@ -223,9 +219,10 @@ impl From<api::GetMessageResponse> for wit::GetMessageResponse {
     }
 }
 
+// GetForwardResponse has a custom field (message uses extract_plain_text)
 impl From<api::GetForwardResponse> for wit::GetForwardResponse {
     fn from(response: api::GetForwardResponse) -> Self {
-        wit::GetForwardResponse {
+        Self {
             message: response.message.extract_plain_text(),
         }
     }
@@ -235,27 +232,11 @@ impl From<api::GetForwardResponse> for wit::GetForwardResponse {
 // User Info Types
 // ============================================================================
 
-impl From<api::LoginInfo> for wit::LoginInfo {
-    fn from(info: api::LoginInfo) -> Self {
-        wit::LoginInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-        }
-    }
-}
-
-impl From<wit::LoginInfo> for api::LoginInfo {
-    fn from(info: wit::LoginInfo) -> Self {
-        api::LoginInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-        }
-    }
-}
+impl_bidirectional_simple!(api::LoginInfo, wit::LoginInfo, user_id, nickname);
 
 impl From<api::StrangerInfo> for wit::StrangerInfo {
     fn from(info: api::StrangerInfo) -> Self {
-        wit::StrangerInfo {
+        Self {
             user_id: info.user_id,
             nickname: info.nickname,
             sex: info.sex.into(),
@@ -266,7 +247,7 @@ impl From<api::StrangerInfo> for wit::StrangerInfo {
 
 impl From<wit::StrangerInfo> for api::StrangerInfo {
     fn from(info: wit::StrangerInfo) -> Self {
-        api::StrangerInfo {
+        Self {
             user_id: info.user_id,
             nickname: info.nickname,
             sex: info.sex.into(),
@@ -275,55 +256,24 @@ impl From<wit::StrangerInfo> for api::StrangerInfo {
     }
 }
 
-impl From<api::FriendInfo> for wit::FriendInfo {
-    fn from(info: api::FriendInfo) -> Self {
-        wit::FriendInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            remark: info.remark,
-        }
-    }
-}
-
-impl From<wit::FriendInfo> for api::FriendInfo {
-    fn from(info: wit::FriendInfo) -> Self {
-        api::FriendInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            remark: info.remark,
-        }
-    }
-}
+impl_bidirectional_simple!(api::FriendInfo, wit::FriendInfo, user_id, nickname, remark);
 
 // ============================================================================
 // Group Info Types
 // ============================================================================
 
-impl From<api::GroupInfoResponse> for wit::GroupInfoResponse {
-    fn from(info: api::GroupInfoResponse) -> Self {
-        wit::GroupInfoResponse {
-            group_id: info.group_id,
-            group_name: info.group_name,
-            member_count: info.member_count,
-            max_member_count: info.max_member_count,
-        }
-    }
-}
-
-impl From<wit::GroupInfoResponse> for api::GroupInfoResponse {
-    fn from(info: wit::GroupInfoResponse) -> Self {
-        api::GroupInfoResponse {
-            group_id: info.group_id,
-            group_name: info.group_name,
-            member_count: info.member_count,
-            max_member_count: info.max_member_count,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::GroupInfoResponse,
+    wit::GroupInfoResponse,
+    group_id,
+    group_name,
+    member_count,
+    max_member_count,
+);
 
 impl From<api::GroupMemberInfo> for wit::GroupMemberInfo {
     fn from(info: api::GroupMemberInfo) -> Self {
-        wit::GroupMemberInfo {
+        Self {
             group_id: info.group_id,
             user_id: info.user_id,
             nickname: info.nickname,
@@ -345,7 +295,7 @@ impl From<api::GroupMemberInfo> for wit::GroupMemberInfo {
 
 impl From<wit::GroupMemberInfo> for api::GroupMemberInfo {
     fn from(info: wit::GroupMemberInfo) -> Self {
-        api::GroupMemberInfo {
+        Self {
             group_id: info.group_id,
             user_id: info.user_id,
             nickname: info.nickname,
@@ -369,53 +319,28 @@ impl From<wit::GroupMemberInfo> for api::GroupMemberInfo {
 // Group Honor Types
 // ============================================================================
 
-impl From<api::TalkativeInfo> for wit::TalkativeInfo {
-    fn from(info: api::TalkativeInfo) -> Self {
-        wit::TalkativeInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            avatar: info.avatar,
-            day_count: info.day_count,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::TalkativeInfo,
+    wit::TalkativeInfo,
+    user_id,
+    nickname,
+    avatar,
+    day_count,
+);
 
-impl From<wit::TalkativeInfo> for api::TalkativeInfo {
-    fn from(info: wit::TalkativeInfo) -> Self {
-        api::TalkativeInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            avatar: info.avatar,
-            day_count: info.day_count,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::HonorInfo,
+    wit::HonorInfo,
+    user_id,
+    nickname,
+    avatar,
+    description,
+);
 
-impl From<api::HonorInfo> for wit::HonorInfo {
-    fn from(info: api::HonorInfo) -> Self {
-        wit::HonorInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            avatar: info.avatar,
-            description: info.description,
-        }
-    }
-}
-
-impl From<wit::HonorInfo> for api::HonorInfo {
-    fn from(info: wit::HonorInfo) -> Self {
-        api::HonorInfo {
-            user_id: info.user_id,
-            nickname: info.nickname,
-            avatar: info.avatar,
-            description: info.description,
-        }
-    }
-}
-
+// GroupHonorInfo has complex Option<Vec<T>> fields requiring custom mapping
 impl From<api::GroupHonorInfo> for wit::GroupHonorInfo {
     fn from(info: api::GroupHonorInfo) -> Self {
-        wit::GroupHonorInfo {
+        Self {
             group_id: info.group_id,
             current_talkative: info.current_talkative.map(Into::into),
             talkative_list: info
@@ -439,7 +364,7 @@ impl From<api::GroupHonorInfo> for wit::GroupHonorInfo {
 
 impl From<wit::GroupHonorInfo> for api::GroupHonorInfo {
     fn from(info: wit::GroupHonorInfo) -> Self {
-        api::GroupHonorInfo {
+        Self {
             group_id: info.group_id,
             current_talkative: info.current_talkative.map(Into::into),
             talkative_list: info
@@ -461,155 +386,65 @@ impl From<wit::GroupHonorInfo> for api::GroupHonorInfo {
     }
 }
 
-impl From<api::GroupHonorType> for wit::GroupHonorType {
-    fn from(ty: api::GroupHonorType) -> Self {
-        match ty {
-            api::GroupHonorType::Talkative => wit::GroupHonorType::Talkative,
-            api::GroupHonorType::Performer => wit::GroupHonorType::Performer,
-            api::GroupHonorType::Legend => wit::GroupHonorType::Legend,
-            api::GroupHonorType::StrongNewbie => wit::GroupHonorType::StrongNewbie,
-            api::GroupHonorType::Emotion => wit::GroupHonorType::Emotion,
-            api::GroupHonorType::All => wit::GroupHonorType::All,
-        }
-    }
-}
-
-impl From<wit::GroupHonorType> for api::GroupHonorType {
-    fn from(ty: wit::GroupHonorType) -> Self {
-        match ty {
-            wit::GroupHonorType::Talkative => api::GroupHonorType::Talkative,
-            wit::GroupHonorType::Performer => api::GroupHonorType::Performer,
-            wit::GroupHonorType::Legend => api::GroupHonorType::Legend,
-            wit::GroupHonorType::StrongNewbie => api::GroupHonorType::StrongNewbie,
-            wit::GroupHonorType::Emotion => api::GroupHonorType::Emotion,
-            wit::GroupHonorType::All => api::GroupHonorType::All,
-        }
-    }
-}
+impl_bidirectional_enum!(
+    api::GroupHonorType,
+    wit::GroupHonorType,
+    Talkative,
+    Performer,
+    Legend,
+    StrongNewbie,
+    Emotion,
+    All,
+);
 
 // ============================================================================
 // Credential Types
 // ============================================================================
 
-impl From<api::GetCookiesResponse> for wit::GetCookiesResponse {
-    fn from(response: api::GetCookiesResponse) -> Self {
-        wit::GetCookiesResponse {
-            cookies: response.cookies,
-        }
-    }
-}
+impl_bidirectional_simple!(api::GetCookiesResponse, wit::GetCookiesResponse, cookies);
 
-impl From<wit::GetCookiesResponse> for api::GetCookiesResponse {
-    fn from(response: wit::GetCookiesResponse) -> Self {
-        api::GetCookiesResponse {
-            cookies: response.cookies,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::GetCsrfTokenResponse,
+    wit::GetCsrfTokenResponse,
+    token,
+);
 
-impl From<api::GetCsrfTokenResponse> for wit::GetCsrfTokenResponse {
-    fn from(response: api::GetCsrfTokenResponse) -> Self {
-        wit::GetCsrfTokenResponse {
-            token: response.token,
-        }
-    }
-}
-
-impl From<wit::GetCsrfTokenResponse> for api::GetCsrfTokenResponse {
-    fn from(response: wit::GetCsrfTokenResponse) -> Self {
-        api::GetCsrfTokenResponse {
-            token: response.token,
-        }
-    }
-}
-
-impl From<api::GetCredentialsResponse> for wit::GetCredentialsResponse {
-    fn from(response: api::GetCredentialsResponse) -> Self {
-        wit::GetCredentialsResponse {
-            cookies: response.cookies,
-            csrf_token: response.csrf_token,
-        }
-    }
-}
-
-impl From<wit::GetCredentialsResponse> for api::GetCredentialsResponse {
-    fn from(response: wit::GetCredentialsResponse) -> Self {
-        api::GetCredentialsResponse {
-            cookies: response.cookies,
-            csrf_token: response.csrf_token,
-        }
-    }
-}
+impl_bidirectional_simple!(
+    api::GetCredentialsResponse,
+    wit::GetCredentialsResponse,
+    cookies,
+    csrf_token,
+);
 
 // ============================================================================
 // File and Media Types
 // ============================================================================
 
-impl From<api::GetFileResponse> for wit::GetFileResponse {
-    fn from(response: api::GetFileResponse) -> Self {
-        wit::GetFileResponse {
-            file: response.file,
-        }
-    }
-}
+impl_bidirectional_simple!(api::GetFileResponse, wit::GetFileResponse, file);
 
-impl From<wit::GetFileResponse> for api::GetFileResponse {
-    fn from(response: wit::GetFileResponse) -> Self {
-        api::GetFileResponse {
-            file: response.file,
-        }
-    }
-}
+impl_bidirectional_enum!(
+    api::RecordFormat,
+    wit::RecordFormat,
+    Mp3,
+    Amr,
+    Wma,
+    M4a,
+    Spx,
+    Ogg,
+    Wav,
+    Flac,
+);
 
-impl From<api::RecordFormat> for wit::RecordFormat {
-    fn from(format: api::RecordFormat) -> Self {
-        match format {
-            api::RecordFormat::Mp3 => wit::RecordFormat::Mp3,
-            api::RecordFormat::Amr => wit::RecordFormat::Amr,
-            api::RecordFormat::Wma => wit::RecordFormat::Wma,
-            api::RecordFormat::M4a => wit::RecordFormat::M4a,
-            api::RecordFormat::Spx => wit::RecordFormat::Spx,
-            api::RecordFormat::Ogg => wit::RecordFormat::Ogg,
-            api::RecordFormat::Wav => wit::RecordFormat::Wav,
-            api::RecordFormat::Flac => wit::RecordFormat::Flac,
-        }
-    }
-}
-
-impl From<wit::RecordFormat> for api::RecordFormat {
-    fn from(format: wit::RecordFormat) -> Self {
-        match format {
-            wit::RecordFormat::Mp3 => api::RecordFormat::Mp3,
-            wit::RecordFormat::Amr => api::RecordFormat::Amr,
-            wit::RecordFormat::Wma => api::RecordFormat::Wma,
-            wit::RecordFormat::M4a => api::RecordFormat::M4a,
-            wit::RecordFormat::Spx => api::RecordFormat::Spx,
-            wit::RecordFormat::Ogg => api::RecordFormat::Ogg,
-            wit::RecordFormat::Wav => api::RecordFormat::Wav,
-            wit::RecordFormat::Flac => api::RecordFormat::Flac,
-        }
-    }
-}
-
-impl From<api::CanSendResponse> for wit::CanSendResponse {
-    fn from(response: api::CanSendResponse) -> Self {
-        wit::CanSendResponse { yes: response.yes }
-    }
-}
-
-impl From<wit::CanSendResponse> for api::CanSendResponse {
-    fn from(response: wit::CanSendResponse) -> Self {
-        api::CanSendResponse { yes: response.yes }
-    }
-}
+impl_bidirectional_simple!(api::CanSendResponse, wit::CanSendResponse, yes);
 
 // ============================================================================
 // Version Info Types
 // ============================================================================
 
+// VersionInfo has a renamed field (data <-> extra_data)
 impl From<api::VersionInfo> for wit::VersionInfo {
     fn from(info: api::VersionInfo) -> Self {
-        wit::VersionInfo {
+        Self {
             app_name: info.app_name,
             app_version: info.app_version,
             protocol_version: info.protocol_version,
@@ -620,7 +455,7 @@ impl From<api::VersionInfo> for wit::VersionInfo {
 
 impl From<wit::VersionInfo> for api::VersionInfo {
     fn from(info: wit::VersionInfo) -> Self {
-        api::VersionInfo {
+        Self {
             app_name: info.app_name,
             app_version: info.app_version,
             protocol_version: info.protocol_version,
@@ -633,28 +468,9 @@ impl From<wit::VersionInfo> for api::VersionInfo {
 // Request Sub-types
 // ============================================================================
 
-impl From<wit::GroupRequestSubType> for flow_bot_onebot11::event::request::GroupRequestSubType {
-    fn from(ty: wit::GroupRequestSubType) -> Self {
-        match ty {
-            wit::GroupRequestSubType::Add => {
-                flow_bot_onebot11::event::request::GroupRequestSubType::Add
-            }
-            wit::GroupRequestSubType::Invite => {
-                flow_bot_onebot11::event::request::GroupRequestSubType::Invite
-            }
-        }
-    }
-}
-
-impl From<flow_bot_onebot11::event::request::GroupRequestSubType> for wit::GroupRequestSubType {
-    fn from(ty: flow_bot_onebot11::event::request::GroupRequestSubType) -> Self {
-        match ty {
-            flow_bot_onebot11::event::request::GroupRequestSubType::Add => {
-                wit::GroupRequestSubType::Add
-            }
-            flow_bot_onebot11::event::request::GroupRequestSubType::Invite => {
-                wit::GroupRequestSubType::Invite
-            }
-        }
-    }
-}
+impl_bidirectional_enum!(
+    flow_bot_onebot11::event::request::GroupRequestSubType,
+    wit::GroupRequestSubType,
+    Add,
+    Invite,
+);
