@@ -8,8 +8,8 @@ use flow_bot_onebot11::event::request::GroupRequestSubType;
 use super::{
     BotStatus, CanSendResponse, FriendInfo, GetCookiesResponse, GetCredentialsResponse,
     GetCsrfTokenResponse, GetFileResponse, GetForwardResponse, GetMessageResponse, GroupHonorInfo,
-    GroupHonorType, GroupInfoResponse, LoginInfo, RecordFormat, SendMessageResponse, VersionInfo,
-    api_ext::ApiExt,
+    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat, SendMessageResponse,
+    VersionInfo, api_ext::ApiExt,
 };
 
 macro_rules! impl_api {
@@ -245,14 +245,14 @@ impl ApiExt for Context {
         group_id: i64,
         user_id: i64,
         no_cache: Option<bool>,
-    ) -> Result<crate::api::GroupInfoResponse, Self::Error> {
+    ) -> Result<GroupMemberInfo, Self::Error> {
         impl_api!(self, get_group_member_info, group_id, user_id, no_cache)
     }
 
     async fn get_group_member_list(
         &self,
         group_id: i64,
-    ) -> Result<Vec<crate::api::FriendInfo>, Self::Error> {
+    ) -> Result<Vec<GroupMemberInfo>, Self::Error> {
         impl_api!(self, get_group_member_list, group_id)
     }
 
