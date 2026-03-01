@@ -31,3 +31,11 @@ Thumbs.db
 # Plugin system
 plugins/*.wasm
 plugins/*.json
+
+# Web UI
+node_modules
+flow-bot/src/web/static/assets
+flow-bot/src/web/static/*.html
+flow-bot/src/web/static/*.js
+flow-bot/src/web/static/*.css
+flow-bot/src/web/static/*.svg

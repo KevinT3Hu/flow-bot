@@ -258,6 +258,25 @@ impl PluginManager {
         self.plugins.len()
     }
 
+    /// Check if a plugin is currently loaded
+    pub async fn is_plugin_loaded(&self, name: &str) -> bool {
+        self.plugins.contains_key(name)
+    }
+
+    /// Enable a plugin by loading it from the plugin directory
+    pub async fn enable_plugin(&self, name: &str) -> Result<()> {
+        let plugin_path = self.config.plugin_dir.join(format!("{}.wasm", name));
+        if !plugin_path.exists() {
+            return Err(anyhow!("Plugin file not found: {:?}", plugin_path));
+        }
+        self.load_plugin_internal(&plugin_path).await
+    }
+
+    /// Scan the plugin directory and return all available plugin paths
+    pub async fn scan_available_plugins(&self) -> Vec<std::path::PathBuf> {
+        self.loader.scan_plugin_directory().unwrap_or_default()
+    }
+
     /// Start the file watcher for hot reloading
     pub async fn start_watcher(&self) -> Result<()> {
         if !self.config.hot_reload {

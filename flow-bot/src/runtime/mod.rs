@@ -161,6 +161,11 @@ impl FlowBotRuntime {
     pub async fn plugin_count(&self) -> usize {
         self.manager.plugin_count().await
     }
+
+    /// Get a reference to the plugin manager for web UI access
+    pub fn manager(&self) -> Arc<PluginManager> {
+        self.manager.clone()
+    }
 }
 
 #[cfg(test)]

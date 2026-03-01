@@ -51,6 +51,8 @@ use anyhow::{Context, Result, anyhow};
 use clap::Parser;
 use serde::Deserialize;
 
+#[cfg(feature = "api-server")]
+use flow_bot::web::{self, LogMessage};
 use flow_bot::{
     FlowBotBuilder,
     base::connect::{
@@ -58,6 +60,12 @@ use flow_bot::{
     },
     runtime::{FlowBotRuntime, RuntimeConfig},
 };
+#[cfg(feature = "api-server")]
+use tokio::sync::broadcast;
+#[cfg(feature = "api-server")]
+use tracing_subscriber::layer::SubscriberExt;
+#[cfg(feature = "api-server")]
+use tracing_subscriber::util::SubscriberInitExt;
 
 /// Command-line arguments
 #[derive(Parser, Debug)]
@@ -90,6 +98,10 @@ struct Config {
     /// Logging configuration (optional)
     #[serde(default)]
     logging: LoggingConfig,
+
+    /// Web interface configuration (optional)
+    #[serde(default)]
+    web: WebConfig,
 }
 
 /// Connection configuration
@@ -228,7 +240,8 @@ impl Default for RuntimeConfigWrapper {
             enable_wasi: flow_bot::runtime::config::default_true(),
             wasm_stack_bytes: flow_bot::runtime::config::default_wasm_stack_bytes(),
             request_timeout_secs: flow_bot::runtime::config::default_request_timeout_secs(),
-            max_concurrent_plugin_tasks: flow_bot::runtime::config::default_max_concurrent_plugin_tasks(),
+            max_concurrent_plugin_tasks:
+                flow_bot::runtime::config::default_max_concurrent_plugin_tasks(),
         }
     }
 }
@@ -255,6 +268,33 @@ struct LoggingConfig {
     /// Log level: trace, debug, info, warn, error
     #[serde(default = "default_log_level")]
     level: String,
+}
+
+/// Web interface configuration
+#[derive(Debug, Deserialize)]
+struct WebConfig {
+    /// Enable web management interface
+    #[serde(default = "default_web_enabled")]
+    enabled: bool,
+    /// Bind address for the web server
+    #[cfg_attr(not(feature = "api-server"), allow(dead_code))]
+    #[serde(default = "default_web_bind")]
+    bind: String,
+    /// Password for web interface authentication (optional)
+    /// If not set, no authentication is required
+    #[cfg_attr(not(feature = "api-server"), allow(dead_code))]
+    #[serde(default)]
+    password: Option<String>,
+}
+
+impl Default for WebConfig {
+    fn default() -> Self {
+        Self {
+            enabled: default_web_enabled(),
+            bind: default_web_bind(),
+            password: None,
+        }
+    }
 }
 
 impl Default for LoggingConfig {
@@ -284,6 +324,14 @@ fn default_log_level() -> String {
 
 fn default_mode() -> String {
     "client".to_string()
+}
+
+fn default_web_enabled() -> bool {
+    true
+}
+
+fn default_web_bind() -> String {
+    "127.0.0.1:8080".to_string()
 }
 
 /// Load configuration from file
@@ -351,6 +399,19 @@ max_execution_time_ms = 5000
 # Enable WASI preview2 support
 enable_wasi = true
 
+[web]
+# Enable web management interface
+# Access the web UI at http://127.0.0.1:8080
+enabled = true
+
+# Bind address for the web server
+# Default is localhost only for security. Use "0.0.0.0:8080" to bind to all interfaces.
+bind = "127.0.0.1:8080"
+
+# Optional password for web interface authentication
+# If set, users must login with this password to access the web UI
+# password = "your-secure-password"
+
 [logging]
 # Log level: trace, debug, info, warn, error
 level = "info"
@@ -363,8 +424,34 @@ level = "info"
     Ok(())
 }
 
-/// Initialize logging
-fn init_logging(level: &str) -> Result<()> {
+/// Initialize logging with optional web log layer
+#[cfg(feature = "api-server")]
+fn init_logging(level: &str) -> broadcast::Sender<LogMessage> {
+    let (log_tx, _log_rx) = broadcast::channel::<LogMessage>(1000);
+
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level));
+
+    // Create the web log layer
+    let web_layer = web::log_collector::WebLogLayer::new(log_tx.clone());
+
+    tracing_subscriber::fmt()
+        .with_env_filter(env_filter)
+        .with_target(true)
+        .with_thread_ids(false)
+        .with_file(false)
+        .with_line_number(false)
+        .finish()
+        .with(web_layer)
+        .try_init()
+        .ok(); // Ignore error if already initialized (e.g., in tests)
+
+    log_tx
+}
+
+/// Initialize logging without web log layer
+#[cfg(not(feature = "api-server"))]
+fn init_logging(level: &str) {
     let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level));
 
@@ -375,9 +462,7 @@ fn init_logging(level: &str) -> Result<()> {
         .with_file(false)
         .with_line_number(false)
         .try_init()
-        .map_err(|e| anyhow!("Failed to initialize logging: {}", e))?;
-
-    Ok(())
+        .ok(); // Ignore error if already initialized (e.g., in tests)
 }
 
 #[tokio::main]
@@ -396,7 +481,10 @@ async fn main() -> Result<()> {
 
     // Initialize logging
     let log_level = args.log_level.as_ref().unwrap_or(&config.logging.level);
-    init_logging(log_level)?;
+    #[cfg(feature = "api-server")]
+    let log_tx = init_logging(log_level);
+    #[cfg(not(feature = "api-server"))]
+    init_logging(log_level);
 
     tracing::info!("Flow-Bot starting...");
     tracing::info!("Configuration file: {}", args.config.display());
@@ -502,10 +590,50 @@ async fn main() -> Result<()> {
     }
     let bot = builder.build();
 
+    // Start web server if enabled (only when api-server feature is enabled)
+    #[cfg(feature = "api-server")]
+    let web_handle = if config.web.enabled {
+        tracing::info!("Web interface enabled on http://{}", config.web.bind);
+
+        let plugin_manager = runtime.as_ref().map(|r| r.manager());
+        let bind_addr = config.web.bind.clone();
+        let connection_mode = config.connection.mode.clone();
+
+        Some(tokio::spawn(async move {
+            if let Some(pm) = plugin_manager {
+                if let Err(e) = web::start_web_server(
+                    &bind_addr,
+                    pm,
+                    log_tx,
+                    connection_mode,
+                    config.web.password,
+                )
+                .await
+                {
+                    tracing::error!("Web server error: {}", e);
+                }
+            } else {
+                tracing::warn!("Web interface requires runtime to be enabled");
+            }
+        }))
+    } else {
+        tracing::info!("Web interface disabled");
+        None
+    };
+
+    #[cfg(not(feature = "api-server"))]
+    {
+        if config.web.enabled {
+            tracing::warn!(
+                "Web interface enabled in config but api-server feature is not compiled. Build with --features api-server to enable."
+            );
+        }
+    }
+
     tracing::info!("Bot ready! Starting event loop...");
 
-    // Run the bot
-    let result = bot.run().await;
+    // Run the bot and web server concurrently
+    let bot_result = bot.run().await;
 
     // Cleanup
     if let Some(runtime) = runtime {
@@ -515,8 +643,14 @@ async fn main() -> Result<()> {
         }
     }
 
+    // Abort web server if it's still running
+    #[cfg(feature = "api-server")]
+    if let Some(handle) = web_handle {
+        handle.abort();
+    }
+
     // Handle result
-    match result {
+    match bot_result {
         Ok(_) => {
             tracing::info!("Bot stopped gracefully");
             Ok(())

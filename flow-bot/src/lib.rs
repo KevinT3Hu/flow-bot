@@ -81,6 +81,8 @@ pub mod api;
 pub mod base;
 pub mod error;
 pub mod runtime;
+#[cfg(feature = "api-server")]
+pub mod web;
 
 // Re-export event and message modules from flow-bot-onebot11
 pub use flow_bot_onebot11::event;
