@@ -158,8 +158,8 @@ pub async fn start_web_server(
     // Protected API routes (auth required if password is set)
     let protected_routes = Router::new()
         .route("/api/plugins", get(list_plugins))
-        .route("/api/plugins/:name/enable", post(enable_plugin))
-        .route("/api/plugins/:name/disable", post(disable_plugin))
+        .route("/api/plugins/{name}/enable", post(enable_plugin))
+        .route("/api/plugins/{name}/disable", post(disable_plugin))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             auth_middleware,

@@ -8,8 +8,8 @@ use flow_bot_onebot11::event::request::GroupRequestSubType;
 use super::{
     BotStatus, CanSendResponse, FriendInfo, GetCookiesResponse, GetCredentialsResponse,
     GetCsrfTokenResponse, GetFileResponse, GetForwardResponse, GetMessageResponse, GroupHonorInfo,
-    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat, SendMessageResponse,
-    VersionInfo, api_ext::ApiExt,
+    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat,
+    SendMessageResponse, VersionInfo, api_ext::ApiExt,
 };
 
 macro_rules! impl_api {

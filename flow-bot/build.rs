@@ -7,7 +7,9 @@ fn main() {
     let webui_enabled = env::var("CARGO_FEATURE_WEBUI").is_ok();
 
     if !webui_enabled {
-        println!("cargo::warning=Web UI feature not enabled. Build with --features webui to include the web interface.");
+        println!(
+            "cargo::warning=Web UI feature not enabled. Build with --features webui to include the web interface."
+        );
         return;
     }
 
@@ -17,7 +19,9 @@ fn main() {
 
     // Skip web build in debug mode unless forced (to speed up development)
     if profile == "debug" && !force_build {
-        println!("cargo::warning=Skipping web UI build in debug mode. Set FORCE_WEB_BUILD=1 to force build.");
+        println!(
+            "cargo::warning=Skipping web UI build in debug mode. Set FORCE_WEB_BUILD=1 to force build."
+        );
         return;
     }
 
@@ -34,7 +38,10 @@ fn main() {
 
     // Check if node_modules exists, if not run npm install
     if !ui_dir.join("node_modules").exists() {
-        println!("cargo::rerun-if-changed={}", ui_dir.join("package.json").display());
+        println!(
+            "cargo::rerun-if-changed={}",
+            ui_dir.join("package.json").display()
+        );
 
         let output = Command::new("npm")
             .arg("install")
@@ -52,7 +59,10 @@ fn main() {
 
     // Run npm run build
     println!("cargo::rerun-if-changed={}", ui_dir.join("src").display());
-    println!("cargo::rerun-if-changed={}", ui_dir.join("index.html").display());
+    println!(
+        "cargo::rerun-if-changed={}",
+        ui_dir.join("index.html").display()
+    );
 
     let output = Command::new("npm")
         .arg("run")

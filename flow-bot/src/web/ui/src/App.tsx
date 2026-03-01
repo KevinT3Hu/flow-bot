@@ -12,6 +12,8 @@ import { Loader2 } from 'lucide-react'
 
 function App() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore()
+  const info = useBotStore((state) => state.info)
+  const isConnected = useLogStore((state) => state.isConnected)
 
   // Check auth status on mount
   useEffect(() => {
@@ -43,9 +45,6 @@ function App() {
   if (!isAuthenticated) {
     return <LoginPage />
   }
-
-  const info = useBotStore((state) => state.info)
-  const isConnected = useLogStore((state) => state.isConnected)
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -22,10 +22,7 @@ struct PendingRequestGuard {
 }
 
 impl PendingRequestGuard {
-    fn new(
-        pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
-        echo: String,
-    ) -> Self {
+    fn new(pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>, echo: String) -> Self {
         Self {
             pending_requests,
             echo: Some(echo),
@@ -58,14 +55,8 @@ impl WebSocketSink {
     /// Send a message through the websocket
     pub async fn send(&mut self, msg: Message) -> Result<(), FlowError> {
         match self {
-            WebSocketSink::Server(sink) => sink
-                .send(msg)
-                .await
-                .map_err(FlowError::WebSocketError),
-            WebSocketSink::Client(sink) => sink
-                .send(msg)
-                .await
-                .map_err(FlowError::WebSocketError),
+            WebSocketSink::Server(sink) => sink.send(msg).await.map_err(FlowError::WebSocketError),
+            WebSocketSink::Client(sink) => sink.send(msg).await.map_err(FlowError::WebSocketError),
         }
     }
 }

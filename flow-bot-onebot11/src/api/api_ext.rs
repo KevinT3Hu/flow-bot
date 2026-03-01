@@ -8,8 +8,8 @@ use crate::message::IntoMessage;
 use super::{
     BotStatus, CanSendResponse, FriendInfo, GetCookiesResponse, GetCredentialsResponse,
     GetCsrfTokenResponse, GetFileResponse, GetForwardResponse, GetMessageResponse, GroupHonorInfo,
-    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat, SendMessageResponse,
-    StrangerInfo, VersionInfo,
+    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat,
+    SendMessageResponse, StrangerInfo, VersionInfo,
 };
 
 /// Trait providing OneBot-11 API methods.
@@ -74,7 +74,7 @@ pub trait ApiExt {
     ///
     /// * `message_id` - The ID of the forwarded message
     async fn get_forward_message(&self, message_id: i64)
-        -> Result<GetForwardResponse, Self::Error>;
+    -> Result<GetForwardResponse, Self::Error>;
 
     /// Send a "like" to a user's profile.
     ///
@@ -298,7 +298,10 @@ pub trait ApiExt {
     /// # Arguments
     ///
     /// * `group_id` - The group ID
-    async fn get_group_member_list(&self, group_id: i64) -> Result<Vec<GroupMemberInfo>, Self::Error>;
+    async fn get_group_member_list(
+        &self,
+        group_id: i64,
+    ) -> Result<Vec<GroupMemberInfo>, Self::Error>;
 
     /// Get group honor information.
     ///

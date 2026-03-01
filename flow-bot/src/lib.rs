@@ -234,7 +234,9 @@ impl FlowBot {
         let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
         // Use saturating operations to prevent overflow
         let multiplier = 2_u64.saturating_pow(attempt.min(32)); // Cap exponent at 32 to prevent huge values
-        initial_delay_ms.saturating_mul(multiplier).min(max_delay_ms)
+        initial_delay_ms
+            .saturating_mul(multiplier)
+            .min(max_delay_ms)
     }
 
     async fn run_with_infinite_reconnect(
@@ -330,13 +332,16 @@ impl FlowBot {
                     .and_then(|v| v.to_str().ok());
 
                 let provided = auth_header.and_then(|h| {
-                    h.strip_prefix("Bearer ").or_else(|| h.strip_prefix("bearer "))
+                    h.strip_prefix("Bearer ")
+                        .or_else(|| h.strip_prefix("bearer "))
                 });
 
                 if provided != Some(expected.as_str()) {
-                    tracing::warn!("WebSocket connection rejected: invalid or missing authorization");
+                    tracing::warn!(
+                        "WebSocket connection rejected: invalid or missing authorization"
+                    );
                     return Err(ErrorResponse::new(Some(
-                        "Invalid or missing Authorization header".to_string()
+                        "Invalid or missing Authorization header".to_string(),
                     )));
                 }
                 tracing::debug!("WebSocket client authorized successfully");
@@ -417,14 +422,15 @@ impl FlowBot {
 
     async fn handle_event(&self, text: Utf8Bytes) -> Result<(), FlowError> {
         // Log the incoming event for debugging
-        tracing::debug!("Received event: {}", text);
+        tracing::info!("Received event: {}", text);
 
         // Pass the event to the runtime if one is attached
         if let Some(runtime) = &self.runtime
-            && let Err(e) = runtime.handle_event(text.as_bytes()).await {
-                tracing::error!("Runtime failed to handle event: {}", e);
-                // Don't propagate the error - log it and continue processing
-            }
+            && let Err(e) = runtime.handle_event(text.as_bytes()).await
+        {
+            tracing::error!("Runtime failed to handle event: {}", e);
+            // Don't propagate the error - log it and continue processing
+        }
 
         Ok(())
     }

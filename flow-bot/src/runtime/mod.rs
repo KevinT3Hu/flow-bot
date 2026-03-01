@@ -4,11 +4,11 @@
 //! to handle OneBot-11 events. Plugins are loaded from a directory and can be
 //! automatically reloaded when their files change.
 
+pub mod config;
 mod loader;
 mod manager;
 mod plugin;
 pub mod types;
-pub mod config;
 
 use std::path::PathBuf;
 use std::sync::Arc;

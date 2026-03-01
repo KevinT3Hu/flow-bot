@@ -26,6 +26,7 @@ pub struct PluginManager {
     loader: Arc<PluginLoader>,
     plugins: Arc<DashMap<String, Arc<Mutex<LoadedPlugin>>>>,
     watcher: Arc<RwLock<Option<Debouncer<RecommendedWatcher>>>>,
+    reload_tx: Arc<RwLock<Option<tokio::sync::mpsc::UnboundedSender<std::path::PathBuf>>>>,
 }
 
 impl PluginManager {
@@ -38,6 +39,7 @@ impl PluginManager {
             loader,
             plugins: Arc::new(DashMap::new()),
             watcher: Arc::new(RwLock::new(None)),
+            reload_tx: Arc::new(RwLock::new(None)),
         })
     }
 
@@ -187,9 +189,10 @@ impl PluginManager {
 
             let handle = tokio::spawn(async move {
                 // Acquire permit to limit concurrency
-                let _permit = sem.acquire().await.map_err(|e| {
-                    anyhow::anyhow!("Failed to acquire semaphore permit: {}", e)
-                })?;
+                let _permit = sem
+                    .acquire()
+                    .await
+                    .map_err(|e| anyhow::anyhow!("Failed to acquire semaphore permit: {}", e))?;
 
                 let mut plugin = plugin_arc.lock().await;
                 let plugin_name = plugin.name.clone();
@@ -284,6 +287,7 @@ impl PluginManager {
         }
 
         let mut watcher_guard = self.watcher.write().await;
+        let mut tx_guard = self.reload_tx.write().await;
 
         if watcher_guard.is_some() {
             tracing::warn!("File watcher already running");
@@ -294,29 +298,39 @@ impl PluginManager {
         let manager = Arc::new(self.create_weak_ref());
         let debounce_duration = Duration::from_millis(self.config.reload_debounce_ms);
 
+        // Create channel for sending reload events from watcher thread to tokio runtime
+        let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<std::path::PathBuf>();
+
+        // Spawn background task to handle reload events in tokio runtime context
+        let reload_manager = manager.clone();
+        tokio::spawn(async move {
+            while let Some(path) = rx.recv().await {
+                if path.extension().and_then(|s| s.to_str()) == Some("wasm") {
+                    tracing::info!("Detected change in plugin: {:?}", path);
+                    if let Err(e) = reload_manager.reload_plugin_by_path(&path).await {
+                        tracing::error!("Failed to reload plugin {:?}: {}", path, e);
+                    }
+                }
+            }
+        });
+
+        let tx_clone = tx.clone();
         let mut debouncer = new_debouncer(
             debounce_duration,
             move |result: Result<Vec<DebouncedEvent>, NotifyError>| {
                 if let Ok(events) = result {
-                    let manager_clone = manager.clone();
-                    tokio::spawn(async move {
-                        for event in events {
-                            if let DebouncedEventKind::Any = event.kind {
-                                let path = &event.path;
-                                if path.extension().and_then(|s| s.to_str()) == Some("wasm") {
-                                    tracing::info!("Detected change in plugin: {:?}", path);
-                                    if let Err(e) = manager_clone.reload_plugin_by_path(path).await
-                                    {
-                                        tracing::error!(
-                                            "Failed to reload plugin {:?}: {}",
-                                            path,
-                                            e
-                                        );
-                                    }
-                                }
+                    for event in events {
+                        if let DebouncedEventKind::Any = event.kind {
+                            let path = event.path;
+                            // Just send the path through the channel - no tokio::spawn needed
+                            if let Err(e) = tx_clone.send(path) {
+                                tracing::debug!(
+                                    "Failed to send reload event, receiver dropped: {}",
+                                    e
+                                );
                             }
                         }
-                    });
+                    }
                 }
             },
         )
@@ -328,6 +342,7 @@ impl PluginManager {
             .with_context(|| format!("Failed to watch directory: {:?}", plugin_dir))?;
 
         *watcher_guard = Some(debouncer);
+        *tx_guard = Some(tx);
 
         tracing::info!("File watcher started for {:?}", plugin_dir);
         Ok(())
@@ -336,8 +351,10 @@ impl PluginManager {
     /// Stop the file watcher
     pub async fn stop_watcher(&self) {
         let mut watcher_guard = self.watcher.write().await;
+        let mut tx_guard = self.reload_tx.write().await;
         if watcher_guard.is_some() {
             *watcher_guard = None;
+            *tx_guard = None;
             tracing::info!("File watcher stopped");
         }
     }

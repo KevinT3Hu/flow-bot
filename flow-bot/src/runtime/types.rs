@@ -79,13 +79,7 @@ macro_rules! impl_bidirectional_enum {
 // API Response Types
 // ============================================================================
 
-impl_bidirectional_enum!(
-    api::ApiRetStatus,
-    wit::ApiRetStatus,
-    Ok,
-    Async,
-    Failed,
-);
+impl_bidirectional_enum!(api::ApiRetStatus, wit::ApiRetStatus, Ok, Async, Failed,);
 
 // BotStatus has a renamed field (data <-> extra_data)
 impl From<api::BotStatus> for wit::BotStatus {
@@ -118,13 +112,7 @@ impl_bidirectional_simple!(
 // Sender Types
 // ============================================================================
 
-impl_bidirectional_enum!(
-    message::SenderSex,
-    wit::SenderSex,
-    Male,
-    Female,
-    Unknown,
-);
+impl_bidirectional_enum!(message::SenderSex, wit::SenderSex, Male, Female, Unknown,);
 
 impl_bidirectional_option!(
     message::PrivateSenderInfo,
@@ -200,8 +188,12 @@ impl From<api::GetMessageType> for wit::GetMessageType {
 impl From<wit::GetMessageType> for api::GetMessageType {
     fn from(ty: wit::GetMessageType) -> Self {
         match ty {
-            wit::GetMessageType::Private(sender) => Self::Private { sender: sender.into() },
-            wit::GetMessageType::Group(sender) => Self::Group { sender: sender.into() },
+            wit::GetMessageType::Private(sender) => Self::Private {
+                sender: sender.into(),
+            },
+            wit::GetMessageType::Group(sender) => Self::Group {
+                sender: sender.into(),
+            },
         }
     }
 }
@@ -403,11 +395,7 @@ impl_bidirectional_enum!(
 
 impl_bidirectional_simple!(api::GetCookiesResponse, wit::GetCookiesResponse, cookies);
 
-impl_bidirectional_simple!(
-    api::GetCsrfTokenResponse,
-    wit::GetCsrfTokenResponse,
-    token,
-);
+impl_bidirectional_simple!(api::GetCsrfTokenResponse, wit::GetCsrfTokenResponse, token,);
 
 impl_bidirectional_simple!(
     api::GetCredentialsResponse,
