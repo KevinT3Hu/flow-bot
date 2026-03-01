@@ -40,4 +40,7 @@ pub enum FlowError {
 
     #[error("Plugin execution timeout")]
     PluginTimeout,
+
+    #[error("Invalid configuration: {0}")]
+    InvalidConfig(String),
 }

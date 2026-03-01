@@ -69,7 +69,7 @@ use futures::{
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, accept_async, connect_async,
-    tungstenite::{Message, Utf8Bytes, client::IntoClientRequest},
+    tungstenite::{Message, Utf8Bytes, client::IntoClientRequest, http::HeaderValue},
 };
 
 pub mod api;
@@ -335,9 +335,10 @@ impl FlowBot {
     > {
         let mut request = config.target.clone().into_client_request()?;
         if let Some(auth) = &config.auth {
-            request
-                .headers_mut()
-                .append("Authorization", auth.parse().unwrap());
+            let auth_header: HeaderValue = auth.parse().map_err(|_| {
+                FlowError::InvalidConfig(format!("Invalid authorization header value: {}", auth))
+            })?;
+            request.headers_mut().append("Authorization", auth_header);
         }
 
         let (ws_stream, _) = connect_async(request).await?;
@@ -403,7 +404,7 @@ impl FlowBot {
     }
 
     fn check_is_echo(msg: &str) -> Option<String> {
-        let msg = serde_json::from_str::<serde_json::Value>(msg).unwrap();
+        let msg = serde_json::from_str::<serde_json::Value>(msg).ok()?;
         if let serde_json::Value::Object(obj) = msg
             && let Some(serde_json::Value::String(echo)) = obj.get("echo")
         {

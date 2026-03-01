@@ -148,8 +148,10 @@ impl PluginLoader {
         let mut store = Store::new(&self.engine, plugin_state);
 
         // Set execution timeout using epoch interruption
-        store.set_epoch_deadline(1);
-        store.epoch_deadline_async_yield_and_update(1);
+        // Each epoch is 10ms, so divide max_execution_time_ms by 10 to get epochs
+        let timeout_epochs = self.config.max_execution_time_ms / 10;
+        store.set_epoch_deadline(timeout_epochs);
+        store.epoch_deadline_async_yield_and_update(timeout_epochs);
 
         Ok(store)
     }
