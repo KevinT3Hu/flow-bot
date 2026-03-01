@@ -68,8 +68,13 @@ use futures::{
 };
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, accept_async, connect_async,
-    tungstenite::{Message, Utf8Bytes, client::IntoClientRequest, http::HeaderValue},
+    MaybeTlsStream, WebSocketStream, accept_hdr_async, connect_async,
+    tungstenite::{
+        Message, Utf8Bytes,
+        client::IntoClientRequest,
+        handshake::server::{ErrorResponse, Request, Response},
+        http::HeaderValue,
+    },
 };
 
 pub mod api;
@@ -313,12 +318,31 @@ impl FlowBot {
         let (stream, addr) = listener.accept().await.map_err(FlowError::IoError)?;
         tracing::info!("Client connected from: {}", addr);
 
-        // Optionally validate auth header from the request
-        // Note: tokio_tungstenite's accept_async doesn't provide easy access to headers
-        // For more sophisticated auth, we'd need to implement a custom accept
-        // For now, we accept the connection and auth validation can be done at the protocol level
+        // Validate auth header if configured
+        let expected_auth = config.auth.clone();
+        let ws_stream = accept_hdr_async(stream, |req: &Request, response: Response| {
+            if let Some(ref expected) = expected_auth {
+                let auth_header = req
+                    .headers()
+                    .get("authorization")
+                    .and_then(|v| v.to_str().ok());
 
-        let ws_stream = accept_async(stream).await?;
+                let provided = auth_header.and_then(|h| {
+                    h.strip_prefix("Bearer ").or_else(|| h.strip_prefix("bearer "))
+                });
+
+                if provided != Some(expected.as_str()) {
+                    tracing::warn!("WebSocket connection rejected: invalid or missing authorization");
+                    return Err(ErrorResponse::new(Some(
+                        "Invalid or missing Authorization header".to_string()
+                    )));
+                }
+                tracing::debug!("WebSocket client authorized successfully");
+            }
+            Ok(response)
+        })
+        .await?;
+
         Ok(ws_stream.split())
     }
 
