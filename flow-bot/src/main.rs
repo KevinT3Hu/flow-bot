@@ -176,44 +176,44 @@ impl From<ReconnectionConfig> for ReconnectionStrategy {
 #[derive(Debug, Deserialize)]
 struct RuntimeConfigWrapper {
     /// Enable WASM plugin runtime
-    #[serde(default = "default_true")]
+    #[serde(default = "flow_bot::runtime::config::default_true")]
     enabled: bool,
 
     /// Plugin directory
-    #[serde(default = "default_plugin_dir")]
+    #[serde(default = "flow_bot::runtime::config::default_plugin_dir")]
     plugin_dir: PathBuf,
 
     /// Enable hot reloading
-    #[serde(default = "default_true")]
+    #[serde(default = "flow_bot::runtime::config::default_true")]
     hot_reload: bool,
 
     /// Reload debounce delay in milliseconds
-    #[serde(default = "default_reload_debounce")]
+    #[serde(default = "flow_bot::runtime::config::default_reload_debounce_ms")]
     reload_debounce_ms: u64,
 
     /// Maximum memory per plugin (in bytes)
-    #[serde(default = "default_max_memory")]
+    #[serde(default = "flow_bot::runtime::config::default_max_memory_bytes")]
     max_memory_bytes: usize,
 
     /// Maximum execution time per event (in milliseconds)
-    #[serde(default = "default_max_execution_time")]
+    #[serde(default = "flow_bot::runtime::config::default_max_execution_time_ms")]
     max_execution_time_ms: u64,
 
     /// Enable WASI support
-    #[serde(default = "default_true")]
+    #[serde(default = "flow_bot::runtime::config::default_true")]
     enable_wasi: bool,
 }
 
 impl Default for RuntimeConfigWrapper {
     fn default() -> Self {
         Self {
-            enabled: default_true(),
-            plugin_dir: default_plugin_dir(),
-            hot_reload: default_true(),
-            reload_debounce_ms: default_reload_debounce(),
-            max_memory_bytes: default_max_memory(),
-            max_execution_time_ms: default_max_execution_time(),
-            enable_wasi: default_true(),
+            enabled: flow_bot::runtime::config::default_true(),
+            plugin_dir: flow_bot::runtime::config::default_plugin_dir(),
+            hot_reload: flow_bot::runtime::config::default_true(),
+            reload_debounce_ms: flow_bot::runtime::config::default_reload_debounce_ms(),
+            max_memory_bytes: flow_bot::runtime::config::default_max_memory_bytes(),
+            max_execution_time_ms: flow_bot::runtime::config::default_max_execution_time_ms(),
+            enable_wasi: flow_bot::runtime::config::default_true(),
         }
     }
 }
@@ -247,27 +247,7 @@ impl Default for LoggingConfig {
     }
 }
 
-// Default value functions
-fn default_true() -> bool {
-    true
-}
-
-fn default_plugin_dir() -> PathBuf {
-    PathBuf::from("plugins")
-}
-
-fn default_reload_debounce() -> u64 {
-    500
-}
-
-fn default_max_memory() -> usize {
-    128 * 1024 * 1024 // 128 MB
-}
-
-fn default_max_execution_time() -> u64 {
-    5000
-}
-
+// Default value functions for connection and logging configuration
 fn default_initial_delay() -> u64 {
     1000
 }

@@ -8,6 +8,7 @@ mod loader;
 mod manager;
 mod plugin;
 pub mod types;
+pub mod config;
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -57,12 +58,12 @@ pub struct RuntimeConfig {
 impl Default for RuntimeConfig {
     fn default() -> Self {
         Self {
-            plugin_dir: PathBuf::from("plugins"),
-            hot_reload: true,
-            reload_debounce_ms: 500,
-            max_memory_bytes: 128 * 1024 * 1024, // 128 MB
-            max_execution_time_ms: 5000,         // 5 seconds
-            enable_wasi: true,
+            plugin_dir: config::default_plugin_dir(),
+            hot_reload: config::default_true(),
+            reload_debounce_ms: config::default_reload_debounce_ms(),
+            max_memory_bytes: config::default_max_memory_bytes(),
+            max_execution_time_ms: config::default_max_execution_time_ms(),
+            enable_wasi: config::default_true(),
         }
     }
 }

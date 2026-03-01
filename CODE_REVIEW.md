@@ -19,16 +19,25 @@
 
 ### 1.2 Code Style Improvements
 
-**Duplicate Default Values**: The main binary (`main.rs`) and `runtime/mod.rs` both define identical default functions:
+~~**Duplicate Default Values**: The main binary (`main.rs`) and `runtime/mod.rs` both define identical default functions:~~ **(Fixed)**
 
-```rust
-// main.rs:251-289
-fn default_true() -> bool { true }
-fn default_plugin_dir() -> PathBuf { PathBuf::from("plugins") }
-// ... etc
-```
+~~```rust~~
+~~// main.rs:251-289~~
+~~fn default_true() -> bool { true }~~
+~~fn default_plugin_dir() -> PathBuf { PathBuf::from("plugins") }~~
+~~// ... etc~~
+~~```~~
 
-**Recommendation**: Move all default value functions to a shared `config` module.
+~~**Recommendation**: Move all default value functions to a shared `config` module.~~
+
+**Fix Applied**: Created `flow-bot/src/runtime/config.rs` with shared default value functions:
+- `default_true()`
+- `default_plugin_dir()`
+- `default_reload_debounce_ms()`
+- `default_max_memory_bytes()`
+- `default_max_execution_time_ms()`
+
+`RuntimeConfig::default()` in `runtime/mod.rs` and `RuntimeConfigWrapper` in `main.rs` now both use these shared functions.
 
 ---
 
@@ -158,7 +167,7 @@ The version is 0.1.0 but the crates are at 0.2.5 - version mismatch.
 3. Fix epoch deadline calculation for WASM plugins
 
 ### Medium Priority:
-1. Reduce code duplication in defaults
+1. ~~Reduce code duplication in defaults~~ (Fixed)
 2. ~~Add input validation for connection mode~~ (Fixed)
 3. ~~Document the `Default` requirement for `export_plugin!` macro~~ (Fixed)
 
