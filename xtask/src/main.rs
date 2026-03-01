@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
+mod gen_wit;
 mod publish;
 mod sort_deps;
 
@@ -32,6 +33,8 @@ enum Commands {
         #[arg(long)]
         check: bool,
     },
+    /// Generate WIT bindings for the plugin SDK
+    GenWit,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -46,6 +49,7 @@ fn main() -> anyhow::Result<()> {
             no_verify,
         } => publish::run(&project_root, dry_run, allow_dirty, no_verify),
         Commands::SortDeps { check } => sort_deps::run(&project_root, check),
+        Commands::GenWit => gen_wit::run(&project_root),
     }
 }
 
