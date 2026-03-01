@@ -114,11 +114,24 @@ pub trait PluginHandler {
 /// WIT bindings. It handles automatic event deserialization and delegates to
 /// your trait implementation.
 ///
+/// # Requirements
+///
+/// The plugin handler type must implement both [`PluginHandler`] and [`Default`] traits.
+/// The `Default` trait is used to create the singleton handler instance.
+///
+/// # Limitations
+///
+/// The handler instance is stored in a static `OnceLock` and lives for the entire duration
+/// of the plugin's execution. There is no automatic cleanup mechanism when the plugin is
+/// unloaded. If your plugin holds resources that need cleanup (e.g., database connections,
+/// file handles), consider using interior mutability patterns or drop guards.
+///
 /// # Example
 ///
 /// ```rust,ignore
 /// use flow_bot_plugin_sdk::*;
 ///
+/// #[derive(Default)]
 /// struct MyPlugin;
 ///
 /// impl PluginHandler for MyPlugin {

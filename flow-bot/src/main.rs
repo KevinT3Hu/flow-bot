@@ -411,14 +411,17 @@ async fn main() -> Result<()> {
             reconnection: config.connection.reconnection.into(),
         }
         .into(),
+        "client" => ClientConnectionConfig {
+            target: config.connection.target.clone(),
+            auth: config.connection.auth.clone(),
+            reconnection: config.connection.reconnection.into(),
+        }
+        .into(),
         _ => {
-            // Default to client mode
-            ClientConnectionConfig {
-                target: config.connection.target.clone(),
-                auth: config.connection.auth.clone(),
-                reconnection: config.connection.reconnection.into(),
-            }
-            .into()
+            return Err(anyhow!(
+                "Invalid connection mode '{}'. Must be either 'server' or 'client'",
+                config.connection.mode
+            ));
         }
     };
 
