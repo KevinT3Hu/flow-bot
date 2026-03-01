@@ -28,7 +28,6 @@ const LOG_LEVELS: LogLevel[] = [
 
 export default function LogViewer() {
   const {
-    logs,
     filteredLogs,
     isConnected,
     filters,
@@ -132,7 +131,7 @@ export default function LogViewer() {
             </div>
           ) : (
             filteredLogs.map((log, index) => (
-              <div key={index} className="flex items-start gap-3 py-1 border-b border-border/50 last:border-0">
+              <div key={index} className="flex items-center gap-3 py-1 border-b border-border/50 last:border-0">
                 <span className="text-muted-foreground text-xs shrink-0">
                   {formatTime(log.timestamp)}
                 </span>

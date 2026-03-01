@@ -33,6 +33,13 @@ interface LogState {
   setAutoScroll: (value: boolean) => void
 }
 
+const filterLogs = (logs: LogMessage[], filters: LogFilters): LogMessage[] => {
+  return logs.filter((log) => {
+    const level = log.level.toLowerCase() as keyof LogFilters
+    return filters[level] !== false
+  })
+}
+
 export const useLogStore = create<LogState>((set, get) => ({
   logs: [],
   isConnected: false,
@@ -46,14 +53,7 @@ export const useLogStore = create<LogState>((set, get) => ({
   autoScroll: true,
   ws: null,
   reconnectTimeout: null,
-
-  get filteredLogs() {
-    const { logs, filters } = get()
-    return logs.filter((log) => {
-      const level = log.level.toLowerCase() as keyof LogFilters
-      return filters[level] !== false
-    })
-  },
+  filteredLogs: [],
 
   connect: () => {
     const { ws, reconnectTimeout } = get()
@@ -79,10 +79,13 @@ export const useLogStore = create<LogState>((set, get) => ({
           const log: LogMessage = JSON.parse(event.data)
           set((state) => {
             const newLogs = [...state.logs, log]
-            if (newLogs.length > MAX_LOGS) {
-              return { logs: newLogs.slice(newLogs.length - MAX_LOGS) }
+            const trimmedLogs = newLogs.length > MAX_LOGS
+              ? newLogs.slice(newLogs.length - MAX_LOGS)
+              : newLogs
+            return {
+              logs: trimmedLogs,
+              filteredLogs: filterLogs(trimmedLogs, state.filters)
             }
-            return { logs: newLogs }
           })
         } catch (err) {
           console.error('Failed to parse log message:', err)
@@ -113,12 +116,19 @@ export const useLogStore = create<LogState>((set, get) => ({
     set({ ws: null, reconnectTimeout: null })
   },
 
-  clearLogs: () => set({ logs: [] }),
+  clearLogs: () => set((state) => ({
+    logs: [],
+    filteredLogs: filterLogs([], state.filters)
+  })),
 
   toggleFilter: (key: keyof LogFilters) =>
-    set((state) => ({
-      filters: { ...state.filters, [key]: !state.filters[key] },
-    })),
+    set((state) => {
+      const newFilters = { ...state.filters, [key]: !state.filters[key] }
+      return {
+        filters: newFilters,
+        filteredLogs: filterLogs(state.logs, newFilters)
+      }
+    }),
 
   setAutoScroll: (value: boolean) => set({ autoScroll: value }),
 }))
