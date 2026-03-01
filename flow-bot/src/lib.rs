@@ -17,22 +17,16 @@
 //! ```no_run
 //! use flow_bot::{
 //!     FlowBotBuilder,
-//!     base::{connect::ClientConnectionConfig, extract::Message, handler::HandlerControl},
+//!     base::connect::ClientConnectionConfig,
 //! };
 //!
-//! async fn on_message(msg: Message) -> HandlerControl {
-//!     println!("{:?}", msg.message);
-//!     HandlerControl::Continue
-//! }
-//!
+//! #[tokio::main]
 //! async fn main() {
-//!     let bot = FlowBotBuilder::new(ClientConnectionConfig {
+//!     let bot = FlowBotBuilder::new_client(ClientConnectionConfig {
 //!         target: "ws://localhost:3001".to_string(),
 //!         auth: None,
 //!         reconnection: Default::default(),
 //!     })
-//!     .with_state(())
-//!     .with_handler(on_message)
 //!     .build();
 //!
 //!     bot.run().await.unwrap();

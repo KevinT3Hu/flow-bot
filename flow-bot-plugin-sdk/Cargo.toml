@@ -11,13 +11,11 @@ categories = ["api-bindings", "wasm"]
 
 [dependencies]
 async-trait = "0.1.89"
-flow-bot-extractor = { path = "../flow-bot-extractor" }
-flow-bot-onebot11 = { path = "../flow-bot-onebot11" }
+flow-bot-extractor = { path = "../flow-bot-extractor", version = "0.1.0" }
+flow-bot-onebot11 = { path = "../flow-bot-onebot11", version = "0.1.0" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 wit-bindgen = "0.53.1"
-[build-dependencies]
-# Not needed yet, but reserved for future use if we want to pregenerate at build time
 
 [features]
 default = []
