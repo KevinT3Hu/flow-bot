@@ -14,6 +14,38 @@ use crate::{
     error::FlowError,
 };
 
+/// A guard that removes the pending request entry when dropped.
+/// This ensures cleanup happens even if the response arrives after timeout.
+struct PendingRequestGuard {
+    pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
+    echo: Option<String>,
+}
+
+impl PendingRequestGuard {
+    fn new(
+        pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
+        echo: String,
+    ) -> Self {
+        Self {
+            pending_requests,
+            echo: Some(echo),
+        }
+    }
+
+    /// Disarm the guard, preventing cleanup on drop.
+    fn disarm(mut self) {
+        self.echo = None;
+    }
+}
+
+impl Drop for PendingRequestGuard {
+    fn drop(&mut self) {
+        if let Some(echo) = self.echo.take() {
+            self.pending_requests.remove(&echo);
+        }
+    }
+}
+
 /// Enum to wrap different WebSocket sink types for server and client modes
 pub enum WebSocketSink {
     /// Server mode: plain TCP stream (bot acts as WebSocket server)
@@ -77,6 +109,10 @@ impl Context {
         // Register the request BEFORE sending (lock-free)
         self.pending_requests.insert(echo.clone(), tx);
 
+        // Create a guard to ensure cleanup happens even if response arrives after timeout.
+        // This prevents unbounded growth of pending_requests.
+        let guard = PendingRequestGuard::new(self.pending_requests.clone(), echo.clone());
+
         // Build and send the message
         let msg = json!({
             "action": action,
@@ -97,25 +133,30 @@ impl Context {
         let response = tokio::time::timeout(std::time::Duration::from_secs(30), rx).await;
 
         match response {
-            Ok(Ok(data)) => Ok(serde_json::from_str(&data)?),
-            Ok(Err(_)) => Err(FlowError::NoResponse), // Sender dropped
+            Ok(Ok(data)) => {
+                // Success: disarm the guard since on_recv_echo will handle cleanup
+                guard.disarm();
+                Ok(serde_json::from_str(&data)?)
+            }
+            Ok(Err(_)) => {
+                // Sender dropped: let guard clean up the entry
+                Err(FlowError::NoResponse)
+            }
             Err(_) => {
-                // Timeout occurred, clean up the pending request (lock-free)
-                self.pending_requests.remove(&echo);
+                // Timeout: let guard clean up the entry
                 Err(FlowError::Timeout(30000))
             }
         }
     }
 
     pub(crate) fn on_recv_echo(&self, echo: String, data: String) {
-        let pending_requests = self.pending_requests.clone();
-        tokio::spawn(async move {
-            // DashMap::remove returns Option<(K, V)>, extract the sender
-            if let Some((_, tx)) = pending_requests.remove(&echo) {
-                let _ = tx.send(data); // Ignore error if receiver dropped
-            }
-            // If echo not found, response arrived after timeout - silently ignore
-        });
+        // Try to remove and send immediately without spawning a task.
+        // This reduces latency and prevents race conditions with the timeout handler.
+        if let Some((_, tx)) = self.pending_requests.remove(&echo) {
+            let _ = tx.send(data); // Ignore error if receiver dropped
+        }
+        // If echo not found, the request was either already timed out (guard cleaned up)
+        // or is being processed - silently ignore.
     }
 
     pub async fn get_self_id(&self) -> Result<i64, FlowError> {
