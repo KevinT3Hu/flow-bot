@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::path::Path;
 use std::process::Command;
 
@@ -9,12 +9,7 @@ const CRATES: &[(&str, &str)] = &[
     ("flow-bot", "flow-bot"),
 ];
 
-pub fn run(
-    project_root: &Path,
-    dry_run: bool,
-    allow_dirty: bool,
-    no_verify: bool,
-) -> Result<()> {
+pub fn run(project_root: &Path, dry_run: bool, allow_dirty: bool, no_verify: bool) -> Result<()> {
     println!("🔧 Flow-Bot Publish Task");
     println!("========================");
     println!();
@@ -23,15 +18,6 @@ pub fn run(
     if !command_exists("cargo") {
         bail!("cargo is not installed");
     }
-
-    // Check if logged in to crates.io
-    println!("Checking crates.io login status...");
-    let output = Command::new("cargo").arg("whoami").output()?;
-    if !output.status.success() {
-        bail!("Not logged in to crates.io. Run 'cargo login' first.");
-    }
-    println!("✓ Logged in to crates.io");
-    println!();
 
     if dry_run {
         println!("🏃 Running in dry-run mode (no actual publish)");
@@ -89,7 +75,10 @@ fn publish_crate(
         let search_result = format!("{} = \"{}\"", crate_name, version);
 
         if stdout.contains(&search_result) {
-            println!("  ⚠ {} v{} is already published, skipping", crate_name, version);
+            println!(
+                "  ⚠ {} v{} is already published, skipping",
+                crate_name, version
+            );
             println!();
             return Ok(());
         }

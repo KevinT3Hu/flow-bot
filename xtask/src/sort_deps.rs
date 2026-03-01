@@ -53,13 +53,12 @@ pub fn run(project_root: &Path, check: bool) -> Result<()> {
 }
 
 fn is_target_dir(entry: &walkdir::DirEntry) -> bool {
-    entry.file_type().is_dir()
-        && (entry.file_name() == "target" || entry.file_name() == ".git")
+    entry.file_type().is_dir() && (entry.file_name() == "target" || entry.file_name() == ".git")
 }
 
 fn process_file(path: &Path, check: bool) -> Result<bool> {
-    let content =
-        std::fs::read_to_string(path).with_context(|| format!("Failed to read {}", path.display()))?;
+    let content = std::fs::read_to_string(path)
+        .with_context(|| format!("Failed to read {}", path.display()))?;
 
     let mut doc: DocumentMut = content
         .parse()
