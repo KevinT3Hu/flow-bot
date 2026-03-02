@@ -86,11 +86,13 @@ impl Host for PluginState {
     async fn send_private_message(
         &mut self,
         user_id: i64,
-        message: String,
+        message: Vec<wit::MessageSegment>,
         auto_escape: Option<bool>,
     ) -> Result<wit::SendMessageResponse, String> {
+        let native_segments: Vec<crate::runtime::types::NativeMessageSegment> =
+            message.into_iter().map(Into::into).collect();
         self.context
-            .send_private_message(user_id, message, auto_escape)
+            .send_private_message(user_id, native_segments, auto_escape)
             .await
             .map(Into::into)
             .map_err(|e| e.to_string())
@@ -99,11 +101,13 @@ impl Host for PluginState {
     async fn send_group_message(
         &mut self,
         group_id: i64,
-        message: String,
+        message: Vec<wit::MessageSegment>,
         auto_escape: Option<bool>,
     ) -> Result<wit::SendMessageResponse, String> {
+        let native_segments: Vec<crate::runtime::types::NativeMessageSegment> =
+            message.into_iter().map(Into::into).collect();
         self.context
-            .send_group_message(group_id, message, auto_escape)
+            .send_group_message(group_id, native_segments, auto_escape)
             .await
             .map(Into::into)
             .map_err(|e| e.to_string())

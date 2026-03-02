@@ -5,7 +5,10 @@
 //! defined in the flow-bot-onebot11 crate.
 
 use crate::runtime::flow_bot::onebot11::types as wit;
-use flow_bot_onebot11::{api, event::message};
+use flow_bot_onebot11::{api, event::message, message::segments};
+
+// Re-export message segment types for convenience
+pub use flow_bot_onebot11::message::segments::Segment as NativeMessageSegment;
 
 // ============================================================================
 // Macros for Bidirectional Conversions
@@ -462,3 +465,202 @@ impl_bidirectional_enum!(
     Add,
     Invite,
 );
+
+// ============================================================================
+// Message Segment Types
+// ============================================================================
+
+// ContactType enum - manual impl due to naming difference (QQ vs Qq)
+impl From<segments::ContactType> for wit::ContactType {
+    fn from(ty: segments::ContactType) -> Self {
+        match ty {
+            segments::ContactType::QQ => Self::Qq,
+            segments::ContactType::Group => Self::Group,
+        }
+    }
+}
+
+impl From<wit::ContactType> for segments::ContactType {
+    fn from(ty: wit::ContactType) -> Self {
+        match ty {
+            wit::ContactType::Qq => Self::QQ,
+            wit::ContactType::Group => Self::Group,
+        }
+    }
+}
+
+// Simple segment types with identical fields
+impl_bidirectional_simple!(segments::TextSegment, wit::TextSegment, text);
+impl_bidirectional_simple!(segments::FaceSegment, wit::FaceSegment, id);
+impl_bidirectional_simple!(segments::ImageSegment, wit::ImageSegment, file);
+impl_bidirectional_simple!(segments::RecordSegment, wit::RecordSegment, file);
+impl_bidirectional_simple!(segments::VideoSegment, wit::VideoSegment, file);
+impl_bidirectional_simple!(segments::AtSegment, wit::AtSegment, qq);
+
+// Unit-like struct segments
+impl From<segments::DiceSegment> for wit::DiceSegment {
+    fn from(_: segments::DiceSegment) -> Self {
+        Self {}
+    }
+}
+
+impl From<wit::DiceSegment> for segments::DiceSegment {
+    fn from(_: wit::DiceSegment) -> Self {
+        Self {}
+    }
+}
+
+impl From<segments::ShakeSegment> for wit::ShakeSegment {
+    fn from(_: segments::ShakeSegment) -> Self {
+        Self {}
+    }
+}
+
+impl From<wit::ShakeSegment> for segments::ShakeSegment {
+    fn from(_: wit::ShakeSegment) -> Self {
+        Self {}
+    }
+}
+
+impl From<segments::AnonymousSegment> for wit::AnonymousSegment {
+    fn from(_: segments::AnonymousSegment) -> Self {
+        Self {}
+    }
+}
+
+impl From<wit::AnonymousSegment> for segments::AnonymousSegment {
+    fn from(_: wit::AnonymousSegment) -> Self {
+        Self {}
+    }
+}
+
+// Other simple segments
+impl_bidirectional_simple!(segments::PokeSegment, wit::PokeSegment, ty, id);
+impl_bidirectional_simple!(segments::ShareSegment, wit::ShareSegment, url, title);
+
+// ContactSegment has a ContactType field
+impl From<segments::ContactSegment> for wit::ContactSegment {
+    fn from(segment: segments::ContactSegment) -> Self {
+        Self {
+            ty: segment.ty.into(),
+            id: segment.id,
+        }
+    }
+}
+
+impl From<wit::ContactSegment> for segments::ContactSegment {
+    fn from(segment: wit::ContactSegment) -> Self {
+        Self {
+            ty: segment.ty.into(),
+            id: segment.id,
+        }
+    }
+}
+
+// LocationSegment with mixed required/optional fields - manual impl
+impl From<segments::LocationSegment> for wit::LocationSegment {
+    fn from(segment: segments::LocationSegment) -> Self {
+        Self {
+            lat: segment.lat,
+            lon: segment.lon,
+            title: segment.title,
+            content: segment.content,
+        }
+    }
+}
+
+impl From<wit::LocationSegment> for segments::LocationSegment {
+    fn from(segment: wit::LocationSegment) -> Self {
+        Self {
+            lat: segment.lat,
+            lon: segment.lon,
+            title: segment.title,
+            content: segment.content,
+        }
+    }
+}
+
+// MusicSegment with mixed required/optional fields - manual impl
+impl From<segments::MusicSegment> for wit::MusicSegment {
+    fn from(segment: segments::MusicSegment) -> Self {
+        Self {
+            ty: segment.ty,
+            id: segment.id,
+            url: segment.url,
+            audio: segment.audio,
+            title: segment.title,
+        }
+    }
+}
+
+impl From<wit::MusicSegment> for segments::MusicSegment {
+    fn from(segment: wit::MusicSegment) -> Self {
+        Self {
+            ty: segment.ty,
+            id: segment.id,
+            url: segment.url,
+            audio: segment.audio,
+            title: segment.title,
+        }
+    }
+}
+
+// Simple id-based segments
+impl_bidirectional_simple!(segments::ReplySegment, wit::ReplySegment, id);
+impl_bidirectional_simple!(segments::ForwardSegment, wit::ForwardSegment, id);
+impl_bidirectional_simple!(segments::NodeSegment, wit::NodeSegment, id);
+impl_bidirectional_simple!(segments::XmlSegment, wit::XmlSegment, data);
+impl_bidirectional_simple!(segments::JsonSegment, wit::JsonSegment, data);
+
+// Main Segment enum
+impl From<segments::Segment> for wit::MessageSegment {
+    fn from(segment: segments::Segment) -> Self {
+        match segment {
+            segments::Segment::Text(s) => Self::Text(s.into()),
+            segments::Segment::Face(s) => Self::Face(s.into()),
+            segments::Segment::Image(s) => Self::Image(s.into()),
+            segments::Segment::Record(s) => Self::Record(s.into()),
+            segments::Segment::Video(s) => Self::Video(s.into()),
+            segments::Segment::At(s) => Self::At(s.into()),
+            segments::Segment::Dice(s) => Self::Dice(s.into()),
+            segments::Segment::Shake(s) => Self::Shake(s.into()),
+            segments::Segment::Poke(s) => Self::Poke(s.into()),
+            segments::Segment::Anonymous(s) => Self::Anonymous(s.into()),
+            segments::Segment::Share(s) => Self::Share(s.into()),
+            segments::Segment::Contact(s) => Self::Contact(s.into()),
+            segments::Segment::Location(s) => Self::Location(s.into()),
+            segments::Segment::Music(s) => Self::Music(s.into()),
+            segments::Segment::Reply(s) => Self::Reply(s.into()),
+            segments::Segment::Forward(s) => Self::Forward(s.into()),
+            segments::Segment::Node(s) => Self::Node(s.into()),
+            segments::Segment::Xml(s) => Self::Xml(s.into()),
+            segments::Segment::Json(s) => Self::Json(s.into()),
+        }
+    }
+}
+
+impl From<wit::MessageSegment> for segments::Segment {
+    fn from(segment: wit::MessageSegment) -> Self {
+        match segment {
+            wit::MessageSegment::Text(s) => Self::Text(s.into()),
+            wit::MessageSegment::Face(s) => Self::Face(s.into()),
+            wit::MessageSegment::Image(s) => Self::Image(s.into()),
+            wit::MessageSegment::Record(s) => Self::Record(s.into()),
+            wit::MessageSegment::Video(s) => Self::Video(s.into()),
+            wit::MessageSegment::At(s) => Self::At(s.into()),
+            wit::MessageSegment::Dice(s) => Self::Dice(s.into()),
+            wit::MessageSegment::Shake(s) => Self::Shake(s.into()),
+            wit::MessageSegment::Poke(s) => Self::Poke(s.into()),
+            wit::MessageSegment::Anonymous(s) => Self::Anonymous(s.into()),
+            wit::MessageSegment::Share(s) => Self::Share(s.into()),
+            wit::MessageSegment::Contact(s) => Self::Contact(s.into()),
+            wit::MessageSegment::Location(s) => Self::Location(s.into()),
+            wit::MessageSegment::Music(s) => Self::Music(s.into()),
+            wit::MessageSegment::Reply(s) => Self::Reply(s.into()),
+            wit::MessageSegment::Forward(s) => Self::Forward(s.into()),
+            wit::MessageSegment::Node(s) => Self::Node(s.into()),
+            wit::MessageSegment::Xml(s) => Self::Xml(s.into()),
+            wit::MessageSegment::Json(s) => Self::Json(s.into()),
+        }
+    }
+}
