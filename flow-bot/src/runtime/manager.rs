@@ -159,9 +159,17 @@ impl PluginManager {
     pub async fn unload_plugin(&self, name: &str) -> Result<()> {
         tracing::info!("Unloading plugin: {}", name);
 
-        self.plugins
+        let (_, plugin_entry) = self
+            .plugins
             .remove(name)
             .ok_or_else(|| anyhow!("Plugin not found: {}", name))?;
+
+        let mut plugin = plugin_entry.lock().await;
+
+        plugin
+            .cleanup()
+            .await
+            .with_context(|| format!("Failed to cleanup plugin: {}", name))?;
 
         tracing::info!("Plugin {} unloaded successfully", name);
         Ok(())

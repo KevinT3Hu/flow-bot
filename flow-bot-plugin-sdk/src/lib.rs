@@ -15,13 +15,17 @@
 //!
 //! struct MyPlugin;
 //!
+//! #[async_trait::async_trait]
 //! impl PluginHandler for MyPlugin {
-//!     fn handle_event(&self, event: Event) -> Result<(), String> {
+//!     async fn handle_event(&self, event: Event) -> Result<(), String> {
 //!         match event.event {
 //!             TypedEvent::Message(msg) => {
 //!                 if msg.raw_message.trim() == "!ping" {
 //!                     if let Some(group_id) = msg.group_id {
-//!                         api::send_group_message(group_id, "Pong!".to_string(), None)?;
+//!                         let message = vec![types::MessageSegment::Text(types::TextSegment {
+//!                             text: "Pong!".to_string(),
+//!                         })];
+//!                         api::send_group_message(group_id, message, None).await?;
 //!                     }
 //!                 }
 //!             }
@@ -73,8 +77,9 @@ pub use flow_bot_onebot11::event::{Event, TypedEvent};
 ///
 /// struct MyPlugin;
 ///
+/// #[async_trait::async_trait]
 /// impl PluginHandler for MyPlugin {
-///     fn handle_event(&self, event: Event) -> Result<(), String> {
+///     async fn handle_event(&self, event: Event) -> Result<(), String> {
 ///         eprintln!("Got event: {:?}", event.event.get_type());
 ///         Ok(())
 ///     }
@@ -97,6 +102,16 @@ pub trait PluginHandler {
     /// * `Ok(())` - Event handled successfully
     /// * `Err(String)` - Error message if handling failed
     async fn handle_event(&self, event: Event) -> Result<(), String>;
+
+    /// Initialize the plugin (optional)
+    async fn init(&self) -> Result<(), String> {
+        Ok(())
+    }
+
+    /// Cleanup resources when the plugin is unloaded (optional)
+    async fn cleanup(&self) -> Result<(), String> {
+        Ok(())
+    }
 
     /// Get the plugin name
     fn name(&self) -> &str;
@@ -171,6 +186,16 @@ macro_rules! export_plugin {
                 // Get the singleton handler instance and delegate
                 let handler = __get_handler();
                 $crate::PluginHandler::handle_event(handler, event).await
+            }
+
+            async fn init() -> Result<(), String> {
+                let handler = __get_handler();
+                $crate::PluginHandler::init(handler).await
+            }
+
+            async fn cleanup() -> Result<(), String> {
+                let handler = __get_handler();
+                $crate::PluginHandler::cleanup(handler).await
             }
 
             async fn plugin_name() -> String {

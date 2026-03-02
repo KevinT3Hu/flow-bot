@@ -4,1258 +4,2530 @@
 //   * async: all
 #[allow(dead_code, clippy::all)]
 pub mod flow_bot {
-    pub mod onebot11 {
-        /// OneBot-11 API definitions for bot interactions
-        #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
-        pub mod types {
-            #[used]
-            #[doc(hidden)]
-            static __FORCE_SECTION_REF: fn() =
-                super::super::super::__link_custom_section_describing_imports;
-
-            use super::super::super::_rt;
-            /// API response status
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum ApiRetStatus {
-                Ok,
-                Async,
-                Failed,
+  pub mod onebot11 {
+    /// OneBot-11 API definitions for bot interactions
+    #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
+    pub mod types {
+      #[used]
+      #[doc(hidden)]
+      static __FORCE_SECTION_REF: fn() =
+      super::super::super::__link_custom_section_describing_imports;
+      
+      use super::super::super::_rt;
+      /// API response status
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum ApiRetStatus {
+        Ok,
+        Async,
+        Failed,
+      }
+      impl ::core::fmt::Debug for ApiRetStatus {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            ApiRetStatus::Ok => {
+              f.debug_tuple("ApiRetStatus::Ok").finish()
             }
-            impl ::core::fmt::Debug for ApiRetStatus {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        ApiRetStatus::Ok => f.debug_tuple("ApiRetStatus::Ok").finish(),
-                        ApiRetStatus::Async => f.debug_tuple("ApiRetStatus::Async").finish(),
-                        ApiRetStatus::Failed => f.debug_tuple("ApiRetStatus::Failed").finish(),
-                    }
-                }
+            ApiRetStatus::Async => {
+              f.debug_tuple("ApiRetStatus::Async").finish()
             }
-
-            impl ApiRetStatus {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> ApiRetStatus {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => ApiRetStatus::Ok,
-                        1 => ApiRetStatus::Async,
-                        2 => ApiRetStatus::Failed,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
+            ApiRetStatus::Failed => {
+              f.debug_tuple("ApiRetStatus::Failed").finish()
             }
-
-            /// Bot status information
-            #[derive(Clone)]
-            pub struct BotStatus {
-                pub online: Option<bool>,
-                pub good: bool,
-                pub extra_data: _rt::Vec<(_rt::String, _rt::String)>,
-            }
-            impl ::core::fmt::Debug for BotStatus {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("BotStatus")
-                        .field("online", &self.online)
-                        .field("good", &self.good)
-                        .field("extra-data", &self.extra_data)
-                        .finish()
-                }
-            }
-            /// Response from sending a message
-            #[repr(C)]
-            #[derive(Clone, Copy)]
-            pub struct SendMessageResponse {
-                pub message_id: i64,
-            }
-            impl ::core::fmt::Debug for SendMessageResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("SendMessageResponse")
-                        .field("message-id", &self.message_id)
-                        .finish()
-                }
-            }
-            /// Gender/sex of a user
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum SenderSex {
-                Male,
-                Female,
-                Unknown,
-            }
-            impl ::core::fmt::Debug for SenderSex {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        SenderSex::Male => f.debug_tuple("SenderSex::Male").finish(),
-                        SenderSex::Female => f.debug_tuple("SenderSex::Female").finish(),
-                        SenderSex::Unknown => f.debug_tuple("SenderSex::Unknown").finish(),
-                    }
-                }
-            }
-
-            impl SenderSex {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> SenderSex {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => SenderSex::Male,
-                        1 => SenderSex::Female,
-                        2 => SenderSex::Unknown,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
-            }
-
-            /// Private message sender information
-            #[derive(Clone)]
-            pub struct PrivateSenderInfo {
-                pub user_id: Option<i64>,
-                pub nickname: Option<_rt::String>,
-                pub sex: Option<SenderSex>,
-                pub age: Option<i32>,
-            }
-            impl ::core::fmt::Debug for PrivateSenderInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("PrivateSenderInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("sex", &self.sex)
-                        .field("age", &self.age)
-                        .finish()
-                }
-            }
-            /// Group member role
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum GroupSenderRole {
-                Owner,
-                Admin,
-                Member,
-            }
-            impl ::core::fmt::Debug for GroupSenderRole {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        GroupSenderRole::Owner => f.debug_tuple("GroupSenderRole::Owner").finish(),
-                        GroupSenderRole::Admin => f.debug_tuple("GroupSenderRole::Admin").finish(),
-                        GroupSenderRole::Member => {
-                            f.debug_tuple("GroupSenderRole::Member").finish()
-                        }
-                    }
-                }
-            }
-
-            impl GroupSenderRole {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> GroupSenderRole {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => GroupSenderRole::Owner,
-                        1 => GroupSenderRole::Admin,
-                        2 => GroupSenderRole::Member,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
-            }
-
-            /// Group message sender information
-            #[derive(Clone)]
-            pub struct GroupSenderInfo {
-                pub user_id: Option<i64>,
-                pub nickname: Option<_rt::String>,
-                pub card: Option<_rt::String>,
-                pub sex: Option<SenderSex>,
-                pub age: Option<i32>,
-                pub area: Option<_rt::String>,
-                pub level: Option<_rt::String>,
-                pub role: Option<GroupSenderRole>,
-                pub title: Option<_rt::String>,
-            }
-            impl ::core::fmt::Debug for GroupSenderInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GroupSenderInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("card", &self.card)
-                        .field("sex", &self.sex)
-                        .field("age", &self.age)
-                        .field("area", &self.area)
-                        .field("level", &self.level)
-                        .field("role", &self.role)
-                        .field("title", &self.title)
-                        .finish()
-                }
-            }
-            /// Anonymous user information in group
-            #[derive(Clone)]
-            pub struct GroupAnonymousInfo {
-                pub id: i64,
-                pub name: _rt::String,
-                pub flag: _rt::String,
-            }
-            impl ::core::fmt::Debug for GroupAnonymousInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GroupAnonymousInfo")
-                        .field("id", &self.id)
-                        .field("name", &self.name)
-                        .field("flag", &self.flag)
-                        .finish()
-                }
-            }
-            /// Message type in get-message response
-            #[derive(Clone)]
-            pub enum GetMessageType {
-                Private(PrivateSenderInfo),
-                Group(GroupSenderInfo),
-            }
-            impl ::core::fmt::Debug for GetMessageType {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        GetMessageType::Private(e) => {
-                            f.debug_tuple("GetMessageType::Private").field(e).finish()
-                        }
-                        GetMessageType::Group(e) => {
-                            f.debug_tuple("GetMessageType::Group").field(e).finish()
-                        }
-                    }
-                }
-            }
-            /// Response from getting a message
-            #[derive(Clone)]
-            pub struct GetMessageResponse {
-                pub time: i32,
-                pub message_id: i32,
-                pub real_id: i32,
-                pub message: _rt::String,
-                pub msg_type: GetMessageType,
-            }
-            impl ::core::fmt::Debug for GetMessageResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetMessageResponse")
-                        .field("time", &self.time)
-                        .field("message-id", &self.message_id)
-                        .field("real-id", &self.real_id)
-                        .field("message", &self.message)
-                        .field("msg-type", &self.msg_type)
-                        .finish()
-                }
-            }
-            /// Response from getting a forward message
-            #[derive(Clone)]
-            pub struct GetForwardResponse {
-                pub message: _rt::String,
-            }
-            impl ::core::fmt::Debug for GetForwardResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetForwardResponse")
-                        .field("message", &self.message)
-                        .finish()
-                }
-            }
-            /// Bot login information
-            #[derive(Clone)]
-            pub struct LoginInfo {
-                pub user_id: i64,
-                pub nickname: _rt::String,
-            }
-            impl ::core::fmt::Debug for LoginInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("LoginInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .finish()
-                }
-            }
-            /// Stranger information
-            #[derive(Clone)]
-            pub struct StrangerInfo {
-                pub user_id: i64,
-                pub nickname: _rt::String,
-                pub sex: SenderSex,
-                pub age: i32,
-            }
-            impl ::core::fmt::Debug for StrangerInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("StrangerInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("sex", &self.sex)
-                        .field("age", &self.age)
-                        .finish()
-                }
-            }
-            /// Friend information
-            #[derive(Clone)]
-            pub struct FriendInfo {
-                pub user_id: i64,
-                pub nickname: _rt::String,
-                pub remark: _rt::String,
-            }
-            impl ::core::fmt::Debug for FriendInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("FriendInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("remark", &self.remark)
-                        .finish()
-                }
-            }
-            /// Group information
-            #[derive(Clone)]
-            pub struct GroupInfoResponse {
-                pub group_id: i64,
-                pub group_name: _rt::String,
-                pub member_count: i32,
-                pub max_member_count: i32,
-            }
-            impl ::core::fmt::Debug for GroupInfoResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GroupInfoResponse")
-                        .field("group-id", &self.group_id)
-                        .field("group-name", &self.group_name)
-                        .field("member-count", &self.member_count)
-                        .field("max-member-count", &self.max_member_count)
-                        .finish()
-                }
-            }
-            /// Group member detailed information
-            #[derive(Clone)]
-            pub struct GroupMemberInfo {
-                pub group_id: i64,
-                pub user_id: i64,
-                pub nickname: _rt::String,
-                pub card: _rt::String,
-                pub sex: SenderSex,
-                pub age: i32,
-                pub area: Option<_rt::String>,
-                pub join_time: i32,
-                pub last_sent_time: i32,
-                pub level: _rt::String,
-                pub role: GroupSenderRole,
-                pub unfriendly: bool,
-                pub title: Option<_rt::String>,
-                pub title_expire_time: i32,
-                pub card_changeable: bool,
-            }
-            impl ::core::fmt::Debug for GroupMemberInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GroupMemberInfo")
-                        .field("group-id", &self.group_id)
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("card", &self.card)
-                        .field("sex", &self.sex)
-                        .field("age", &self.age)
-                        .field("area", &self.area)
-                        .field("join-time", &self.join_time)
-                        .field("last-sent-time", &self.last_sent_time)
-                        .field("level", &self.level)
-                        .field("role", &self.role)
-                        .field("unfriendly", &self.unfriendly)
-                        .field("title", &self.title)
-                        .field("title-expire-time", &self.title_expire_time)
-                        .field("card-changeable", &self.card_changeable)
-                        .finish()
-                }
-            }
-            /// Most talkative user information
-            #[derive(Clone)]
-            pub struct TalkativeInfo {
-                pub user_id: i64,
-                pub nickname: _rt::String,
-                pub avatar: _rt::String,
-                pub day_count: i32,
-            }
-            impl ::core::fmt::Debug for TalkativeInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("TalkativeInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("avatar", &self.avatar)
-                        .field("day-count", &self.day_count)
-                        .finish()
-                }
-            }
-            /// Honor information
-            #[derive(Clone)]
-            pub struct HonorInfo {
-                pub user_id: i64,
-                pub nickname: _rt::String,
-                pub avatar: _rt::String,
-                pub description: _rt::String,
-            }
-            impl ::core::fmt::Debug for HonorInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("HonorInfo")
-                        .field("user-id", &self.user_id)
-                        .field("nickname", &self.nickname)
-                        .field("avatar", &self.avatar)
-                        .field("description", &self.description)
-                        .finish()
-                }
-            }
-            /// Group honor information
-            #[derive(Clone)]
-            pub struct GroupHonorInfo {
-                pub group_id: i64,
-                pub current_talkative: Option<TalkativeInfo>,
-                pub talkative_list: Option<_rt::Vec<HonorInfo>>,
-                pub performer_list: Option<_rt::Vec<HonorInfo>>,
-                pub legend_list: Option<_rt::Vec<HonorInfo>>,
-                pub strong_newbie_list: Option<_rt::Vec<HonorInfo>>,
-                pub emotion_list: Option<_rt::Vec<HonorInfo>>,
-            }
-            impl ::core::fmt::Debug for GroupHonorInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GroupHonorInfo")
-                        .field("group-id", &self.group_id)
-                        .field("current-talkative", &self.current_talkative)
-                        .field("talkative-list", &self.talkative_list)
-                        .field("performer-list", &self.performer_list)
-                        .field("legend-list", &self.legend_list)
-                        .field("strong-newbie-list", &self.strong_newbie_list)
-                        .field("emotion-list", &self.emotion_list)
-                        .finish()
-                }
-            }
-            /// Type of group honor
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum GroupHonorType {
-                Talkative,
-                Performer,
-                Legend,
-                StrongNewbie,
-                Emotion,
-                All,
-            }
-            impl ::core::fmt::Debug for GroupHonorType {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        GroupHonorType::Talkative => {
-                            f.debug_tuple("GroupHonorType::Talkative").finish()
-                        }
-                        GroupHonorType::Performer => {
-                            f.debug_tuple("GroupHonorType::Performer").finish()
-                        }
-                        GroupHonorType::Legend => f.debug_tuple("GroupHonorType::Legend").finish(),
-                        GroupHonorType::StrongNewbie => {
-                            f.debug_tuple("GroupHonorType::StrongNewbie").finish()
-                        }
-                        GroupHonorType::Emotion => {
-                            f.debug_tuple("GroupHonorType::Emotion").finish()
-                        }
-                        GroupHonorType::All => f.debug_tuple("GroupHonorType::All").finish(),
-                    }
-                }
-            }
-
-            impl GroupHonorType {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> GroupHonorType {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => GroupHonorType::Talkative,
-                        1 => GroupHonorType::Performer,
-                        2 => GroupHonorType::Legend,
-                        3 => GroupHonorType::StrongNewbie,
-                        4 => GroupHonorType::Emotion,
-                        5 => GroupHonorType::All,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
-            }
-
-            /// Response containing cookies
-            #[derive(Clone)]
-            pub struct GetCookiesResponse {
-                pub cookies: _rt::String,
-            }
-            impl ::core::fmt::Debug for GetCookiesResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetCookiesResponse")
-                        .field("cookies", &self.cookies)
-                        .finish()
-                }
-            }
-            /// Response containing CSRF token
-            #[repr(C)]
-            #[derive(Clone, Copy)]
-            pub struct GetCsrfTokenResponse {
-                pub token: i32,
-            }
-            impl ::core::fmt::Debug for GetCsrfTokenResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetCsrfTokenResponse")
-                        .field("token", &self.token)
-                        .finish()
-                }
-            }
-            /// Response containing credentials
-            #[derive(Clone)]
-            pub struct GetCredentialsResponse {
-                pub cookies: _rt::String,
-                pub csrf_token: i32,
-            }
-            impl ::core::fmt::Debug for GetCredentialsResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetCredentialsResponse")
-                        .field("cookies", &self.cookies)
-                        .field("csrf-token", &self.csrf_token)
-                        .finish()
-                }
-            }
-            /// Response containing file path/data
-            #[derive(Clone)]
-            pub struct GetFileResponse {
-                pub file: _rt::String,
-            }
-            impl ::core::fmt::Debug for GetFileResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("GetFileResponse")
-                        .field("file", &self.file)
-                        .finish()
-                }
-            }
-            /// Audio record format
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum RecordFormat {
-                Mp3,
-                Amr,
-                Wma,
-                M4a,
-                Spx,
-                Ogg,
-                Wav,
-                Flac,
-            }
-            impl ::core::fmt::Debug for RecordFormat {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        RecordFormat::Mp3 => f.debug_tuple("RecordFormat::Mp3").finish(),
-                        RecordFormat::Amr => f.debug_tuple("RecordFormat::Amr").finish(),
-                        RecordFormat::Wma => f.debug_tuple("RecordFormat::Wma").finish(),
-                        RecordFormat::M4a => f.debug_tuple("RecordFormat::M4a").finish(),
-                        RecordFormat::Spx => f.debug_tuple("RecordFormat::Spx").finish(),
-                        RecordFormat::Ogg => f.debug_tuple("RecordFormat::Ogg").finish(),
-                        RecordFormat::Wav => f.debug_tuple("RecordFormat::Wav").finish(),
-                        RecordFormat::Flac => f.debug_tuple("RecordFormat::Flac").finish(),
-                    }
-                }
-            }
-
-            impl RecordFormat {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> RecordFormat {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => RecordFormat::Mp3,
-                        1 => RecordFormat::Amr,
-                        2 => RecordFormat::Wma,
-                        3 => RecordFormat::M4a,
-                        4 => RecordFormat::Spx,
-                        5 => RecordFormat::Ogg,
-                        6 => RecordFormat::Wav,
-                        7 => RecordFormat::Flac,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
-            }
-
-            /// Response indicating capability
-            #[repr(C)]
-            #[derive(Clone, Copy)]
-            pub struct CanSendResponse {
-                pub yes: bool,
-            }
-            impl ::core::fmt::Debug for CanSendResponse {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("CanSendResponse")
-                        .field("yes", &self.yes)
-                        .finish()
-                }
-            }
-            /// Version information
-            #[derive(Clone)]
-            pub struct VersionInfo {
-                pub app_name: _rt::String,
-                pub app_version: _rt::String,
-                pub protocol_version: _rt::String,
-                pub extra_data: _rt::Vec<(_rt::String, _rt::String)>,
-            }
-            impl ::core::fmt::Debug for VersionInfo {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("VersionInfo")
-                        .field("app-name", &self.app_name)
-                        .field("app-version", &self.app_version)
-                        .field("protocol-version", &self.protocol_version)
-                        .field("extra-data", &self.extra_data)
-                        .finish()
-                }
-            }
-            /// Group request subtype
-            #[repr(u8)]
-            #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
-            pub enum GroupRequestSubType {
-                Add,
-                Invite,
-            }
-            impl ::core::fmt::Debug for GroupRequestSubType {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    match self {
-                        GroupRequestSubType::Add => {
-                            f.debug_tuple("GroupRequestSubType::Add").finish()
-                        }
-                        GroupRequestSubType::Invite => {
-                            f.debug_tuple("GroupRequestSubType::Invite").finish()
-                        }
-                    }
-                }
-            }
-
-            impl GroupRequestSubType {
-                #[doc(hidden)]
-                pub unsafe fn _lift(val: u8) -> GroupRequestSubType {
-                    if !cfg!(debug_assertions) {
-                        return unsafe { ::core::mem::transmute(val) };
-                    }
-
-                    match val {
-                        0 => GroupRequestSubType::Add,
-                        1 => GroupRequestSubType::Invite,
-
-                        _ => panic!("invalid enum discriminant"),
-                    }
-                }
-            }
+          }
         }
+      }
 
-        /// OneBot-11 API interface for bot operations
-        #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
-        pub mod api {
-            #[used]
-            #[doc(hidden)]
-            static __FORCE_SECTION_REF: fn() =
-                super::super::super::__link_custom_section_describing_imports;
+      impl ApiRetStatus{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> ApiRetStatus{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
 
-            use super::super::super::_rt;
-            pub type SendMessageResponse =
-                super::super::super::flow_bot::onebot11::types::SendMessageResponse;
-            pub type GetMessageResponse =
-                super::super::super::flow_bot::onebot11::types::GetMessageResponse;
-            pub type GetForwardResponse =
-                super::super::super::flow_bot::onebot11::types::GetForwardResponse;
-            pub type LoginInfo = super::super::super::flow_bot::onebot11::types::LoginInfo;
-            pub type StrangerInfo = super::super::super::flow_bot::onebot11::types::StrangerInfo;
-            pub type FriendInfo = super::super::super::flow_bot::onebot11::types::FriendInfo;
-            pub type GroupInfoResponse =
-                super::super::super::flow_bot::onebot11::types::GroupInfoResponse;
-            pub type GroupMemberInfo =
-                super::super::super::flow_bot::onebot11::types::GroupMemberInfo;
-            pub type GroupHonorInfo =
-                super::super::super::flow_bot::onebot11::types::GroupHonorInfo;
-            pub type GroupHonorType =
-                super::super::super::flow_bot::onebot11::types::GroupHonorType;
-            pub type GetCookiesResponse =
-                super::super::super::flow_bot::onebot11::types::GetCookiesResponse;
-            pub type GetCsrfTokenResponse =
-                super::super::super::flow_bot::onebot11::types::GetCsrfTokenResponse;
-            pub type GetCredentialsResponse =
-                super::super::super::flow_bot::onebot11::types::GetCredentialsResponse;
-            pub type GetFileResponse =
-                super::super::super::flow_bot::onebot11::types::GetFileResponse;
-            pub type RecordFormat = super::super::super::flow_bot::onebot11::types::RecordFormat;
-            pub type CanSendResponse =
-                super::super::super::flow_bot::onebot11::types::CanSendResponse;
-            pub type BotStatus = super::super::super::flow_bot::onebot11::types::BotStatus;
-            pub type VersionInfo = super::super::super::flow_bot::onebot11::types::VersionInfo;
-            pub type GroupAnonymousInfo =
-                super::super::super::flow_bot::onebot11::types::GroupAnonymousInfo;
-            pub type GroupRequestSubType =
-                super::super::super::flow_bot::onebot11::types::GroupRequestSubType;
-            #[allow(unused_unsafe, clippy::all)]
-            /// Send a private message to a user
-            #[allow(async_fn_in_trait)]
-            pub async fn send_private_message(
-                user_id: i64,
-                message: _rt::String,
-                auto_escape: Option<bool>,
-            ) -> Result<SendMessageResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
+          match val {
+            0 => ApiRetStatus::Ok,
+            1 => ApiRetStatus::Async,
+            2 => ApiRetStatus::Failed,
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Bot status information
+      #[derive(Clone)]
+      pub struct BotStatus {
+        pub online: Option<bool>,
+        pub good: bool,
+        pub extra_data: _rt::Vec::<(_rt::String,_rt::String,)>,
+      }
+      impl ::core::fmt::Debug for BotStatus {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("BotStatus").field("online", &self.online).field("good", &self.good).field("extra-data", &self.extra_data).finish()
+        }
+      }
+      /// Response from sending a message
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct SendMessageResponse {
+        pub message_id: i64,
+      }
+      impl ::core::fmt::Debug for SendMessageResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("SendMessageResponse").field("message-id", &self.message_id).finish()
+        }
+      }
+      /// Gender/sex of a user
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum SenderSex {
+        Male,
+        Female,
+        Unknown,
+      }
+      impl ::core::fmt::Debug for SenderSex {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            SenderSex::Male => {
+              f.debug_tuple("SenderSex::Male").finish()
+            }
+            SenderSex::Female => {
+              f.debug_tuple("SenderSex::Female").finish()
+            }
+            SenderSex::Unknown => {
+              f.debug_tuple("SenderSex::Unknown").finish()
+            }
+          }
+        }
+      }
+
+      impl SenderSex{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> SenderSex{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => SenderSex::Male,
+            1 => SenderSex::Female,
+            2 => SenderSex::Unknown,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Private message sender information
+      #[derive(Clone)]
+      pub struct PrivateSenderInfo {
+        pub user_id: Option<i64>,
+        pub nickname: Option<_rt::String>,
+        pub sex: Option<SenderSex>,
+        pub age: Option<i32>,
+      }
+      impl ::core::fmt::Debug for PrivateSenderInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("PrivateSenderInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("sex", &self.sex).field("age", &self.age).finish()
+        }
+      }
+      /// Group member role
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum GroupSenderRole {
+        Owner,
+        Admin,
+        Member,
+      }
+      impl ::core::fmt::Debug for GroupSenderRole {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            GroupSenderRole::Owner => {
+              f.debug_tuple("GroupSenderRole::Owner").finish()
+            }
+            GroupSenderRole::Admin => {
+              f.debug_tuple("GroupSenderRole::Admin").finish()
+            }
+            GroupSenderRole::Member => {
+              f.debug_tuple("GroupSenderRole::Member").finish()
+            }
+          }
+        }
+      }
+
+      impl GroupSenderRole{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> GroupSenderRole{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => GroupSenderRole::Owner,
+            1 => GroupSenderRole::Admin,
+            2 => GroupSenderRole::Member,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Group message sender information
+      #[derive(Clone)]
+      pub struct GroupSenderInfo {
+        pub user_id: Option<i64>,
+        pub nickname: Option<_rt::String>,
+        pub card: Option<_rt::String>,
+        pub sex: Option<SenderSex>,
+        pub age: Option<i32>,
+        pub area: Option<_rt::String>,
+        pub level: Option<_rt::String>,
+        pub role: Option<GroupSenderRole>,
+        pub title: Option<_rt::String>,
+      }
+      impl ::core::fmt::Debug for GroupSenderInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GroupSenderInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("card", &self.card).field("sex", &self.sex).field("age", &self.age).field("area", &self.area).field("level", &self.level).field("role", &self.role).field("title", &self.title).finish()
+        }
+      }
+      /// Anonymous user information in group
+      #[derive(Clone)]
+      pub struct GroupAnonymousInfo {
+        pub id: i64,
+        pub name: _rt::String,
+        pub flag: _rt::String,
+      }
+      impl ::core::fmt::Debug for GroupAnonymousInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GroupAnonymousInfo").field("id", &self.id).field("name", &self.name).field("flag", &self.flag).finish()
+        }
+      }
+      /// Message type in get-message response
+      #[derive(Clone)]
+      pub enum GetMessageType {
+        Private(PrivateSenderInfo),
+        Group(GroupSenderInfo),
+      }
+      impl ::core::fmt::Debug for GetMessageType {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            GetMessageType::Private(e) => {
+              f.debug_tuple("GetMessageType::Private").field(e).finish()
+            }
+            GetMessageType::Group(e) => {
+              f.debug_tuple("GetMessageType::Group").field(e).finish()
+            }
+          }
+        }
+      }
+      /// Response from getting a message
+      #[derive(Clone)]
+      pub struct GetMessageResponse {
+        pub time: i32,
+        pub message_id: i32,
+        pub real_id: i32,
+        pub message: _rt::String,
+        pub msg_type: GetMessageType,
+      }
+      impl ::core::fmt::Debug for GetMessageResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetMessageResponse").field("time", &self.time).field("message-id", &self.message_id).field("real-id", &self.real_id).field("message", &self.message).field("msg-type", &self.msg_type).finish()
+        }
+      }
+      /// Response from getting a forward message
+      #[derive(Clone)]
+      pub struct GetForwardResponse {
+        pub message: _rt::String,
+      }
+      impl ::core::fmt::Debug for GetForwardResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetForwardResponse").field("message", &self.message).finish()
+        }
+      }
+      /// Bot login information
+      #[derive(Clone)]
+      pub struct LoginInfo {
+        pub user_id: i64,
+        pub nickname: _rt::String,
+      }
+      impl ::core::fmt::Debug for LoginInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("LoginInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).finish()
+        }
+      }
+      /// Stranger information
+      #[derive(Clone)]
+      pub struct StrangerInfo {
+        pub user_id: i64,
+        pub nickname: _rt::String,
+        pub sex: SenderSex,
+        pub age: i32,
+      }
+      impl ::core::fmt::Debug for StrangerInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("StrangerInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("sex", &self.sex).field("age", &self.age).finish()
+        }
+      }
+      /// Friend information
+      #[derive(Clone)]
+      pub struct FriendInfo {
+        pub user_id: i64,
+        pub nickname: _rt::String,
+        pub remark: _rt::String,
+      }
+      impl ::core::fmt::Debug for FriendInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("FriendInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("remark", &self.remark).finish()
+        }
+      }
+      /// Group information
+      #[derive(Clone)]
+      pub struct GroupInfoResponse {
+        pub group_id: i64,
+        pub group_name: _rt::String,
+        pub member_count: i32,
+        pub max_member_count: i32,
+      }
+      impl ::core::fmt::Debug for GroupInfoResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GroupInfoResponse").field("group-id", &self.group_id).field("group-name", &self.group_name).field("member-count", &self.member_count).field("max-member-count", &self.max_member_count).finish()
+        }
+      }
+      /// Group member detailed information
+      #[derive(Clone)]
+      pub struct GroupMemberInfo {
+        pub group_id: i64,
+        pub user_id: i64,
+        pub nickname: _rt::String,
+        pub card: _rt::String,
+        pub sex: SenderSex,
+        pub age: i32,
+        pub area: Option<_rt::String>,
+        pub join_time: i32,
+        pub last_sent_time: i32,
+        pub level: _rt::String,
+        pub role: GroupSenderRole,
+        pub unfriendly: bool,
+        pub title: Option<_rt::String>,
+        pub title_expire_time: i32,
+        pub card_changeable: bool,
+      }
+      impl ::core::fmt::Debug for GroupMemberInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GroupMemberInfo").field("group-id", &self.group_id).field("user-id", &self.user_id).field("nickname", &self.nickname).field("card", &self.card).field("sex", &self.sex).field("age", &self.age).field("area", &self.area).field("join-time", &self.join_time).field("last-sent-time", &self.last_sent_time).field("level", &self.level).field("role", &self.role).field("unfriendly", &self.unfriendly).field("title", &self.title).field("title-expire-time", &self.title_expire_time).field("card-changeable", &self.card_changeable).finish()
+        }
+      }
+      /// Most talkative user information
+      #[derive(Clone)]
+      pub struct TalkativeInfo {
+        pub user_id: i64,
+        pub nickname: _rt::String,
+        pub avatar: _rt::String,
+        pub day_count: i32,
+      }
+      impl ::core::fmt::Debug for TalkativeInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("TalkativeInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("avatar", &self.avatar).field("day-count", &self.day_count).finish()
+        }
+      }
+      /// Honor information
+      #[derive(Clone)]
+      pub struct HonorInfo {
+        pub user_id: i64,
+        pub nickname: _rt::String,
+        pub avatar: _rt::String,
+        pub description: _rt::String,
+      }
+      impl ::core::fmt::Debug for HonorInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("HonorInfo").field("user-id", &self.user_id).field("nickname", &self.nickname).field("avatar", &self.avatar).field("description", &self.description).finish()
+        }
+      }
+      /// Group honor information
+      #[derive(Clone)]
+      pub struct GroupHonorInfo {
+        pub group_id: i64,
+        pub current_talkative: Option<TalkativeInfo>,
+        pub talkative_list: Option<_rt::Vec::<HonorInfo>>,
+        pub performer_list: Option<_rt::Vec::<HonorInfo>>,
+        pub legend_list: Option<_rt::Vec::<HonorInfo>>,
+        pub strong_newbie_list: Option<_rt::Vec::<HonorInfo>>,
+        pub emotion_list: Option<_rt::Vec::<HonorInfo>>,
+      }
+      impl ::core::fmt::Debug for GroupHonorInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GroupHonorInfo").field("group-id", &self.group_id).field("current-talkative", &self.current_talkative).field("talkative-list", &self.talkative_list).field("performer-list", &self.performer_list).field("legend-list", &self.legend_list).field("strong-newbie-list", &self.strong_newbie_list).field("emotion-list", &self.emotion_list).finish()
+        }
+      }
+      /// Type of group honor
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum GroupHonorType {
+        Talkative,
+        Performer,
+        Legend,
+        StrongNewbie,
+        Emotion,
+        All,
+      }
+      impl ::core::fmt::Debug for GroupHonorType {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            GroupHonorType::Talkative => {
+              f.debug_tuple("GroupHonorType::Talkative").finish()
+            }
+            GroupHonorType::Performer => {
+              f.debug_tuple("GroupHonorType::Performer").finish()
+            }
+            GroupHonorType::Legend => {
+              f.debug_tuple("GroupHonorType::Legend").finish()
+            }
+            GroupHonorType::StrongNewbie => {
+              f.debug_tuple("GroupHonorType::StrongNewbie").finish()
+            }
+            GroupHonorType::Emotion => {
+              f.debug_tuple("GroupHonorType::Emotion").finish()
+            }
+            GroupHonorType::All => {
+              f.debug_tuple("GroupHonorType::All").finish()
+            }
+          }
+        }
+      }
+
+      impl GroupHonorType{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> GroupHonorType{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => GroupHonorType::Talkative,
+            1 => GroupHonorType::Performer,
+            2 => GroupHonorType::Legend,
+            3 => GroupHonorType::StrongNewbie,
+            4 => GroupHonorType::Emotion,
+            5 => GroupHonorType::All,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Response containing cookies
+      #[derive(Clone)]
+      pub struct GetCookiesResponse {
+        pub cookies: _rt::String,
+      }
+      impl ::core::fmt::Debug for GetCookiesResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetCookiesResponse").field("cookies", &self.cookies).finish()
+        }
+      }
+      /// Response containing CSRF token
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct GetCsrfTokenResponse {
+        pub token: i32,
+      }
+      impl ::core::fmt::Debug for GetCsrfTokenResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetCsrfTokenResponse").field("token", &self.token).finish()
+        }
+      }
+      /// Response containing credentials
+      #[derive(Clone)]
+      pub struct GetCredentialsResponse {
+        pub cookies: _rt::String,
+        pub csrf_token: i32,
+      }
+      impl ::core::fmt::Debug for GetCredentialsResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetCredentialsResponse").field("cookies", &self.cookies).field("csrf-token", &self.csrf_token).finish()
+        }
+      }
+      /// Response containing file path/data
+      #[derive(Clone)]
+      pub struct GetFileResponse {
+        pub file: _rt::String,
+      }
+      impl ::core::fmt::Debug for GetFileResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("GetFileResponse").field("file", &self.file).finish()
+        }
+      }
+      /// Audio record format
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum RecordFormat {
+        Mp3,
+        Amr,
+        Wma,
+        M4a,
+        Spx,
+        Ogg,
+        Wav,
+        Flac,
+      }
+      impl ::core::fmt::Debug for RecordFormat {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            RecordFormat::Mp3 => {
+              f.debug_tuple("RecordFormat::Mp3").finish()
+            }
+            RecordFormat::Amr => {
+              f.debug_tuple("RecordFormat::Amr").finish()
+            }
+            RecordFormat::Wma => {
+              f.debug_tuple("RecordFormat::Wma").finish()
+            }
+            RecordFormat::M4a => {
+              f.debug_tuple("RecordFormat::M4a").finish()
+            }
+            RecordFormat::Spx => {
+              f.debug_tuple("RecordFormat::Spx").finish()
+            }
+            RecordFormat::Ogg => {
+              f.debug_tuple("RecordFormat::Ogg").finish()
+            }
+            RecordFormat::Wav => {
+              f.debug_tuple("RecordFormat::Wav").finish()
+            }
+            RecordFormat::Flac => {
+              f.debug_tuple("RecordFormat::Flac").finish()
+            }
+          }
+        }
+      }
+
+      impl RecordFormat{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> RecordFormat{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => RecordFormat::Mp3,
+            1 => RecordFormat::Amr,
+            2 => RecordFormat::Wma,
+            3 => RecordFormat::M4a,
+            4 => RecordFormat::Spx,
+            5 => RecordFormat::Ogg,
+            6 => RecordFormat::Wav,
+            7 => RecordFormat::Flac,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Response indicating capability
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct CanSendResponse {
+        pub yes: bool,
+      }
+      impl ::core::fmt::Debug for CanSendResponse {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("CanSendResponse").field("yes", &self.yes).finish()
+        }
+      }
+      /// Version information
+      #[derive(Clone)]
+      pub struct VersionInfo {
+        pub app_name: _rt::String,
+        pub app_version: _rt::String,
+        pub protocol_version: _rt::String,
+        pub extra_data: _rt::Vec::<(_rt::String,_rt::String,)>,
+      }
+      impl ::core::fmt::Debug for VersionInfo {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("VersionInfo").field("app-name", &self.app_name).field("app-version", &self.app_version).field("protocol-version", &self.protocol_version).field("extra-data", &self.extra_data).finish()
+        }
+      }
+      /// Group request subtype
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum GroupRequestSubType {
+        Add,
+        Invite,
+      }
+      impl ::core::fmt::Debug for GroupRequestSubType {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            GroupRequestSubType::Add => {
+              f.debug_tuple("GroupRequestSubType::Add").finish()
+            }
+            GroupRequestSubType::Invite => {
+              f.debug_tuple("GroupRequestSubType::Invite").finish()
+            }
+          }
+        }
+      }
+
+      impl GroupRequestSubType{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> GroupRequestSubType{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => GroupRequestSubType::Add,
+            1 => GroupRequestSubType::Invite,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// ========== Message Segment Types ==========
+      /// Text segment
+      #[derive(Clone)]
+      pub struct TextSegment {
+        pub text: _rt::String,
+      }
+      impl ::core::fmt::Debug for TextSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("TextSegment").field("text", &self.text).finish()
+        }
+      }
+      /// Face/emoji segment
+      #[derive(Clone)]
+      pub struct FaceSegment {
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for FaceSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("FaceSegment").field("id", &self.id).finish()
+        }
+      }
+      /// Image segment
+      #[derive(Clone)]
+      pub struct ImageSegment {
+        pub file: _rt::String,
+      }
+      impl ::core::fmt::Debug for ImageSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ImageSegment").field("file", &self.file).finish()
+        }
+      }
+      /// Record/voice segment
+      #[derive(Clone)]
+      pub struct RecordSegment {
+        pub file: _rt::String,
+      }
+      impl ::core::fmt::Debug for RecordSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("RecordSegment").field("file", &self.file).finish()
+        }
+      }
+      /// Video segment
+      #[derive(Clone)]
+      pub struct VideoSegment {
+        pub file: _rt::String,
+      }
+      impl ::core::fmt::Debug for VideoSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("VideoSegment").field("file", &self.file).finish()
+        }
+      }
+      /// At/mention segment
+      #[derive(Clone)]
+      pub struct AtSegment {
+        pub qq: _rt::String,
+      }
+      impl ::core::fmt::Debug for AtSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("AtSegment").field("qq", &self.qq).finish()
+        }
+      }
+      /// Dice segment
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct DiceSegment {
+      }
+      impl ::core::fmt::Debug for DiceSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("DiceSegment").finish()
+        }
+      }
+      /// Shake segment
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct ShakeSegment {
+      }
+      impl ::core::fmt::Debug for ShakeSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ShakeSegment").finish()
+        }
+      }
+      /// Poke segment
+      #[derive(Clone)]
+      pub struct PokeSegment {
+        pub ty: _rt::String,
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for PokeSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("PokeSegment").field("ty", &self.ty).field("id", &self.id).finish()
+        }
+      }
+      /// Anonymous segment
+      #[repr(C)]
+      #[derive(Clone, Copy)]
+      pub struct AnonymousSegment {
+      }
+      impl ::core::fmt::Debug for AnonymousSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("AnonymousSegment").finish()
+        }
+      }
+      /// Share segment
+      #[derive(Clone)]
+      pub struct ShareSegment {
+        pub url: _rt::String,
+        pub title: _rt::String,
+      }
+      impl ::core::fmt::Debug for ShareSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ShareSegment").field("url", &self.url).field("title", &self.title).finish()
+        }
+      }
+      /// Contact type
+      #[repr(u8)]
+      #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
+      pub enum ContactType {
+        Qq,
+        Group,
+      }
+      impl ::core::fmt::Debug for ContactType {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            ContactType::Qq => {
+              f.debug_tuple("ContactType::Qq").finish()
+            }
+            ContactType::Group => {
+              f.debug_tuple("ContactType::Group").finish()
+            }
+          }
+        }
+      }
+
+      impl ContactType{
+        #[doc(hidden)]
+        pub unsafe fn _lift(val: u8) -> ContactType{
+          if !cfg!(debug_assertions) {
+            return unsafe { ::core::mem::transmute(val) };
+          }
+
+          match val {
+            0 => ContactType::Qq,
+            1 => ContactType::Group,
+
+            _ => panic!("invalid enum discriminant"),
+          }
+        }
+      }
+
+      /// Contact segment
+      #[derive(Clone)]
+      pub struct ContactSegment {
+        pub ty: ContactType,
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for ContactSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ContactSegment").field("ty", &self.ty).field("id", &self.id).finish()
+        }
+      }
+      /// Location segment
+      #[derive(Clone)]
+      pub struct LocationSegment {
+        pub lat: _rt::String,
+        pub lon: _rt::String,
+        pub title: Option<_rt::String>,
+        pub content: Option<_rt::String>,
+      }
+      impl ::core::fmt::Debug for LocationSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("LocationSegment").field("lat", &self.lat).field("lon", &self.lon).field("title", &self.title).field("content", &self.content).finish()
+        }
+      }
+      /// Music segment
+      #[derive(Clone)]
+      pub struct MusicSegment {
+        pub ty: _rt::String,
+        pub id: Option<_rt::String>,
+        pub url: Option<_rt::String>,
+        pub audio: Option<_rt::String>,
+        pub title: Option<_rt::String>,
+      }
+      impl ::core::fmt::Debug for MusicSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("MusicSegment").field("ty", &self.ty).field("id", &self.id).field("url", &self.url).field("audio", &self.audio).field("title", &self.title).finish()
+        }
+      }
+      /// Reply segment
+      #[derive(Clone)]
+      pub struct ReplySegment {
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for ReplySegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ReplySegment").field("id", &self.id).finish()
+        }
+      }
+      /// Forward segment
+      #[derive(Clone)]
+      pub struct ForwardSegment {
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for ForwardSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("ForwardSegment").field("id", &self.id).finish()
+        }
+      }
+      /// Node segment
+      #[derive(Clone)]
+      pub struct NodeSegment {
+        pub id: _rt::String,
+      }
+      impl ::core::fmt::Debug for NodeSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("NodeSegment").field("id", &self.id).finish()
+        }
+      }
+      /// XML segment
+      #[derive(Clone)]
+      pub struct XmlSegment {
+        pub data: _rt::String,
+      }
+      impl ::core::fmt::Debug for XmlSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("XmlSegment").field("data", &self.data).finish()
+        }
+      }
+      /// JSON segment
+      #[derive(Clone)]
+      pub struct JsonSegment {
+        pub data: _rt::String,
+      }
+      impl ::core::fmt::Debug for JsonSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          f.debug_struct("JsonSegment").field("data", &self.data).finish()
+        }
+      }
+      /// Message segment - a single element in a message
+      #[derive(Clone)]
+      pub enum MessageSegment {
+        Text(TextSegment),
+        Face(FaceSegment),
+        Image(ImageSegment),
+        Record(RecordSegment),
+        Video(VideoSegment),
+        At(AtSegment),
+        Dice(DiceSegment),
+        Shake(ShakeSegment),
+        Poke(PokeSegment),
+        Anonymous(AnonymousSegment),
+        Share(ShareSegment),
+        Contact(ContactSegment),
+        Location(LocationSegment),
+        Music(MusicSegment),
+        Reply(ReplySegment),
+        Forward(ForwardSegment),
+        Node(NodeSegment),
+        Xml(XmlSegment),
+        Json(JsonSegment),
+      }
+      impl ::core::fmt::Debug for MessageSegment {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+          match self {
+            MessageSegment::Text(e) => {
+              f.debug_tuple("MessageSegment::Text").field(e).finish()
+            }
+            MessageSegment::Face(e) => {
+              f.debug_tuple("MessageSegment::Face").field(e).finish()
+            }
+            MessageSegment::Image(e) => {
+              f.debug_tuple("MessageSegment::Image").field(e).finish()
+            }
+            MessageSegment::Record(e) => {
+              f.debug_tuple("MessageSegment::Record").field(e).finish()
+            }
+            MessageSegment::Video(e) => {
+              f.debug_tuple("MessageSegment::Video").field(e).finish()
+            }
+            MessageSegment::At(e) => {
+              f.debug_tuple("MessageSegment::At").field(e).finish()
+            }
+            MessageSegment::Dice(e) => {
+              f.debug_tuple("MessageSegment::Dice").field(e).finish()
+            }
+            MessageSegment::Shake(e) => {
+              f.debug_tuple("MessageSegment::Shake").field(e).finish()
+            }
+            MessageSegment::Poke(e) => {
+              f.debug_tuple("MessageSegment::Poke").field(e).finish()
+            }
+            MessageSegment::Anonymous(e) => {
+              f.debug_tuple("MessageSegment::Anonymous").field(e).finish()
+            }
+            MessageSegment::Share(e) => {
+              f.debug_tuple("MessageSegment::Share").field(e).finish()
+            }
+            MessageSegment::Contact(e) => {
+              f.debug_tuple("MessageSegment::Contact").field(e).finish()
+            }
+            MessageSegment::Location(e) => {
+              f.debug_tuple("MessageSegment::Location").field(e).finish()
+            }
+            MessageSegment::Music(e) => {
+              f.debug_tuple("MessageSegment::Music").field(e).finish()
+            }
+            MessageSegment::Reply(e) => {
+              f.debug_tuple("MessageSegment::Reply").field(e).finish()
+            }
+            MessageSegment::Forward(e) => {
+              f.debug_tuple("MessageSegment::Forward").field(e).finish()
+            }
+            MessageSegment::Node(e) => {
+              f.debug_tuple("MessageSegment::Node").field(e).finish()
+            }
+            MessageSegment::Xml(e) => {
+              f.debug_tuple("MessageSegment::Xml").field(e).finish()
+            }
+            MessageSegment::Json(e) => {
+              f.debug_tuple("MessageSegment::Json").field(e).finish()
+            }
+          }
+        }
+      }
+      /// Message is a list of segments
+      pub type Message = _rt::Vec::<MessageSegment>;
+
+    }
+
+    /// OneBot-11 API interface for bot operations
+    #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
+    pub mod api {
+      #[used]
+      #[doc(hidden)]
+      static __FORCE_SECTION_REF: fn() =
+      super::super::super::__link_custom_section_describing_imports;
+      
+      use super::super::super::_rt;
+      pub type SendMessageResponse = super::super::super::flow_bot::onebot11::types::SendMessageResponse;
+      pub type GetMessageResponse = super::super::super::flow_bot::onebot11::types::GetMessageResponse;
+      pub type GetForwardResponse = super::super::super::flow_bot::onebot11::types::GetForwardResponse;
+      pub type LoginInfo = super::super::super::flow_bot::onebot11::types::LoginInfo;
+      pub type StrangerInfo = super::super::super::flow_bot::onebot11::types::StrangerInfo;
+      pub type FriendInfo = super::super::super::flow_bot::onebot11::types::FriendInfo;
+      pub type GroupInfoResponse = super::super::super::flow_bot::onebot11::types::GroupInfoResponse;
+      pub type GroupMemberInfo = super::super::super::flow_bot::onebot11::types::GroupMemberInfo;
+      pub type GroupHonorInfo = super::super::super::flow_bot::onebot11::types::GroupHonorInfo;
+      pub type GroupHonorType = super::super::super::flow_bot::onebot11::types::GroupHonorType;
+      pub type GetCookiesResponse = super::super::super::flow_bot::onebot11::types::GetCookiesResponse;
+      pub type GetCsrfTokenResponse = super::super::super::flow_bot::onebot11::types::GetCsrfTokenResponse;
+      pub type GetCredentialsResponse = super::super::super::flow_bot::onebot11::types::GetCredentialsResponse;
+      pub type GetFileResponse = super::super::super::flow_bot::onebot11::types::GetFileResponse;
+      pub type RecordFormat = super::super::super::flow_bot::onebot11::types::RecordFormat;
+      pub type CanSendResponse = super::super::super::flow_bot::onebot11::types::CanSendResponse;
+      pub type BotStatus = super::super::super::flow_bot::onebot11::types::BotStatus;
+      pub type VersionInfo = super::super::super::flow_bot::onebot11::types::VersionInfo;
+      pub type GroupAnonymousInfo = super::super::super::flow_bot::onebot11::types::GroupAnonymousInfo;
+      pub type GroupRequestSubType = super::super::super::flow_bot::onebot11::types::GroupRequestSubType;
+      pub type Message = super::super::super::flow_bot::onebot11::types::Message;
+      #[allow(unused_unsafe, clippy::all)]
+      /// Send a private message to a user
+      #[allow(async_fn_in_trait)]
+      pub async fn send_private_message(user_id: i64,message: Message,auto_escape: Option<bool>,) -> Result<SendMessageResponse,_rt::String>{
+        unsafe {
+
+          #[derive(Copy, Clone)]
+          struct ParamsLower(
+          *mut u8, 
+          );
+          unsafe impl Send for ParamsLower {}
+          
+
+          use wit_bindgen::rt::async_support::Subtask as _Subtask;
+          struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+          #[allow(unused_parens)]
+          unsafe impl<'a> _Subtask for _MySubtask<'a> {
+            
+            type Params = (i64, Message, Option<bool>, );
+            type Results = Result<SendMessageResponse,_rt::String>;
+            type ParamsLower = ParamsLower;
+            fn abi_layout(&mut self) -> ::core::alloc::Layout {
+              unsafe {
+                ::core::alloc::Layout::from_size_align_unchecked((24+4*::core::mem::size_of::<*const u8>()), 8)
+              }
+            }
+            
+            fn results_offset(&mut self) -> usize { (16+2*::core::mem::size_of::<*const u8>()) }
+
+            unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+              
+              #[cfg(target_arch = "wasm32")]
+              #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+              unsafe extern "C" {
+                #[link_name = "[async-lower]send-private-message"]
+                fn call(_: *mut u8, _: *mut u8, ) -> i32;
+              }
+
+              #[cfg(not(target_arch = "wasm32"))]
+              unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+              
+              unsafe { call(_params.0,_results) as u32 }
+            }
+            
+            unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+              unsafe { let l0 = *_params.0.add(8).cast::<*mut u8>();
+              let l1 = *_params.0.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base59 = l0;
+              let len59 = l1;
+              for i in 0..len59 {
+                let base = base59.add(i * (15*::core::mem::size_of::<*const u8>()));
+                {
+                  let l2 = i32::from(*base.add(0).cast::<u8>());
+                  match l2 {
+                    0 => {
+                      let l3 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l4 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l3, l4, 1);
+                    },
+                    1 => {
+                      let l5 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l6 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l5, l6, 1);
+                    },
+                    2 => {
+                      let l7 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l8 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l7, l8, 1);
+                    },
+                    3 => {
+                      let l9 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l10 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l9, l10, 1);
+                    },
+                    4 => {
+                      let l11 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l12 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l11, l12, 1);
+                    },
+                    5 => {
+                      let l13 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l14 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l13, l14, 1);
+                    },
+                    6 => (),
+                    7 => (),
+                    8 => {
+                      let l15 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l16 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l15, l16, 1);
+                      let l17 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l18 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l17, l18, 1);
+                    },
+                    9 => (),
+                    10 => {
+                      let l19 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l20 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l19, l20, 1);
+                      let l21 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l22 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l21, l22, 1);
+                    },
+                    11 => {
+                      let l23 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l24 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l23, l24, 1);
+                    },
+                    12 => {
+                      let l25 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l26 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l25, l26, 1);
+                      let l27 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l28 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l27, l28, 1);
+                      let l29 = i32::from(*base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l29 {
+                        0 => (),
+                        _ => {
+                          let l30 = *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l31 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l30, l31, 1);
+                        },
+                      }
+                      let l32 = i32::from(*base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l32 {
+                        0 => (),
+                        _ => {
+                          let l33 = *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l34 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l33, l34, 1);
+                        },
+                      }
+                    },
+                    13 => {
+                      let l35 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l36 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l35, l36, 1);
+                      let l37 = i32::from(*base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l37 {
+                        0 => (),
+                        _ => {
+                          let l38 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l39 = *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l38, l39, 1);
+                        },
+                      }
+                      let l40 = i32::from(*base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l40 {
+                        0 => (),
+                        _ => {
+                          let l41 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l42 = *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l41, l42, 1);
+                        },
+                      }
+                      let l43 = i32::from(*base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l43 {
+                        0 => (),
+                        _ => {
+                          let l44 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l45 = *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l44, l45, 1);
+                        },
+                      }
+                      let l46 = i32::from(*base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                      match l46 {
+                        0 => (),
+                        _ => {
+                          let l47 = *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                          let l48 = *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                          _rt::cabi_dealloc(l47, l48, 1);
+                        },
+                      }
+                    },
+                    14 => {
+                      let l49 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l50 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l49, l50, 1);
+                    },
+                    15 => {
+                      let l51 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l52 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l51, l52, 1);
+                    },
+                    16 => {
+                      let l53 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l54 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l53, l54, 1);
+                    },
+                    17 => {
+                      let l55 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l56 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l55, l56, 1);
+                    },
+                    _ => {
+                      let l57 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l58 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l57, l58, 1);
+                    },
+                  }
+                }
+              }
+              _rt::cabi_dealloc(base59, len59 * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
+            }
+          }
+          unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+            unsafe { let l0 = *_params.0.add(8).cast::<*mut u8>();
+            let l1 = *_params.0.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            let base59 = l0;
+            let len59 = l1;
+            for i in 0..len59 {
+              let base = base59.add(i * (15*::core::mem::size_of::<*const u8>()));
+              {
+                let l2 = i32::from(*base.add(0).cast::<u8>());
+                match l2 {
+                  0 => {
+                    let l3 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l4 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l3, l4, 1);
+                  },
+                  1 => {
+                    let l5 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l6 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l5, l6, 1);
+                  },
+                  2 => {
+                    let l7 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l8 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l7, l8, 1);
+                  },
+                  3 => {
+                    let l9 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l10 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l9, l10, 1);
+                  },
+                  4 => {
+                    let l11 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l12 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l11, l12, 1);
+                  },
+                  5 => {
+                    let l13 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l14 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l13, l14, 1);
+                  },
+                  6 => (),
+                  7 => (),
+                  8 => {
+                    let l15 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l16 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l15, l16, 1);
+                    let l17 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l18 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l17, l18, 1);
+                  },
+                  9 => (),
+                  10 => {
+                    let l19 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l20 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l19, l20, 1);
+                    let l21 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l22 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l21, l22, 1);
+                  },
+                  11 => {
+                    let l23 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l24 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l23, l24, 1);
+                  },
+                  12 => {
+                    let l25 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l26 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l25, l26, 1);
+                    let l27 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l28 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l27, l28, 1);
+                    let l29 = i32::from(*base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l29 {
+                      0 => (),
+                      _ => {
+                        let l30 = *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l31 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l30, l31, 1);
+                      },
                     }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, _rt::String, Option<bool>);
-                        type Results = Result<SendMessageResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (24 + 4 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+                    let l32 = i32::from(*base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l32 {
+                      0 => (),
+                      _ => {
+                        let l33 = *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l34 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l33, l34, 1);
+                      },
+                    }
+                  },
+                  13 => {
+                    let l35 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l36 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l35, l36, 1);
+                    let l37 = i32::from(*base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l37 {
+                      0 => (),
+                      _ => {
+                        let l38 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l39 = *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l38, l39, 1);
+                      },
+                    }
+                    let l40 = i32::from(*base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l40 {
+                      0 => (),
+                      _ => {
+                        let l41 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l42 = *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l41, l42, 1);
+                      },
+                    }
+                    let l43 = i32::from(*base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l43 {
+                      0 => (),
+                      _ => {
+                        let l44 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l45 = *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l44, l45, 1);
+                      },
+                    }
+                    let l46 = i32::from(*base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    match l46 {
+                      0 => (),
+                      _ => {
+                        let l47 = *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                        let l48 = *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                        _rt::cabi_dealloc(l47, l48, 1);
+                      },
+                    }
+                  },
+                  14 => {
+                    let l49 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l50 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l49, l50, 1);
+                  },
+                  15 => {
+                    let l51 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l52 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l51, l52, 1);
+                  },
+                  16 => {
+                    let l53 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l54 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l53, l54, 1);
+                  },
+                  17 => {
+                    let l55 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l56 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l55, l56, 1);
+                  },
+                  _ => {
+                    let l57 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l58 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l57, l58, 1);
+                  },
+                }
+              }
+            }
+            _rt::cabi_dealloc(base59, len59 * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
+          }
+        }
+        unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+          let _param_ptr = unsafe { _ptr.add(0) };
+          unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
+        }
+        let _param_ptr = unsafe { _ptr.add(8) };
+        unsafe { let vec45 = _lower1;
+        let len45 = vec45.len();
+        let layout45 = _rt::alloc::Layout::from_size_align(vec45.len() * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>()).unwrap();
+        let (result45, _cleanup45) = wit_bindgen::rt::Cleanup::new(layout45);if let Some(cleanup) = _cleanup45 { cleanup.forget(); }
+        for (i, e) in vec45.into_iter().enumerate() {
+          let base = result45.add(i * (15*::core::mem::size_of::<*const u8>()));
+          {
+            use super::super::super::flow_bot::onebot11::types::MessageSegment as V44;
+            match e {
+              V44::Text(e) => {
+                *base.add(0).cast::<u8>() = (0i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::TextSegment{ text:text0, } = e;
+                let vec1 = (text0.into_bytes()).into_boxed_slice();
+                let ptr1 = vec1.as_ptr().cast::<u8>();
+                let len1 = vec1.len();
+                ::core::mem::forget(vec1);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len1;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr1.cast_mut();
+              },
+              V44::Face(e) => {
+                *base.add(0).cast::<u8>() = (1i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::FaceSegment{ id:id2, } = e;
+                let vec3 = (id2.into_bytes()).into_boxed_slice();
+                let ptr3 = vec3.as_ptr().cast::<u8>();
+                let len3 = vec3.len();
+                ::core::mem::forget(vec3);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len3;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr3.cast_mut();
+              },
+              V44::Image(e) => {
+                *base.add(0).cast::<u8>() = (2i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ImageSegment{ file:file4, } = e;
+                let vec5 = (file4.into_bytes()).into_boxed_slice();
+                let ptr5 = vec5.as_ptr().cast::<u8>();
+                let len5 = vec5.len();
+                ::core::mem::forget(vec5);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len5;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr5.cast_mut();
+              },
+              V44::Record(e) => {
+                *base.add(0).cast::<u8>() = (3i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::RecordSegment{ file:file6, } = e;
+                let vec7 = (file6.into_bytes()).into_boxed_slice();
+                let ptr7 = vec7.as_ptr().cast::<u8>();
+                let len7 = vec7.len();
+                ::core::mem::forget(vec7);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len7;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr7.cast_mut();
+              },
+              V44::Video(e) => {
+                *base.add(0).cast::<u8>() = (4i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::VideoSegment{ file:file8, } = e;
+                let vec9 = (file8.into_bytes()).into_boxed_slice();
+                let ptr9 = vec9.as_ptr().cast::<u8>();
+                let len9 = vec9.len();
+                ::core::mem::forget(vec9);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len9;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr9.cast_mut();
+              },
+              V44::At(e) => {
+                *base.add(0).cast::<u8>() = (5i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::AtSegment{ qq:qq10, } = e;
+                let vec11 = (qq10.into_bytes()).into_boxed_slice();
+                let ptr11 = vec11.as_ptr().cast::<u8>();
+                let len11 = vec11.len();
+                ::core::mem::forget(vec11);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len11;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr11.cast_mut();
+              },
+              V44::Dice(e) => {
+                *base.add(0).cast::<u8>() = (6i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::DiceSegment{ } = e;
+              },
+              V44::Shake(e) => {
+                *base.add(0).cast::<u8>() = (7i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ShakeSegment{ } = e;
+              },
+              V44::Poke(e) => {
+                *base.add(0).cast::<u8>() = (8i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::PokeSegment{ ty:ty14, id:id14, } = e;
+                let vec15 = (ty14.into_bytes()).into_boxed_slice();
+                let ptr15 = vec15.as_ptr().cast::<u8>();
+                let len15 = vec15.len();
+                ::core::mem::forget(vec15);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len15;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr15.cast_mut();
+                let vec16 = (id14.into_bytes()).into_boxed_slice();
+                let ptr16 = vec16.as_ptr().cast::<u8>();
+                let len16 = vec16.len();
+                ::core::mem::forget(vec16);
+                *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len16;
+                *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr16.cast_mut();
+              },
+              V44::Anonymous(e) => {
+                *base.add(0).cast::<u8>() = (9i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::AnonymousSegment{ } = e;
+              },
+              V44::Share(e) => {
+                *base.add(0).cast::<u8>() = (10i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ShareSegment{ url:url18, title:title18, } = e;
+                let vec19 = (url18.into_bytes()).into_boxed_slice();
+                let ptr19 = vec19.as_ptr().cast::<u8>();
+                let len19 = vec19.len();
+                ::core::mem::forget(vec19);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len19;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr19.cast_mut();
+                let vec20 = (title18.into_bytes()).into_boxed_slice();
+                let ptr20 = vec20.as_ptr().cast::<u8>();
+                let len20 = vec20.len();
+                ::core::mem::forget(vec20);
+                *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len20;
+                *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr20.cast_mut();
+              },
+              V44::Contact(e) => {
+                *base.add(0).cast::<u8>() = (11i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ContactSegment{ ty:ty21, id:id21, } = e;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<u8>() = (ty21.clone() as i32) as u8;
+                let vec22 = (id21.into_bytes()).into_boxed_slice();
+                let ptr22 = vec22.as_ptr().cast::<u8>();
+                let len22 = vec22.len();
+                ::core::mem::forget(vec22);
+                *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>() = len22;
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr22.cast_mut();
+              },
+              V44::Location(e) => {
+                *base.add(0).cast::<u8>() = (12i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::LocationSegment{ lat:lat23, lon:lon23, title:title23, content:content23, } = e;
+                let vec24 = (lat23.into_bytes()).into_boxed_slice();
+                let ptr24 = vec24.as_ptr().cast::<u8>();
+                let len24 = vec24.len();
+                ::core::mem::forget(vec24);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len24;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr24.cast_mut();
+                let vec25 = (lon23.into_bytes()).into_boxed_slice();
+                let ptr25 = vec25.as_ptr().cast::<u8>();
+                let len25 = vec25.len();
+                ::core::mem::forget(vec25);
+                *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len25;
+                *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr25.cast_mut();
+                match title23 {
+                  Some(e) => {
+                    *base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                    let vec26 = (e.into_bytes()).into_boxed_slice();
+                    let ptr26 = vec26.as_ptr().cast::<u8>();
+                    let len26 = vec26.len();
+                    ::core::mem::forget(vec26);
+                    *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>() = len26;
+                    *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr26.cast_mut();
+                  },
+                  None => {
+                    {
+                      *base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                    }
+                  },
+                };match content23 {
+                  Some(e) => {
+                    *base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                    let vec27 = (e.into_bytes()).into_boxed_slice();
+                    let ptr27 = vec27.as_ptr().cast::<u8>();
+                    let len27 = vec27.len();
+                    ::core::mem::forget(vec27);
+                    *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>() = len27;
+                    *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr27.cast_mut();
+                  },
+                  None => {
+                    {
+                      *base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                    }
+                  },
+                };},
+                V44::Music(e) => {
+                  *base.add(0).cast::<u8>() = (13i32) as u8;
+                  let super::super::super::flow_bot::onebot11::types::MusicSegment{ ty:ty28, id:id28, url:url28, audio:audio28, title:title28, } = e;
+                  let vec29 = (ty28.into_bytes()).into_boxed_slice();
+                  let ptr29 = vec29.as_ptr().cast::<u8>();
+                  let len29 = vec29.len();
+                  ::core::mem::forget(vec29);
+                  *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len29;
+                  *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr29.cast_mut();
+                  match id28 {
+                    Some(e) => {
+                      *base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                      let vec30 = (e.into_bytes()).into_boxed_slice();
+                      let ptr30 = vec30.as_ptr().cast::<u8>();
+                      let len30 = vec30.len();
+                      ::core::mem::forget(vec30);
+                      *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>() = len30;
+                      *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr30.cast_mut();
+                    },
+                    None => {
+                      {
+                        *base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                      }
+                    },
+                  };match url28 {
+                    Some(e) => {
+                      *base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                      let vec31 = (e.into_bytes()).into_boxed_slice();
+                      let ptr31 = vec31.as_ptr().cast::<u8>();
+                      let len31 = vec31.len();
+                      ::core::mem::forget(vec31);
+                      *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>() = len31;
+                      *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr31.cast_mut();
+                    },
+                    None => {
+                      {
+                        *base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                      }
+                    },
+                  };match audio28 {
+                    Some(e) => {
+                      *base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                      let vec32 = (e.into_bytes()).into_boxed_slice();
+                      let ptr32 = vec32.as_ptr().cast::<u8>();
+                      let len32 = vec32.len();
+                      ::core::mem::forget(vec32);
+                      *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>() = len32;
+                      *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr32.cast_mut();
+                    },
+                    None => {
+                      {
+                        *base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                      }
+                    },
+                  };match title28 {
+                    Some(e) => {
+                      *base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                      let vec33 = (e.into_bytes()).into_boxed_slice();
+                      let ptr33 = vec33.as_ptr().cast::<u8>();
+                      let len33 = vec33.len();
+                      ::core::mem::forget(vec33);
+                      *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>() = len33;
+                      *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr33.cast_mut();
+                    },
+                    None => {
+                      {
+                        *base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                      }
+                    },
+                  };},
+                  V44::Reply(e) => {
+                    *base.add(0).cast::<u8>() = (14i32) as u8;
+                    let super::super::super::flow_bot::onebot11::types::ReplySegment{ id:id34, } = e;
+                    let vec35 = (id34.into_bytes()).into_boxed_slice();
+                    let ptr35 = vec35.as_ptr().cast::<u8>();
+                    let len35 = vec35.len();
+                    ::core::mem::forget(vec35);
+                    *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len35;
+                    *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr35.cast_mut();
+                  },
+                  V44::Forward(e) => {
+                    *base.add(0).cast::<u8>() = (15i32) as u8;
+                    let super::super::super::flow_bot::onebot11::types::ForwardSegment{ id:id36, } = e;
+                    let vec37 = (id36.into_bytes()).into_boxed_slice();
+                    let ptr37 = vec37.as_ptr().cast::<u8>();
+                    let len37 = vec37.len();
+                    ::core::mem::forget(vec37);
+                    *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len37;
+                    *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr37.cast_mut();
+                  },
+                  V44::Node(e) => {
+                    *base.add(0).cast::<u8>() = (16i32) as u8;
+                    let super::super::super::flow_bot::onebot11::types::NodeSegment{ id:id38, } = e;
+                    let vec39 = (id38.into_bytes()).into_boxed_slice();
+                    let ptr39 = vec39.as_ptr().cast::<u8>();
+                    let len39 = vec39.len();
+                    ::core::mem::forget(vec39);
+                    *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len39;
+                    *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr39.cast_mut();
+                  },
+                  V44::Xml(e) => {
+                    *base.add(0).cast::<u8>() = (17i32) as u8;
+                    let super::super::super::flow_bot::onebot11::types::XmlSegment{ data:data40, } = e;
+                    let vec41 = (data40.into_bytes()).into_boxed_slice();
+                    let ptr41 = vec41.as_ptr().cast::<u8>();
+                    let len41 = vec41.len();
+                    ::core::mem::forget(vec41);
+                    *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len41;
+                    *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr41.cast_mut();
+                  },
+                  V44::Json(e) => {
+                    *base.add(0).cast::<u8>() = (18i32) as u8;
+                    let super::super::super::flow_bot::onebot11::types::JsonSegment{ data:data42, } = e;
+                    let vec43 = (data42.into_bytes()).into_boxed_slice();
+                    let ptr43 = vec43.as_ptr().cast::<u8>();
+                    let len43 = vec43.len();
+                    ::core::mem::forget(vec43);
+                    *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len43;
+                    *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr43.cast_mut();
+                  },
+                }
+              }
+            }
+            *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<usize>() = len45;
+            *_param_ptr.add(0).cast::<*mut u8>() = result45;
+          }
+          let _param_ptr = unsafe { _ptr.add((8+2*::core::mem::size_of::<*const u8>())) };
+          unsafe { match _lower2 {
+            Some(e) => {
+              *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+              *_param_ptr.add(1).cast::<u8>() = (match e { true => 1, false => 0 }) as u8;
+            },
+            None => {
+              {
+                *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+              }
+            },
+          }; }
+          ParamsLower(_ptr,)
+        }
+        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+          unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                        fn results_offset(&mut self) -> usize {
-                            (16 + 2 * ::core::mem::size_of::<*const u8>())
-                        }
+          match l0 {
+            0 => {
+              let e = {
+                let l1 = *_ptr.add(8).cast::<i64>();
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]send-private-message"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
+                super::super::super::flow_bot::onebot11::types::SendMessageResponse{
+                  message_id: l1,
+                }
+              };
+              Ok(e)
+            }
+            1 => {
+              let e = {
+                let l2 = *_ptr.add(8).cast::<*mut u8>();
+                let l3 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                let len4 = l3;
+                let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+                _rt::string_lift(bytes4)
+              };
+              Err(e)
+            }
+            _ => _rt::invalid_enum_discriminant(),
+          } }
+        }
+      }
+      _MySubtask { _unused: core::marker::PhantomData }.call((user_id, message, auto_escape,)).await
+    }
+  }
+  #[allow(unused_unsafe, clippy::all)]
+  /// Send a message to a group
+  #[allow(async_fn_in_trait)]
+  pub async fn send_group_message(group_id: i64,message: Message,auto_escape: Option<bool>,) -> Result<SendMessageResponse,_rt::String>{
+    unsafe {
 
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
+      #[derive(Copy, Clone)]
+      struct ParamsLower(
+      *mut u8, 
+      );
+      unsafe impl Send for ParamsLower {}
+      
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = *_params.0.add(8).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = *_params.0.add(8).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(8) };
-                            unsafe {
-                                let vec0 = (_lower1.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                *_param_ptr
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>() = len0;
-                                *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((8 + 2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(1).cast::<u8>() = (match e {
-                                            true => 1,
-                                            false => 0,
-                                        })
-                                            as u8;
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+      use wit_bindgen::rt::async_support::Subtask as _Subtask;
+      struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+      #[allow(unused_parens)]
+      unsafe impl<'a> _Subtask for _MySubtask<'a> {
+        
+        type Params = (i64, Message, Option<bool>, );
+        type Results = Result<SendMessageResponse,_rt::String>;
+        type ParamsLower = ParamsLower;
+        fn abi_layout(&mut self) -> ::core::alloc::Layout {
+          unsafe {
+            ::core::alloc::Layout::from_size_align_unchecked((24+4*::core::mem::size_of::<*const u8>()), 8)
+          }
+        }
+        
+        fn results_offset(&mut self) -> usize { (16+2*::core::mem::size_of::<*const u8>()) }
 
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
+        unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+          
+          #[cfg(target_arch = "wasm32")]
+          #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+          unsafe extern "C" {
+            #[link_name = "[async-lower]send-group-message"]
+            fn call(_: *mut u8, _: *mut u8, ) -> i32;
+          }
 
-                                            super::super::super::flow_bot::onebot11::types::SendMessageResponse{
+          #[cfg(not(target_arch = "wasm32"))]
+          unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+          
+          unsafe { call(_params.0,_results) as u32 }
+        }
+        
+        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+          unsafe { let l0 = *_params.0.add(8).cast::<*mut u8>();
+          let l1 = *_params.0.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let base59 = l0;
+          let len59 = l1;
+          for i in 0..len59 {
+            let base = base59.add(i * (15*::core::mem::size_of::<*const u8>()));
+            {
+              let l2 = i32::from(*base.add(0).cast::<u8>());
+              match l2 {
+                0 => {
+                  let l3 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l4 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l3, l4, 1);
+                },
+                1 => {
+                  let l5 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l6 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l5, l6, 1);
+                },
+                2 => {
+                  let l7 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l8 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l7, l8, 1);
+                },
+                3 => {
+                  let l9 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l10 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l9, l10, 1);
+                },
+                4 => {
+                  let l11 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l12 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l11, l12, 1);
+                },
+                5 => {
+                  let l13 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l14 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l13, l14, 1);
+                },
+                6 => (),
+                7 => (),
+                8 => {
+                  let l15 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l16 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l15, l16, 1);
+                  let l17 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l18 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l17, l18, 1);
+                },
+                9 => (),
+                10 => {
+                  let l19 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l20 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l19, l20, 1);
+                  let l21 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l22 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l21, l22, 1);
+                },
+                11 => {
+                  let l23 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l24 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l23, l24, 1);
+                },
+                12 => {
+                  let l25 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l26 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l25, l26, 1);
+                  let l27 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l28 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l27, l28, 1);
+                  let l29 = i32::from(*base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l29 {
+                    0 => (),
+                    _ => {
+                      let l30 = *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l31 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l30, l31, 1);
+                    },
+                  }
+                  let l32 = i32::from(*base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l32 {
+                    0 => (),
+                    _ => {
+                      let l33 = *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l34 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l33, l34, 1);
+                    },
+                  }
+                },
+                13 => {
+                  let l35 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l36 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l35, l36, 1);
+                  let l37 = i32::from(*base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l37 {
+                    0 => (),
+                    _ => {
+                      let l38 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l39 = *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l38, l39, 1);
+                    },
+                  }
+                  let l40 = i32::from(*base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l40 {
+                    0 => (),
+                    _ => {
+                      let l41 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l42 = *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l41, l42, 1);
+                    },
+                  }
+                  let l43 = i32::from(*base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l43 {
+                    0 => (),
+                    _ => {
+                      let l44 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l45 = *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l44, l45, 1);
+                    },
+                  }
+                  let l46 = i32::from(*base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  match l46 {
+                    0 => (),
+                    _ => {
+                      let l47 = *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                      let l48 = *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                      _rt::cabi_dealloc(l47, l48, 1);
+                    },
+                  }
+                },
+                14 => {
+                  let l49 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l50 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l49, l50, 1);
+                },
+                15 => {
+                  let l51 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l52 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l51, l52, 1);
+                },
+                16 => {
+                  let l53 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l54 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l53, l54, 1);
+                },
+                17 => {
+                  let l55 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l56 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l55, l56, 1);
+                },
+                _ => {
+                  let l57 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l58 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  _rt::cabi_dealloc(l57, l58, 1);
+                },
+              }
+            }
+          }
+          _rt::cabi_dealloc(base59, len59 * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
+        }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = *_params.0.add(8).cast::<*mut u8>();
+        let l1 = *_params.0.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let base59 = l0;
+        let len59 = l1;
+        for i in 0..len59 {
+          let base = base59.add(i * (15*::core::mem::size_of::<*const u8>()));
+          {
+            let l2 = i32::from(*base.add(0).cast::<u8>());
+            match l2 {
+              0 => {
+                let l3 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l4 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l3, l4, 1);
+              },
+              1 => {
+                let l5 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l6 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l5, l6, 1);
+              },
+              2 => {
+                let l7 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l8 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l7, l8, 1);
+              },
+              3 => {
+                let l9 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l10 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l9, l10, 1);
+              },
+              4 => {
+                let l11 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l12 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l11, l12, 1);
+              },
+              5 => {
+                let l13 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l14 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l13, l14, 1);
+              },
+              6 => (),
+              7 => (),
+              8 => {
+                let l15 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l16 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l15, l16, 1);
+                let l17 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l18 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l17, l18, 1);
+              },
+              9 => (),
+              10 => {
+                let l19 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l20 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l19, l20, 1);
+                let l21 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l22 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l21, l22, 1);
+              },
+              11 => {
+                let l23 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l24 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l23, l24, 1);
+              },
+              12 => {
+                let l25 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l26 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l25, l26, 1);
+                let l27 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l28 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l27, l28, 1);
+                let l29 = i32::from(*base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l29 {
+                  0 => (),
+                  _ => {
+                    let l30 = *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l31 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l30, l31, 1);
+                  },
+                }
+                let l32 = i32::from(*base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l32 {
+                  0 => (),
+                  _ => {
+                    let l33 = *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l34 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l33, l34, 1);
+                  },
+                }
+              },
+              13 => {
+                let l35 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l36 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l35, l36, 1);
+                let l37 = i32::from(*base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l37 {
+                  0 => (),
+                  _ => {
+                    let l38 = *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l39 = *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l38, l39, 1);
+                  },
+                }
+                let l40 = i32::from(*base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l40 {
+                  0 => (),
+                  _ => {
+                    let l41 = *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l42 = *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l41, l42, 1);
+                  },
+                }
+                let l43 = i32::from(*base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l43 {
+                  0 => (),
+                  _ => {
+                    let l44 = *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l45 = *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l44, l45, 1);
+                  },
+                }
+                let l46 = i32::from(*base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                match l46 {
+                  0 => (),
+                  _ => {
+                    let l47 = *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                    let l48 = *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                    _rt::cabi_dealloc(l47, l48, 1);
+                  },
+                }
+              },
+              14 => {
+                let l49 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l50 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l49, l50, 1);
+              },
+              15 => {
+                let l51 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l52 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l51, l52, 1);
+              },
+              16 => {
+                let l53 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l54 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l53, l54, 1);
+              },
+              17 => {
+                let l55 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l56 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l55, l56, 1);
+              },
+              _ => {
+                let l57 = *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                let l58 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                _rt::cabi_dealloc(l57, l58, 1);
+              },
+            }
+          }
+        }
+        _rt::cabi_dealloc(base59, len59 * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
+      }
+    }
+    unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+      let _param_ptr = unsafe { _ptr.add(0) };
+      unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
+    }
+    let _param_ptr = unsafe { _ptr.add(8) };
+    unsafe { let vec45 = _lower1;
+    let len45 = vec45.len();
+    let layout45 = _rt::alloc::Layout::from_size_align(vec45.len() * (15*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>()).unwrap();
+    let (result45, _cleanup45) = wit_bindgen::rt::Cleanup::new(layout45);if let Some(cleanup) = _cleanup45 { cleanup.forget(); }
+    for (i, e) in vec45.into_iter().enumerate() {
+      let base = result45.add(i * (15*::core::mem::size_of::<*const u8>()));
+      {
+        use super::super::super::flow_bot::onebot11::types::MessageSegment as V44;
+        match e {
+          V44::Text(e) => {
+            *base.add(0).cast::<u8>() = (0i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::TextSegment{ text:text0, } = e;
+            let vec1 = (text0.into_bytes()).into_boxed_slice();
+            let ptr1 = vec1.as_ptr().cast::<u8>();
+            let len1 = vec1.len();
+            ::core::mem::forget(vec1);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len1;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr1.cast_mut();
+          },
+          V44::Face(e) => {
+            *base.add(0).cast::<u8>() = (1i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::FaceSegment{ id:id2, } = e;
+            let vec3 = (id2.into_bytes()).into_boxed_slice();
+            let ptr3 = vec3.as_ptr().cast::<u8>();
+            let len3 = vec3.len();
+            ::core::mem::forget(vec3);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len3;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr3.cast_mut();
+          },
+          V44::Image(e) => {
+            *base.add(0).cast::<u8>() = (2i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::ImageSegment{ file:file4, } = e;
+            let vec5 = (file4.into_bytes()).into_boxed_slice();
+            let ptr5 = vec5.as_ptr().cast::<u8>();
+            let len5 = vec5.len();
+            ::core::mem::forget(vec5);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len5;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr5.cast_mut();
+          },
+          V44::Record(e) => {
+            *base.add(0).cast::<u8>() = (3i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::RecordSegment{ file:file6, } = e;
+            let vec7 = (file6.into_bytes()).into_boxed_slice();
+            let ptr7 = vec7.as_ptr().cast::<u8>();
+            let len7 = vec7.len();
+            ::core::mem::forget(vec7);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len7;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr7.cast_mut();
+          },
+          V44::Video(e) => {
+            *base.add(0).cast::<u8>() = (4i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::VideoSegment{ file:file8, } = e;
+            let vec9 = (file8.into_bytes()).into_boxed_slice();
+            let ptr9 = vec9.as_ptr().cast::<u8>();
+            let len9 = vec9.len();
+            ::core::mem::forget(vec9);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len9;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr9.cast_mut();
+          },
+          V44::At(e) => {
+            *base.add(0).cast::<u8>() = (5i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::AtSegment{ qq:qq10, } = e;
+            let vec11 = (qq10.into_bytes()).into_boxed_slice();
+            let ptr11 = vec11.as_ptr().cast::<u8>();
+            let len11 = vec11.len();
+            ::core::mem::forget(vec11);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len11;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr11.cast_mut();
+          },
+          V44::Dice(e) => {
+            *base.add(0).cast::<u8>() = (6i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::DiceSegment{ } = e;
+          },
+          V44::Shake(e) => {
+            *base.add(0).cast::<u8>() = (7i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::ShakeSegment{ } = e;
+          },
+          V44::Poke(e) => {
+            *base.add(0).cast::<u8>() = (8i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::PokeSegment{ ty:ty14, id:id14, } = e;
+            let vec15 = (ty14.into_bytes()).into_boxed_slice();
+            let ptr15 = vec15.as_ptr().cast::<u8>();
+            let len15 = vec15.len();
+            ::core::mem::forget(vec15);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len15;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr15.cast_mut();
+            let vec16 = (id14.into_bytes()).into_boxed_slice();
+            let ptr16 = vec16.as_ptr().cast::<u8>();
+            let len16 = vec16.len();
+            ::core::mem::forget(vec16);
+            *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len16;
+            *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr16.cast_mut();
+          },
+          V44::Anonymous(e) => {
+            *base.add(0).cast::<u8>() = (9i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::AnonymousSegment{ } = e;
+          },
+          V44::Share(e) => {
+            *base.add(0).cast::<u8>() = (10i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::ShareSegment{ url:url18, title:title18, } = e;
+            let vec19 = (url18.into_bytes()).into_boxed_slice();
+            let ptr19 = vec19.as_ptr().cast::<u8>();
+            let len19 = vec19.len();
+            ::core::mem::forget(vec19);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len19;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr19.cast_mut();
+            let vec20 = (title18.into_bytes()).into_boxed_slice();
+            let ptr20 = vec20.as_ptr().cast::<u8>();
+            let len20 = vec20.len();
+            ::core::mem::forget(vec20);
+            *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len20;
+            *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr20.cast_mut();
+          },
+          V44::Contact(e) => {
+            *base.add(0).cast::<u8>() = (11i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::ContactSegment{ ty:ty21, id:id21, } = e;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<u8>() = (ty21.clone() as i32) as u8;
+            let vec22 = (id21.into_bytes()).into_boxed_slice();
+            let ptr22 = vec22.as_ptr().cast::<u8>();
+            let len22 = vec22.len();
+            ::core::mem::forget(vec22);
+            *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>() = len22;
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr22.cast_mut();
+          },
+          V44::Location(e) => {
+            *base.add(0).cast::<u8>() = (12i32) as u8;
+            let super::super::super::flow_bot::onebot11::types::LocationSegment{ lat:lat23, lon:lon23, title:title23, content:content23, } = e;
+            let vec24 = (lat23.into_bytes()).into_boxed_slice();
+            let ptr24 = vec24.as_ptr().cast::<u8>();
+            let len24 = vec24.len();
+            ::core::mem::forget(vec24);
+            *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len24;
+            *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr24.cast_mut();
+            let vec25 = (lon23.into_bytes()).into_boxed_slice();
+            let ptr25 = vec25.as_ptr().cast::<u8>();
+            let len25 = vec25.len();
+            ::core::mem::forget(vec25);
+            *base.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>() = len25;
+            *base.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr25.cast_mut();
+            match title23 {
+              Some(e) => {
+                *base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                let vec26 = (e.into_bytes()).into_boxed_slice();
+                let ptr26 = vec26.as_ptr().cast::<u8>();
+                let len26 = vec26.len();
+                ::core::mem::forget(vec26);
+                *base.add(7*::core::mem::size_of::<*const u8>()).cast::<usize>() = len26;
+                *base.add(6*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr26.cast_mut();
+              },
+              None => {
+                {
+                  *base.add(5*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                }
+              },
+            };match content23 {
+              Some(e) => {
+                *base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                let vec27 = (e.into_bytes()).into_boxed_slice();
+                let ptr27 = vec27.as_ptr().cast::<u8>();
+                let len27 = vec27.len();
+                ::core::mem::forget(vec27);
+                *base.add(10*::core::mem::size_of::<*const u8>()).cast::<usize>() = len27;
+                *base.add(9*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr27.cast_mut();
+              },
+              None => {
+                {
+                  *base.add(8*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                }
+              },
+            };},
+            V44::Music(e) => {
+              *base.add(0).cast::<u8>() = (13i32) as u8;
+              let super::super::super::flow_bot::onebot11::types::MusicSegment{ ty:ty28, id:id28, url:url28, audio:audio28, title:title28, } = e;
+              let vec29 = (ty28.into_bytes()).into_boxed_slice();
+              let ptr29 = vec29.as_ptr().cast::<u8>();
+              let len29 = vec29.len();
+              ::core::mem::forget(vec29);
+              *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len29;
+              *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr29.cast_mut();
+              match id28 {
+                Some(e) => {
+                  *base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                  let vec30 = (e.into_bytes()).into_boxed_slice();
+                  let ptr30 = vec30.as_ptr().cast::<u8>();
+                  let len30 = vec30.len();
+                  ::core::mem::forget(vec30);
+                  *base.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>() = len30;
+                  *base.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr30.cast_mut();
+                },
+                None => {
+                  {
+                    *base.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                  }
+                },
+              };match url28 {
+                Some(e) => {
+                  *base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                  let vec31 = (e.into_bytes()).into_boxed_slice();
+                  let ptr31 = vec31.as_ptr().cast::<u8>();
+                  let len31 = vec31.len();
+                  ::core::mem::forget(vec31);
+                  *base.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>() = len31;
+                  *base.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr31.cast_mut();
+                },
+                None => {
+                  {
+                    *base.add(6*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                  }
+                },
+              };match audio28 {
+                Some(e) => {
+                  *base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                  let vec32 = (e.into_bytes()).into_boxed_slice();
+                  let ptr32 = vec32.as_ptr().cast::<u8>();
+                  let len32 = vec32.len();
+                  ::core::mem::forget(vec32);
+                  *base.add(11*::core::mem::size_of::<*const u8>()).cast::<usize>() = len32;
+                  *base.add(10*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr32.cast_mut();
+                },
+                None => {
+                  {
+                    *base.add(9*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                  }
+                },
+              };match title28 {
+                Some(e) => {
+                  *base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>() = (1i32) as u8;
+                  let vec33 = (e.into_bytes()).into_boxed_slice();
+                  let ptr33 = vec33.as_ptr().cast::<u8>();
+                  let len33 = vec33.len();
+                  ::core::mem::forget(vec33);
+                  *base.add(14*::core::mem::size_of::<*const u8>()).cast::<usize>() = len33;
+                  *base.add(13*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr33.cast_mut();
+                },
+                None => {
+                  {
+                    *base.add(12*::core::mem::size_of::<*const u8>()).cast::<u8>() = (0i32) as u8;
+                  }
+                },
+              };},
+              V44::Reply(e) => {
+                *base.add(0).cast::<u8>() = (14i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ReplySegment{ id:id34, } = e;
+                let vec35 = (id34.into_bytes()).into_boxed_slice();
+                let ptr35 = vec35.as_ptr().cast::<u8>();
+                let len35 = vec35.len();
+                ::core::mem::forget(vec35);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len35;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr35.cast_mut();
+              },
+              V44::Forward(e) => {
+                *base.add(0).cast::<u8>() = (15i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::ForwardSegment{ id:id36, } = e;
+                let vec37 = (id36.into_bytes()).into_boxed_slice();
+                let ptr37 = vec37.as_ptr().cast::<u8>();
+                let len37 = vec37.len();
+                ::core::mem::forget(vec37);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len37;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr37.cast_mut();
+              },
+              V44::Node(e) => {
+                *base.add(0).cast::<u8>() = (16i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::NodeSegment{ id:id38, } = e;
+                let vec39 = (id38.into_bytes()).into_boxed_slice();
+                let ptr39 = vec39.as_ptr().cast::<u8>();
+                let len39 = vec39.len();
+                ::core::mem::forget(vec39);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len39;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr39.cast_mut();
+              },
+              V44::Xml(e) => {
+                *base.add(0).cast::<u8>() = (17i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::XmlSegment{ data:data40, } = e;
+                let vec41 = (data40.into_bytes()).into_boxed_slice();
+                let ptr41 = vec41.as_ptr().cast::<u8>();
+                let len41 = vec41.len();
+                ::core::mem::forget(vec41);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len41;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr41.cast_mut();
+              },
+              V44::Json(e) => {
+                *base.add(0).cast::<u8>() = (18i32) as u8;
+                let super::super::super::flow_bot::onebot11::types::JsonSegment{ data:data42, } = e;
+                let vec43 = (data42.into_bytes()).into_boxed_slice();
+                let ptr43 = vec43.as_ptr().cast::<u8>();
+                let len43 = vec43.len();
+                ::core::mem::forget(vec43);
+                *base.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len43;
+                *base.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr43.cast_mut();
+              },
+            }
+          }
+        }
+        *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<usize>() = len45;
+        *_param_ptr.add(0).cast::<*mut u8>() = result45;
+      }
+      let _param_ptr = unsafe { _ptr.add((8+2*::core::mem::size_of::<*const u8>())) };
+      unsafe { match _lower2 {
+        Some(e) => {
+          *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+          *_param_ptr.add(1).cast::<u8>() = (match e { true => 1, false => 0 }) as u8;
+        },
+        None => {
+          {
+            *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+          }
+        },
+      }; }
+      ParamsLower(_ptr,)
+    }
+    unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+      unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+      match l0 {
+        0 => {
+          let e = {
+            let l1 = *_ptr.add(8).cast::<i64>();
+
+            super::super::super::flow_bot::onebot11::types::SendMessageResponse{
               message_id: l1,
             }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l2 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
-
-                                            _rt::string_lift(bytes4)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((user_id, message, auto_escape))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Send a message to a group
-            #[allow(async_fn_in_trait)]
-            pub async fn send_group_message(
-                group_id: i64,
-                message: _rt::String,
-                auto_escape: Option<bool>,
-            ) -> Result<SendMessageResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, _rt::String, Option<bool>);
-                        type Results = Result<SendMessageResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (24 + 4 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (16 + 2 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]send-group-message"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = *_params.0.add(8).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = *_params.0.add(8).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(8) };
-                            unsafe {
-                                let vec0 = (_lower1.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                *_param_ptr
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>() = len0;
-                                *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((8 + 2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(1).cast::<u8>() = (match e {
-                                            true => 1,
-                                            false => 0,
-                                        })
-                                            as u8;
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-
-                                            super::super::super::flow_bot::onebot11::types::SendMessageResponse{
-          message_id: l1,
+          };
+          Ok(e)
         }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l2 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+        1 => {
+          let e = {
+            let l2 = *_ptr.add(8).cast::<*mut u8>();
+            let l3 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            let len4 = l3;
+            let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
 
-                                            _rt::string_lift(bytes4)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, message, auto_escape))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Delete a message by ID
-            #[allow(async_fn_in_trait)]
-            pub async fn delete_message(message_id: i64) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64);
-                    unsafe impl Send for ParamsLower {}
+            _rt::string_lift(bytes4)
+          };
+          Err(e)
+        }
+        _ => _rt::invalid_enum_discriminant(),
+      } }
+    }
+  }
+  _MySubtask { _unused: core::marker::PhantomData }.call((group_id, message, auto_escape,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Delete a message by ID
+#[allow(async_fn_in_trait)]
+pub async fn delete_message(message_id: i64,) -> Result<(),_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64,);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]delete-message"]
-                                fn call(_: i64, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]delete-message"]
+          fn call(_: i64, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower(_rt::as_i64(_lower0),) }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = ();
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len3 = l2;
+              let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower(_rt::as_i64(_lower0)) }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+              _rt::string_lift(bytes3)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call((message_id,)).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get a message by ID
+#[allow(async_fn_in_trait)]
+pub async fn get_message(message_id: i64,) -> Result<GetMessageResponse,_rt::String>{
+  unsafe {
 
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((message_id,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get a message by ID
-            #[allow(async_fn_in_trait)]
-            pub async fn get_message(message_id: i64) -> Result<GetMessageResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64);
-                    unsafe impl Send for ParamsLower {}
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, );
+      type Results = Result<GetMessageResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((64+18*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64,);
-                        type Results = Result<GetMessageResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (64 + 18 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-message"]
+          fn call(_: i64, _: *mut u8, ) -> i32;
+        }
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower(_rt::as_i64(_lower0),) }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-message"]
-                                fn call(_: i64, _: *mut u8) -> i32;
-                            }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(8).cast::<i32>();
+              let l2 = *_ptr.add(12).cast::<i32>();
+              let l3 = *_ptr.add(16).cast::<i32>();
+              let l4 = *_ptr.add(16+1*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l5 = *_ptr.add(16+2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len6 = l5;
+              let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+              let l7 = i32::from(*_ptr.add(24+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              use super::super::super::flow_bot::onebot11::types::GetMessageType as V46;
+              let v46 = match l7 {
+                0 => {
+                  let e46 = {
+                    let l8 = i32::from(*_ptr.add(32+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l10 = i32::from(*_ptr.add(48+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l14 = i32::from(*_ptr.add(48+5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l16 = i32::from(*_ptr.add(52+5*::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower(_rt::as_i64(_lower0)) }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i32>();
-                                            let l2 = *_ptr.add(12).cast::<i32>();
-                                            let l3 = *_ptr.add(16).cast::<i32>();
-                                            let l4 = *_ptr
-                                                .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
-                                            let l7 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        24 + 2 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            use super::super::super::flow_bot::onebot11::types::GetMessageType as V46;
-                                            let v46 = match l7 {
-                                                0 => {
-                                                    let e46 = {
-                                                        let l8 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    32 + 2
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l10 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    48 + 2
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l14 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    48 + 5
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l16 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    52 + 5
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-
-                                                        super::super::super::flow_bot::onebot11::types::PrivateSenderInfo{
+                    super::super::super::flow_bot::onebot11::types::PrivateSenderInfo{
                       user_id: match l8 {
                         0 => None,
                         1 => {
@@ -1308,116 +2580,23 @@ pub mod flow_bot {
                         _ => _rt::invalid_enum_discriminant(),
                       },
                     }
-                                                    };
-                                                    V46::Private(e46)
-                                                }
-                                                n => {
-                                                    debug_assert_eq!(
-                                                        n, 1,
-                                                        "invalid enum discriminant"
-                                                    );
-                                                    let e46 = {
-                                                        let l18 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    32 + 2
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l20 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    48 + 2
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l24 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    48 + 5
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l28 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    48 + 8
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l30 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    52 + 8
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l32 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    56 + 9
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l36 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    56 + 12
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l40 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    56 + 15
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
-                                                        let l42 = i32::from(
-                                                            *_ptr
-                                                                .add(
-                                                                    56 + 16
-                                                                        * ::core::mem::size_of::<
-                                                                            *const u8,
-                                                                        >(
-                                                                        ),
-                                                                )
-                                                                .cast::<u8>(),
-                                                        );
+                  };
+                  V46::Private(e46)
+                }
+                n => {
+                  debug_assert_eq!(n, 1, "invalid enum discriminant");
+                  let e46 = {
+                    let l18 = i32::from(*_ptr.add(32+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l20 = i32::from(*_ptr.add(48+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l24 = i32::from(*_ptr.add(48+5*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l28 = i32::from(*_ptr.add(48+8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l30 = i32::from(*_ptr.add(52+8*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l32 = i32::from(*_ptr.add(56+9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l36 = i32::from(*_ptr.add(56+12*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l40 = i32::from(*_ptr.add(56+15*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                    let l42 = i32::from(*_ptr.add(56+16*::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                                                        super::super::super::flow_bot::onebot11::types::GroupSenderInfo{
+                    super::super::super::flow_bot::onebot11::types::GroupSenderInfo{
                       user_id: match l18 {
                         0 => None,
                         1 => {
@@ -1542,3235 +2721,2188 @@ pub mod flow_bot {
                         _ => _rt::invalid_enum_discriminant(),
                       },
                     }
-                                                    };
-                                                    V46::Group(e46)
-                                                }
-                                            };
+                  };
+                  V46::Group(e46)
+                }
+              };
 
-                                            super::super::super::flow_bot::onebot11::types::GetMessageResponse{
+              super::super::super::flow_bot::onebot11::types::GetMessageResponse{
                 time: l1,
                 message_id: l2,
                 real_id: l3,
                 message: _rt::string_lift(bytes6),
                 msg_type: v46,
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l47 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l48 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len49 = l48;
-                                            let bytes49 =
-                                                _rt::Vec::from_raw_parts(l47.cast(), len49, len49);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l47 = *_ptr.add(8).cast::<*mut u8>();
+              let l48 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len49 = l48;
+              let bytes49 = _rt::Vec::from_raw_parts(l47.cast(), len49, len49);
 
-                                            _rt::string_lift(bytes49)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((message_id,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get a forwarded message by ID
-            #[allow(async_fn_in_trait)]
-            pub async fn get_forward_message(
-                message_id: i64,
-            ) -> Result<GetForwardResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes49)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call((message_id,)).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get a forwarded message by ID
+#[allow(async_fn_in_trait)]
+pub async fn get_forward_message(message_id: i64,) -> Result<GetForwardResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64,);
-                        type Results = Result<GetForwardResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, );
+      type Results = Result<GetForwardResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-forward-message"]
-                                fn call(_: i64, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-forward-message"]
+          fn call(_: i64, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower(_rt::as_i64(_lower0),) }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len3 = l2;
+              let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower(_rt::as_i64(_lower0)) }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            super::super::super::flow_bot::onebot11::types::GetForwardResponse{
+              super::super::super::flow_bot::onebot11::types::GetForwardResponse{
                 message: _rt::string_lift(bytes3),
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l4 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
-
-                                            _rt::string_lift(bytes6)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((message_id,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Send a like to a user's profile
-            #[allow(async_fn_in_trait)]
-            pub async fn send_like(user_id: i64, times: Option<i32>) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<i32>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]send-like"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (1i32, _rt::as_i32(e)),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((user_id, times))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Kick a user from a group
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_kick(
-                group_id: i64,
-                user_id: i64,
-                reject_add_request: Option<bool>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<bool>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-kick"]
-                                fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i64,
-                                _: i64,
-                                _: i32,
-                                _: i32,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe {
-                                call(_params.0, _params.1, _params.2, _params.3, _results) as u32
-                            }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower2 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(
-                                    _rt::as_i64(_lower0),
-                                    _rt::as_i64(_lower1),
-                                    result0_0,
-                                    result0_1,
-                                )
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, reject_add_request))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Ban a user in a group (0 duration = unban)
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_ban(
-                group_id: i64,
-                user_id: i64,
-                duration: Option<i64>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i64, i32, i64);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<i64>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-ban"]
-                                fn call(_: i64, _: i64, _: i32, _: i64, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i64,
-                                _: i64,
-                                _: i32,
-                                _: i64,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe {
-                                call(_params.0, _params.1, _params.2, _params.3, _results) as u32
-                            }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower2 {
-                                    Some(e) => (1i32, _rt::as_i64(e)),
-                                    None => (0i32, 0i64),
-                                };
-                                ParamsLower(
-                                    _rt::as_i64(_lower0),
-                                    _rt::as_i64(_lower1),
-                                    result0_0,
-                                    result0_1,
-                                )
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, duration))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Ban an anonymous user in a group
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_anonymous_ban(
-                group_id: i64,
-                anonymous: Option<GroupAnonymousInfo>,
-                flag: Option<_rt::String>,
-                duration: Option<i64>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (
-                            i64,
-                            Option<GroupAnonymousInfo>,
-                            Option<_rt::String>,
-                            Option<i64>,
-                        );
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (56 + 8 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (48 + 6 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-anonymous-ban"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(8).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params.0.add(24).cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(24 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                        let l3 = *_params
-                                            .0
-                                            .add(24 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(24 + 3 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                                let l5 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(24 + 4 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l5 {
-                                    0 => (),
-                                    _ => {
-                                        let l6 = *_params
-                                            .0
-                                            .add(24 + 5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l7 = *_params
-                                            .0
-                                            .add(24 + 6 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l6, l7, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(8).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params.0.add(24).cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(24 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                        let l3 = *_params
-                                            .0
-                                            .add(24 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(24 + 3 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                                let l5 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(24 + 4 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l5 {
-                                    0 => (),
-                                    _ => {
-                                        let l6 = *_params
-                                            .0
-                                            .add(24 + 5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l7 = *_params
-                                            .0
-                                            .add(24 + 6 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l6, l7, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2, _lower3): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(8) };
-                            unsafe {
-                                match _lower1 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let super::super::super::flow_bot::onebot11::types::GroupAnonymousInfo{ id:id0, name:name0, flag:flag0, } = e;
-                                        *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(id0);
-                                        let vec1 = (name0.into_bytes()).into_boxed_slice();
-                                        let ptr1 = vec1.as_ptr().cast::<u8>();
-                                        let len1 = vec1.len();
-                                        ::core::mem::forget(vec1);
-                                        *_param_ptr
-                                            .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len1;
-                                        *_param_ptr.add(16).cast::<*mut u8>() = ptr1.cast_mut();
-                                        let vec2 = (flag0.into_bytes()).into_boxed_slice();
-                                        let ptr2 = vec2.as_ptr().cast::<u8>();
-                                        let len2 = vec2.len();
-                                        ::core::mem::forget(vec2);
-                                        *_param_ptr
-                                            .add(16 + 3 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len2;
-                                        *_param_ptr
-                                            .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr2.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((24 + 4 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
-                                        *_param_ptr
-                                            .add(2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len0;
-                                        *_param_ptr
-                                            .add(::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr0.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((32 + 6 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower3 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(e);
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, anonymous, flag, duration))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Enable or disable group-wide ban
-            #[allow(async_fn_in_trait)]
-            pub async fn set_whole_group_ban(
-                group_id: i64,
-                enable: Option<bool>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<bool>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-whole-group-ban"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, enable))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Set or remove a user as group admin
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_admin(
-                group_id: i64,
-                user_id: i64,
-                enable: Option<bool>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<bool>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-admin"]
-                                fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i64,
-                                _: i64,
-                                _: i32,
-                                _: i32,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe {
-                                call(_params.0, _params.1, _params.2, _params.3, _results) as u32
-                            }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower2 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(
-                                    _rt::as_i64(_lower0),
-                                    _rt::as_i64(_lower1),
-                                    result0_0,
-                                    result0_1,
-                                )
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, enable))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Enable or disable anonymous chat in a group
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_anonymous(
-                group_id: i64,
-                enable: Option<bool>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<bool>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-anonymous"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, enable))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Set a user's group card (nickname in group)
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_card(
-                group_id: i64,
-                user_id: i64,
-                card: Option<_rt::String>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<_rt::String>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (16 + 6 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (16 + 3 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-card"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(16).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params
-                                            .0
-                                            .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(16).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params
-                                            .0
-                                            .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(8) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower1);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(16) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
-                                        *_param_ptr
-                                            .add(2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len0;
-                                        *_param_ptr
-                                            .add(::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr0.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, card))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Set the group name
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_name(
-                group_id: i64,
-                group_name: _rt::String,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, *mut u8, usize);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, _rt::String);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-name"]
-                                fn call(_: i64, _: *mut u8, _: usize, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i64,
-                                _: *mut u8,
-                                _: usize,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.1, _params.2, 1);
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.1, _params.2, 1);
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let vec0 = (_lower1.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                ParamsLower(_rt::as_i64(_lower0), ptr0.cast_mut(), len0)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, group_name))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Leave a group (optionally dismiss if owner)
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_leave(
-                group_id: i64,
-                is_dismiss: Option<bool>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<bool>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-leave"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, is_dismiss))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Set a user's special title in a group
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_special_title(
-                group_id: i64,
-                user_id: i64,
-                special_title: Option<_rt::String>,
-                duration: Option<i64>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<_rt::String>, Option<i64>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (48 + 4 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (40 + 2 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-special-title"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(16).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params
-                                            .0
-                                            .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = i32::from(*_params.0.add(16).cast::<u8>());
-                                match l0 {
-                                    0 => (),
-                                    _ => {
-                                        let l1 = *_params
-                                            .0
-                                            .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l2 = *_params
-                                            .0
-                                            .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l1, l2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2, _lower3): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(8) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower1);
-                            }
-                            let _param_ptr = unsafe { _ptr.add(16) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
-                                        *_param_ptr
-                                            .add(2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len0;
-                                        *_param_ptr
-                                            .add(::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr0.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((24 + 2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower3 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(e);
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, special_title, duration))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Process a friend add request
-            #[allow(async_fn_in_trait)]
-            pub async fn set_friend_add_request(
-                flag: _rt::String,
-                approve: Option<bool>,
-                remark: Option<_rt::String>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (_rt::String, Option<bool>, Option<_rt::String>);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (9 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (6 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-friend-add-request"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = *_params.0.add(0).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                                let l2 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(3 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l2 {
-                                    0 => (),
-                                    _ => {
-                                        let l3 = *_params
-                                            .0
-                                            .add(4 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = *_params.0.add(0).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                                let l2 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(3 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l2 {
-                                    0 => (),
-                                    _ => {
-                                        let l3 = *_params
-                                            .0
-                                            .add(4 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                let vec0 = (_lower0.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                *_param_ptr
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>() = len0;
-                                *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower1 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(1).cast::<u8>() = (match e {
-                                            true => 1,
-                                            false => 0,
-                                        })
-                                            as u8;
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((3 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
-                                        *_param_ptr
-                                            .add(2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len0;
-                                        *_param_ptr
-                                            .add(::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr0.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((flag, approve, remark))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Process a group add request
-            #[allow(async_fn_in_trait)]
-            pub async fn set_group_add_request(
-                flag: _rt::String,
-                sub_type: GroupRequestSubType,
-                approve: Option<bool>,
-                reason: Option<_rt::String>,
-            ) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (
-                            _rt::String,
-                            GroupRequestSubType,
-                            Option<bool>,
-                            Option<_rt::String>,
-                        );
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (9 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            (6 * ::core::mem::size_of::<*const u8>())
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-group-add-request"]
-                                fn call(_: *mut u8, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                let l0 = *_params.0.add(0).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                                let l2 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(3 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l2 {
-                                    0 => (),
-                                    _ => {
-                                        let l3 = *_params
-                                            .0
-                                            .add(4 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                let l0 = *_params.0.add(0).cast::<*mut u8>();
-                                let l1 = *_params
-                                    .0
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>();
-                                _rt::cabi_dealloc(l0, l1, 1);
-                                let l2 = i32::from(
-                                    *_params
-                                        .0
-                                        .add(3 * ::core::mem::size_of::<*const u8>())
-                                        .cast::<u8>(),
-                                );
-                                match l2 {
-                                    0 => (),
-                                    _ => {
-                                        let l3 = *_params
-                                            .0
-                                            .add(4 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>();
-                                        let l4 = *_params
-                                            .0
-                                            .add(5 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>();
-                                        _rt::cabi_dealloc(l3, l4, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2, _lower3): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            let _param_ptr = unsafe { _ptr.add(0) };
-                            unsafe {
-                                let vec0 = (_lower0.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                *_param_ptr
-                                    .add(::core::mem::size_of::<*const u8>())
-                                    .cast::<usize>() = len0;
-                                *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                *_param_ptr.add(0).cast::<u8>() = (_lower1.clone() as i32) as u8;
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((1 + 2 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower2 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        *_param_ptr.add(1).cast::<u8>() = (match e {
-                                            true => 1,
-                                            false => 0,
-                                        })
-                                            as u8;
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            let _param_ptr =
-                                unsafe { _ptr.add((3 * ::core::mem::size_of::<*const u8>())) };
-                            unsafe {
-                                match _lower3 {
-                                    Some(e) => {
-                                        *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
-                                        *_param_ptr
-                                            .add(2 * ::core::mem::size_of::<*const u8>())
-                                            .cast::<usize>() = len0;
-                                        *_param_ptr
-                                            .add(::core::mem::size_of::<*const u8>())
-                                            .cast::<*mut u8>() = ptr0.cast_mut();
-                                    }
-                                    None => {
-                                        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
-                                    }
-                                };
-                            }
-                            ParamsLower(_ptr)
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((flag, sub_type, approve, reason))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get bot's login information
-            #[allow(async_fn_in_trait)]
-            pub async fn get_login_info() -> Result<LoginInfo, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<LoginInfo, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (16 + 2 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-login-info"]
-                                fn call(_: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-                                            let l2 = *_ptr.add(16).cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
-
-                                            super::super::super::flow_bot::onebot11::types::LoginInfo{
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l4 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l5 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len6 = l5;
+              let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+
+              _rt::string_lift(bytes6)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call((message_id,)).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Send a like to a user's profile
+#[allow(async_fn_in_trait)]
+pub async fn send_like(user_id: i64,times: Option<i32>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<i32>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]send-like"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, _rt::as_i32(e)),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((user_id, times,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Kick a user from a group
+#[allow(async_fn_in_trait)]
+pub async fn set_group_kick(group_id: i64,user_id: i64,reject_add_request: Option<bool>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<bool>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-kick"]
+          fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_params.3,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.2 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.2 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower2 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), _rt::as_i64(_lower1), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, reject_add_request,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Ban a user in a group (0 duration = unban)
+#[allow(async_fn_in_trait)]
+pub async fn set_group_ban(group_id: i64,user_id: i64,duration: Option<i64>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i64, i32, i64, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<i64>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-ban"]
+          fn call(_: i64, _: i64, _: i32, _: i64, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i64, _: i32, _: i64, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_params.3,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.2 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.2 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower2 {
+      Some(e) => (1i32, _rt::as_i64(e)),
+      None => {
+        (0i32, 0i64)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), _rt::as_i64(_lower1), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, duration,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Ban an anonymous user in a group
+#[allow(async_fn_in_trait)]
+pub async fn set_group_anonymous_ban(group_id: i64,anonymous: Option<GroupAnonymousInfo>,flag: Option<_rt::String>,duration: Option<i64>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<GroupAnonymousInfo>, Option<_rt::String>, Option<i64>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((56+8*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { (48+6*::core::mem::size_of::<*const u8>()) }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-anonymous-ban"]
+          fn call(_: *mut u8, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = i32::from(*_params.0.add(8).cast::<u8>());
+        match l0 {
+          0 => (),
+          _ => {
+            let l1 = *_params.0.add(24).cast::<*mut u8>();
+            let l2 = *_params.0.add(24+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l1, l2, 1);
+            let l3 = *_params.0.add(24+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l4 = *_params.0.add(24+3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l3, l4, 1);
+          },
+        }
+        let l5 = i32::from(*_params.0.add(24+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+        match l5 {
+          0 => (),
+          _ => {
+            let l6 = *_params.0.add(24+5*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l7 = *_params.0.add(24+6*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l6, l7, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { let l0 = i32::from(*_params.0.add(8).cast::<u8>());
+      match l0 {
+        0 => (),
+        _ => {
+          let l1 = *_params.0.add(24).cast::<*mut u8>();
+          let l2 = *_params.0.add(24+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l1, l2, 1);
+          let l3 = *_params.0.add(24+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l4 = *_params.0.add(24+3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l3, l4, 1);
+        },
+      }
+      let l5 = i32::from(*_params.0.add(24+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+      match l5 {
+        0 => (),
+        _ => {
+          let l6 = *_params.0.add(24+5*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l7 = *_params.0.add(24+6*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l6, l7, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2, _lower3,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    let _param_ptr = unsafe { _ptr.add(0) };
+    unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
+  }
+  let _param_ptr = unsafe { _ptr.add(8) };
+  unsafe { match _lower1 {
+    Some(e) => {
+      *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+      let super::super::super::flow_bot::onebot11::types::GroupAnonymousInfo{ id:id0, name:name0, flag:flag0, } = e;
+      *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(id0);
+      let vec1 = (name0.into_bytes()).into_boxed_slice();
+      let ptr1 = vec1.as_ptr().cast::<u8>();
+      let len1 = vec1.len();
+      ::core::mem::forget(vec1);
+      *_param_ptr.add(16+1*::core::mem::size_of::<*const u8>()).cast::<usize>() = len1;
+      *_param_ptr.add(16).cast::<*mut u8>() = ptr1.cast_mut();
+      let vec2 = (flag0.into_bytes()).into_boxed_slice();
+      let ptr2 = vec2.as_ptr().cast::<u8>();
+      let len2 = vec2.len();
+      ::core::mem::forget(vec2);
+      *_param_ptr.add(16+3*::core::mem::size_of::<*const u8>()).cast::<usize>() = len2;
+      *_param_ptr.add(16+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr2.cast_mut();
+    },
+    None => {
+      {
+        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+      }
+    },
+  }; }
+  let _param_ptr = unsafe { _ptr.add((24+4*::core::mem::size_of::<*const u8>())) };
+  unsafe { match _lower2 {
+    Some(e) => {
+      *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+      let vec0 = (e.into_bytes()).into_boxed_slice();
+      let ptr0 = vec0.as_ptr().cast::<u8>();
+      let len0 = vec0.len();
+      ::core::mem::forget(vec0);
+      *_param_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+      *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr0.cast_mut();
+    },
+    None => {
+      {
+        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+      }
+    },
+  }; }
+  let _param_ptr = unsafe { _ptr.add((32+6*::core::mem::size_of::<*const u8>())) };
+  unsafe { match _lower3 {
+    Some(e) => {
+      *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+      *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(e);
+    },
+    None => {
+      {
+        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+      }
+    },
+  }; }
+  ParamsLower(_ptr,)
+}
+unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+  unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+  match l0 {
+    0 => {
+      let e = ();
+      Ok(e)
+    }
+    1 => {
+      let e = {
+        let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+        let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let len3 = l2;
+        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+        _rt::string_lift(bytes3)
+      };
+      Err(e)
+    }
+    _ => _rt::invalid_enum_discriminant(),
+  } }
+}
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, anonymous, flag, duration,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Enable or disable group-wide ban
+#[allow(async_fn_in_trait)]
+pub async fn set_whole_group_ban(group_id: i64,enable: Option<bool>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<bool>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-whole-group-ban"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, enable,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Set or remove a user as group admin
+#[allow(async_fn_in_trait)]
+pub async fn set_group_admin(group_id: i64,user_id: i64,enable: Option<bool>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<bool>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-admin"]
+          fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_params.3,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.2 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.2 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower2 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), _rt::as_i64(_lower1), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, enable,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Enable or disable anonymous chat in a group
+#[allow(async_fn_in_trait)]
+pub async fn set_group_anonymous(group_id: i64,enable: Option<bool>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<bool>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-anonymous"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, enable,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Set a user's group card (nickname in group)
+#[allow(async_fn_in_trait)]
+pub async fn set_group_card(group_id: i64,user_id: i64,card: Option<_rt::String>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<_rt::String>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((16+6*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { (16+3*::core::mem::size_of::<*const u8>()) }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-card"]
+          fn call(_: *mut u8, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = i32::from(*_params.0.add(16).cast::<u8>());
+        match l0 {
+          0 => (),
+          _ => {
+            let l1 = *_params.0.add(16+1*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l2 = *_params.0.add(16+2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l1, l2, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { let l0 = i32::from(*_params.0.add(16).cast::<u8>());
+      match l0 {
+        0 => (),
+        _ => {
+          let l1 = *_params.0.add(16+1*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_params.0.add(16+2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l1, l2, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    let _param_ptr = unsafe { _ptr.add(0) };
+    unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
+  }
+  let _param_ptr = unsafe { _ptr.add(8) };
+  unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower1);
+}
+let _param_ptr = unsafe { _ptr.add(16) };
+unsafe { match _lower2 {
+  Some(e) => {
+    *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+    let vec0 = (e.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    *_param_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+    *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr0.cast_mut();
+  },
+  None => {
+    {
+      *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+    }
+  },
+}; }
+ParamsLower(_ptr,)
+}
+unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+  unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+  match l0 {
+    0 => {
+      let e = ();
+      Ok(e)
+    }
+    1 => {
+      let e = {
+        let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+        let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let len3 = l2;
+        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+        _rt::string_lift(bytes3)
+      };
+      Err(e)
+    }
+    _ => _rt::invalid_enum_discriminant(),
+  } }
+}
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, card,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Set the group name
+#[allow(async_fn_in_trait)]
+pub async fn set_group_name(group_id: i64,group_name: _rt::String,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, *mut u8, usize, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, _rt::String, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-name"]
+          fn call(_: i64, _: *mut u8, _: usize, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: *mut u8, _: usize, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { _rt::cabi_dealloc(_params.1, _params.2, 1);
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { _rt::cabi_dealloc(_params.1, _params.2, 1);
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let vec0 = (_lower1.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    ParamsLower(_rt::as_i64(_lower0), ptr0.cast_mut(), len0,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, group_name,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Leave a group (optionally dismiss if owner)
+#[allow(async_fn_in_trait)]
+pub async fn set_group_leave(group_id: i64,is_dismiss: Option<bool>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<bool>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-leave"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, is_dismiss,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Set a user's special title in a group
+#[allow(async_fn_in_trait)]
+pub async fn set_group_special_title(group_id: i64,user_id: i64,special_title: Option<_rt::String>,duration: Option<i64>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<_rt::String>, Option<i64>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((48+4*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { (40+2*::core::mem::size_of::<*const u8>()) }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-special-title"]
+          fn call(_: *mut u8, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = i32::from(*_params.0.add(16).cast::<u8>());
+        match l0 {
+          0 => (),
+          _ => {
+            let l1 = *_params.0.add(16+1*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l2 = *_params.0.add(16+2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l1, l2, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { let l0 = i32::from(*_params.0.add(16).cast::<u8>());
+      match l0 {
+        0 => (),
+        _ => {
+          let l1 = *_params.0.add(16+1*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_params.0.add(16+2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l1, l2, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2, _lower3,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    let _param_ptr = unsafe { _ptr.add(0) };
+    unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower0);
+  }
+  let _param_ptr = unsafe { _ptr.add(8) };
+  unsafe { *_param_ptr.add(0).cast::<i64>() = _rt::as_i64(_lower1);
+}
+let _param_ptr = unsafe { _ptr.add(16) };
+unsafe { match _lower2 {
+  Some(e) => {
+    *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+    let vec0 = (e.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    *_param_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+    *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr0.cast_mut();
+  },
+  None => {
+    {
+      *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+    }
+  },
+}; }
+let _param_ptr = unsafe { _ptr.add((24+2*::core::mem::size_of::<*const u8>())) };
+unsafe { match _lower3 {
+  Some(e) => {
+    *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+    *_param_ptr.add(8).cast::<i64>() = _rt::as_i64(e);
+  },
+  None => {
+    {
+      *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+    }
+  },
+}; }
+ParamsLower(_ptr,)
+}
+unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+  unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+  match l0 {
+    0 => {
+      let e = ();
+      Ok(e)
+    }
+    1 => {
+      let e = {
+        let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+        let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let len3 = l2;
+        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+        _rt::string_lift(bytes3)
+      };
+      Err(e)
+    }
+    _ => _rt::invalid_enum_discriminant(),
+  } }
+}
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, special_title, duration,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Process a friend add request
+#[allow(async_fn_in_trait)]
+pub async fn set_friend_add_request(flag: _rt::String,approve: Option<bool>,remark: Option<_rt::String>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (_rt::String, Option<bool>, Option<_rt::String>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((9*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { (6*::core::mem::size_of::<*const u8>()) }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-friend-add-request"]
+          fn call(_: *mut u8, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = *_params.0.add(0).cast::<*mut u8>();
+        let l1 = *_params.0.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+        _rt::cabi_dealloc(l0, l1, 1);
+        let l2 = i32::from(*_params.0.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+        match l2 {
+          0 => (),
+          _ => {
+            let l3 = *_params.0.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l4 = *_params.0.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l3, l4, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { let l0 = *_params.0.add(0).cast::<*mut u8>();
+      let l1 = *_params.0.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+      _rt::cabi_dealloc(l0, l1, 1);
+      let l2 = i32::from(*_params.0.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+      match l2 {
+        0 => (),
+        _ => {
+          let l3 = *_params.0.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l4 = *_params.0.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l3, l4, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    let _param_ptr = unsafe { _ptr.add(0) };
+    unsafe { let vec0 = (_lower0.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+    *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
+  }
+  let _param_ptr = unsafe { _ptr.add((2*::core::mem::size_of::<*const u8>())) };
+  unsafe { match _lower1 {
+    Some(e) => {
+      *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+      *_param_ptr.add(1).cast::<u8>() = (match e { true => 1, false => 0 }) as u8;
+    },
+    None => {
+      {
+        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+      }
+    },
+  }; }
+  let _param_ptr = unsafe { _ptr.add((3*::core::mem::size_of::<*const u8>())) };
+  unsafe { match _lower2 {
+    Some(e) => {
+      *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+      let vec0 = (e.into_bytes()).into_boxed_slice();
+      let ptr0 = vec0.as_ptr().cast::<u8>();
+      let len0 = vec0.len();
+      ::core::mem::forget(vec0);
+      *_param_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+      *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr0.cast_mut();
+    },
+    None => {
+      {
+        *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+      }
+    },
+  }; }
+  ParamsLower(_ptr,)
+}
+unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+  unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+  match l0 {
+    0 => {
+      let e = ();
+      Ok(e)
+    }
+    1 => {
+      let e = {
+        let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+        let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let len3 = l2;
+        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+        _rt::string_lift(bytes3)
+      };
+      Err(e)
+    }
+    _ => _rt::invalid_enum_discriminant(),
+  } }
+}
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((flag, approve, remark,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Process a group add request
+#[allow(async_fn_in_trait)]
+pub async fn set_group_add_request(flag: _rt::String,sub_type: GroupRequestSubType,approve: Option<bool>,reason: Option<_rt::String>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (_rt::String, GroupRequestSubType, Option<bool>, Option<_rt::String>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((9*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { (6*::core::mem::size_of::<*const u8>()) }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-group-add-request"]
+          fn call(_: *mut u8, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { let l0 = *_params.0.add(0).cast::<*mut u8>();
+        let l1 = *_params.0.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+        _rt::cabi_dealloc(l0, l1, 1);
+        let l2 = i32::from(*_params.0.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+        match l2 {
+          0 => (),
+          _ => {
+            let l3 = *_params.0.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+            let l4 = *_params.0.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+            _rt::cabi_dealloc(l3, l4, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { let l0 = *_params.0.add(0).cast::<*mut u8>();
+      let l1 = *_params.0.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+      _rt::cabi_dealloc(l0, l1, 1);
+      let l2 = i32::from(*_params.0.add(3*::core::mem::size_of::<*const u8>()).cast::<u8>());
+      match l2 {
+        0 => (),
+        _ => {
+          let l3 = *_params.0.add(4*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l4 = *_params.0.add(5*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          _rt::cabi_dealloc(l3, l4, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2, _lower3,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    let _param_ptr = unsafe { _ptr.add(0) };
+    unsafe { let vec0 = (_lower0.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+    *_param_ptr.add(0).cast::<*mut u8>() = ptr0.cast_mut();
+  }
+  let _param_ptr = unsafe { _ptr.add((2*::core::mem::size_of::<*const u8>())) };
+  unsafe { *_param_ptr.add(0).cast::<u8>() = (_lower1.clone() as i32) as u8;
+}
+let _param_ptr = unsafe { _ptr.add((1+2*::core::mem::size_of::<*const u8>())) };
+unsafe { match _lower2 {
+  Some(e) => {
+    *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+    *_param_ptr.add(1).cast::<u8>() = (match e { true => 1, false => 0 }) as u8;
+  },
+  None => {
+    {
+      *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+    }
+  },
+}; }
+let _param_ptr = unsafe { _ptr.add((3*::core::mem::size_of::<*const u8>())) };
+unsafe { match _lower3 {
+  Some(e) => {
+    *_param_ptr.add(0).cast::<u8>() = (1i32) as u8;
+    let vec0 = (e.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    *_param_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>() = len0;
+    *_param_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>() = ptr0.cast_mut();
+  },
+  None => {
+    {
+      *_param_ptr.add(0).cast::<u8>() = (0i32) as u8;
+    }
+  },
+}; }
+ParamsLower(_ptr,)
+}
+unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+  unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+  match l0 {
+    0 => {
+      let e = ();
+      Ok(e)
+    }
+    1 => {
+      let e = {
+        let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+        let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+        let len3 = l2;
+        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+        _rt::string_lift(bytes3)
+      };
+      Err(e)
+    }
+    _ => _rt::invalid_enum_discriminant(),
+  } }
+}
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((flag, sub_type, approve, reason,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get bot's login information
+#[allow(async_fn_in_trait)]
+pub async fn get_login_info() -> Result<LoginInfo,_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<LoginInfo,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((16+2*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-login-info"]
+          fn call(_: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(8).cast::<i64>();
+              let l2 = *_ptr.add(16).cast::<*mut u8>();
+              let l3 = *_ptr.add(16+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len4 = l3;
+              let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+
+              super::super::super::flow_bot::onebot11::types::LoginInfo{
                 user_id: l1,
                 nickname: _rt::string_lift(bytes4),
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l5 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l6 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len7 = l6;
-                                            let bytes7 =
-                                                _rt::Vec::from_raw_parts(l5.cast(), len7, len7);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l5 = *_ptr.add(8).cast::<*mut u8>();
+              let l6 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len7 = l6;
+              let bytes7 = _rt::Vec::from_raw_parts(l5.cast(), len7, len7);
 
-                                            _rt::string_lift(bytes7)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get stranger information by user ID
-            #[allow(async_fn_in_trait)]
-            pub async fn get_stranger_info(
-                user_id: i64,
-                no_cache: Option<bool>,
-            ) -> Result<StrangerInfo, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes7)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get stranger information by user ID
+#[allow(async_fn_in_trait)]
+pub async fn get_stranger_info(user_id: i64,no_cache: Option<bool>,) -> Result<StrangerInfo,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<bool>);
-                        type Results = Result<StrangerInfo, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (24 + 2 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<bool>, );
+      type Results = Result<StrangerInfo,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((24+2*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-stranger-info"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-stranger-info"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(8).cast::<i64>();
+          let l2 = *_ptr.add(16).cast::<*mut u8>();
+          let l3 = *_ptr.add(16+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len4 = l3;
+          let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+          let l5 = i32::from(*_ptr.add(16+2*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l6 = *_ptr.add(20+2*::core::mem::size_of::<*const u8>()).cast::<i32>();
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-                                            let l2 = *_ptr.add(16).cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
-                                            let l5 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        16 + 2 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l6 = *_ptr
-                                                .add(20 + 2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-
-                                            super::super::super::flow_bot::onebot11::types::StrangerInfo{
+          super::super::super::flow_bot::onebot11::types::StrangerInfo{
             user_id: l1,
             nickname: _rt::string_lift(bytes4),
             sex: super::super::super::flow_bot::onebot11::types::SenderSex::_lift(l5 as u8),
             age: l6,
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l7 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l8 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len9 = l8;
-                                            let bytes9 =
-                                                _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l7 = *_ptr.add(8).cast::<*mut u8>();
+          let l8 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len9 = l8;
+          let bytes9 = _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
 
-                                            _rt::string_lift(bytes9)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((user_id, no_cache))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get the bot's friend list
-            #[allow(async_fn_in_trait)]
-            pub async fn get_friend_list() -> Result<_rt::Vec<FriendInfo>, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes9)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((user_id, no_cache,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get the bot's friend list
+#[allow(async_fn_in_trait)]
+pub async fn get_friend_list() -> Result<_rt::Vec::<FriendInfo>,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<_rt::Vec<FriendInfo>, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<_rt::Vec::<FriendInfo>,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-friend-list"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-friend-list"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base10 = l1;
+              let len10 = l2;
+              let mut result10 = _rt::Vec::with_capacity(len10);
+              for i in 0..len10 {
+                let base = base10.add(i * (8+4*::core::mem::size_of::<*const u8>()));
+                let e10 = {
+                  let l3 = *base.add(0).cast::<i64>();
+                  let l4 = *base.add(8).cast::<*mut u8>();
+                  let l5 = *base.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len6 = l5;
+                  let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+                  let l7 = *base.add(8+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l8 = *base.add(8+3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len9 = l8;
+                  let bytes9 = _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let base10 = l1;
-                                            let len10 = l2;
-                                            let mut result10 = _rt::Vec::with_capacity(len10);
-                                            for i in 0..len10 {
-                                                let base = base10.add(
-                                                    i * (8 + 4
-                                                        * ::core::mem::size_of::<*const u8>()),
-                                                );
-                                                let e10 = {
-                                                    let l3 = *base.add(0).cast::<i64>();
-                                                    let l4 = *base.add(8).cast::<*mut u8>();
-                                                    let l5 = *base
-                                                        .add(
-                                                            8 + 1
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len6 = l5;
-                                                    let bytes6 = _rt::Vec::from_raw_parts(
-                                                        l4.cast(),
-                                                        len6,
-                                                        len6,
-                                                    );
-                                                    let l7 = *base
-                                                        .add(
-                                                            8 + 2
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<*mut u8>();
-                                                    let l8 = *base
-                                                        .add(
-                                                            8 + 3
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len9 = l8;
-                                                    let bytes9 = _rt::Vec::from_raw_parts(
-                                                        l7.cast(),
-                                                        len9,
-                                                        len9,
-                                                    );
-
-                                                    super::super::super::flow_bot::onebot11::types::FriendInfo{
+                  super::super::super::flow_bot::onebot11::types::FriendInfo{
                     user_id: l3,
                     nickname: _rt::string_lift(bytes6),
                     remark: _rt::string_lift(bytes9),
                   }
-                                                };
-                                                result10.push(e10);
-                                            }
-                                            _rt::cabi_dealloc(
-                                                base10,
-                                                len10
-                                                    * (8 + 4 * ::core::mem::size_of::<*const u8>()),
-                                                8,
-                                            );
+                };
+                result10.push(e10);
+              }
+              _rt::cabi_dealloc(base10, len10 * (8+4*::core::mem::size_of::<*const u8>()), 8);
 
-                                            result10
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l11 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l12 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len13 = l12;
-                                            let bytes13 =
-                                                _rt::Vec::from_raw_parts(l11.cast(), len13, len13);
+              result10
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l11 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l12 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len13 = l12;
+              let bytes13 = _rt::Vec::from_raw_parts(l11.cast(), len13, len13);
 
-                                            _rt::string_lift(bytes13)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get group information
-            #[allow(async_fn_in_trait)]
-            pub async fn get_group_info(
-                group_id: i64,
-                no_cache: Option<bool>,
-            ) -> Result<GroupInfoResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes13)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get group information
+#[allow(async_fn_in_trait)]
+pub async fn get_group_info(group_id: i64,no_cache: Option<bool>,) -> Result<GroupInfoResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, Option<bool>);
-                        type Results = Result<GroupInfoResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (24 + 2 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, Option<bool>, );
+      type Results = Result<GroupInfoResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((24+2*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-group-info"]
-                                fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-group-info"]
+          fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.1 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.1 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower1 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(8).cast::<i64>();
+          let l2 = *_ptr.add(16).cast::<*mut u8>();
+          let l3 = *_ptr.add(16+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len4 = l3;
+          let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+          let l5 = *_ptr.add(16+2*::core::mem::size_of::<*const u8>()).cast::<i32>();
+          let l6 = *_ptr.add(20+2*::core::mem::size_of::<*const u8>()).cast::<i32>();
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.1 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower1 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(_rt::as_i64(_lower0), result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-                                            let l2 = *_ptr.add(16).cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(16 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
-                                            let l5 = *_ptr
-                                                .add(16 + 2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-                                            let l6 = *_ptr
-                                                .add(20 + 2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-
-                                            super::super::super::flow_bot::onebot11::types::GroupInfoResponse{
+          super::super::super::flow_bot::onebot11::types::GroupInfoResponse{
             group_id: l1,
             group_name: _rt::string_lift(bytes4),
             member_count: l5,
             max_member_count: l6,
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l7 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l8 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len9 = l8;
-                                            let bytes9 =
-                                                _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l7 = *_ptr.add(8).cast::<*mut u8>();
+          let l8 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len9 = l8;
+          let bytes9 = _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
 
-                                            _rt::string_lift(bytes9)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, no_cache))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get the bot's group list
-            #[allow(async_fn_in_trait)]
-            pub async fn get_group_list() -> Result<_rt::Vec<GroupInfoResponse>, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes9)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, no_cache,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get the bot's group list
+#[allow(async_fn_in_trait)]
+pub async fn get_group_list() -> Result<_rt::Vec::<GroupInfoResponse>,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<_rt::Vec<GroupInfoResponse>, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<_rt::Vec::<GroupInfoResponse>,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-group-list"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-group-list"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base9 = l1;
+              let len9 = l2;
+              let mut result9 = _rt::Vec::with_capacity(len9);
+              for i in 0..len9 {
+                let base = base9.add(i * (16+2*::core::mem::size_of::<*const u8>()));
+                let e9 = {
+                  let l3 = *base.add(0).cast::<i64>();
+                  let l4 = *base.add(8).cast::<*mut u8>();
+                  let l5 = *base.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len6 = l5;
+                  let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+                  let l7 = *base.add(8+2*::core::mem::size_of::<*const u8>()).cast::<i32>();
+                  let l8 = *base.add(12+2*::core::mem::size_of::<*const u8>()).cast::<i32>();
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let base9 = l1;
-                                            let len9 = l2;
-                                            let mut result9 = _rt::Vec::with_capacity(len9);
-                                            for i in 0..len9 {
-                                                let base = base9.add(
-                                                    i * (16
-                                                        + 2 * ::core::mem::size_of::<*const u8>()),
-                                                );
-                                                let e9 = {
-                                                    let l3 = *base.add(0).cast::<i64>();
-                                                    let l4 = *base.add(8).cast::<*mut u8>();
-                                                    let l5 = *base
-                                                        .add(
-                                                            8 + 1
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len6 = l5;
-                                                    let bytes6 = _rt::Vec::from_raw_parts(
-                                                        l4.cast(),
-                                                        len6,
-                                                        len6,
-                                                    );
-                                                    let l7 = *base
-                                                        .add(
-                                                            8 + 2
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<i32>();
-                                                    let l8 = *base
-                                                        .add(
-                                                            12 + 2 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<i32>();
-
-                                                    super::super::super::flow_bot::onebot11::types::GroupInfoResponse{
+                  super::super::super::flow_bot::onebot11::types::GroupInfoResponse{
                     group_id: l3,
                     group_name: _rt::string_lift(bytes6),
                     member_count: l7,
                     max_member_count: l8,
                   }
-                                                };
-                                                result9.push(e9);
-                                            }
-                                            _rt::cabi_dealloc(
-                                                base9,
-                                                len9 * (16
-                                                    + 2 * ::core::mem::size_of::<*const u8>()),
-                                                8,
-                                            );
+                };
+                result9.push(e9);
+              }
+              _rt::cabi_dealloc(base9, len9 * (16+2*::core::mem::size_of::<*const u8>()), 8);
 
-                                            result9
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l10 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l11 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len12 = l11;
-                                            let bytes12 =
-                                                _rt::Vec::from_raw_parts(l10.cast(), len12, len12);
+              result9
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l10 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l11 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len12 = l11;
+              let bytes12 = _rt::Vec::from_raw_parts(l10.cast(), len12, len12);
 
-                                            _rt::string_lift(bytes12)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get group member information
-            #[allow(async_fn_in_trait)]
-            pub async fn get_group_member_info(
-                group_id: i64,
-                user_id: i64,
-                no_cache: Option<bool>,
-            ) -> Result<GroupMemberInfo, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i64, i32, i32);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes12)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get group member information
+#[allow(async_fn_in_trait)]
+pub async fn get_group_member_info(group_id: i64,user_id: i64,no_cache: Option<bool>,) -> Result<GroupMemberInfo,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, i64, Option<bool>);
-                        type Results = Result<GroupMemberInfo, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (56 + 12 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i64, i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, i64, Option<bool>, );
+      type Results = Result<GroupMemberInfo,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((56+12*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-group-member-info"]
-                                fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-group-member-info"]
+          fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i64,
-                                _: i64,
-                                _: i32,
-                                _: i32,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i64, _: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_params.3,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.2 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.2 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1, _lower2,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower2 {
+      Some(e) => (1i32, match e { true => 1, false => 0 }),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(_rt::as_i64(_lower0), _rt::as_i64(_lower1), result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe {
-                                call(_params.0, _params.1, _params.2, _params.3, _results) as u32
-                            }
-                        }
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(8).cast::<i64>();
+          let l2 = *_ptr.add(16).cast::<i64>();
+          let l3 = *_ptr.add(24).cast::<*mut u8>();
+          let l4 = *_ptr.add(24+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len5 = l4;
+          let bytes5 = _rt::Vec::from_raw_parts(l3.cast(), len5, len5);
+          let l6 = *_ptr.add(24+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l7 = *_ptr.add(24+3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len8 = l7;
+          let bytes8 = _rt::Vec::from_raw_parts(l6.cast(), len8, len8);
+          let l9 = i32::from(*_ptr.add(24+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l10 = *_ptr.add(28+4*::core::mem::size_of::<*const u8>()).cast::<i32>();
+          let l11 = i32::from(*_ptr.add(32+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l15 = *_ptr.add(32+7*::core::mem::size_of::<*const u8>()).cast::<i32>();
+          let l16 = *_ptr.add(36+7*::core::mem::size_of::<*const u8>()).cast::<i32>();
+          let l17 = *_ptr.add(40+7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l18 = *_ptr.add(40+8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len19 = l18;
+          let bytes19 = _rt::Vec::from_raw_parts(l17.cast(), len19, len19);
+          let l20 = i32::from(*_ptr.add(40+9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l21 = i32::from(*_ptr.add(41+9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l22 = i32::from(*_ptr.add(40+10*::core::mem::size_of::<*const u8>()).cast::<u8>());
+          let l26 = *_ptr.add(40+13*::core::mem::size_of::<*const u8>()).cast::<i32>();
+          let l27 = i32::from(*_ptr.add(44+13*::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.2 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1, _lower2): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower2 {
-                                    Some(e) => (
-                                        1i32,
-                                        match e {
-                                            true => 1,
-                                            false => 0,
-                                        },
-                                    ),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(
-                                    _rt::as_i64(_lower0),
-                                    _rt::as_i64(_lower1),
-                                    result0_0,
-                                    result0_1,
-                                )
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-                                            let l2 = *_ptr.add(16).cast::<i64>();
-                                            let l3 = *_ptr.add(24).cast::<*mut u8>();
-                                            let l4 = *_ptr
-                                                .add(24 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len5 = l4;
-                                            let bytes5 =
-                                                _rt::Vec::from_raw_parts(l3.cast(), len5, len5);
-                                            let l6 = *_ptr
-                                                .add(24 + 2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l7 = *_ptr
-                                                .add(24 + 3 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len8 = l7;
-                                            let bytes8 =
-                                                _rt::Vec::from_raw_parts(l6.cast(), len8, len8);
-                                            let l9 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        24 + 4 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l10 = *_ptr
-                                                .add(28 + 4 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-                                            let l11 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        32 + 4 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l15 = *_ptr
-                                                .add(32 + 7 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-                                            let l16 = *_ptr
-                                                .add(36 + 7 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-                                            let l17 = *_ptr
-                                                .add(40 + 7 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l18 = *_ptr
-                                                .add(40 + 8 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len19 = l18;
-                                            let bytes19 =
-                                                _rt::Vec::from_raw_parts(l17.cast(), len19, len19);
-                                            let l20 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 9 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l21 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        41 + 9 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l22 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 10
-                                                            * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l26 = *_ptr
-                                                .add(40 + 13 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-                                            let l27 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        44 + 13
-                                                            * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::GroupMemberInfo{
+          super::super::super::flow_bot::onebot11::types::GroupMemberInfo{
             group_id: l1,
             user_id: l2,
             nickname: _rt::string_lift(bytes5),
@@ -4815,282 +4947,120 @@ pub mod flow_bot {
             title_expire_time: l26,
             card_changeable: _rt::bool_lift(l27 as u8),
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l28 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l29 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len30 = l29;
-                                            let bytes30 =
-                                                _rt::Vec::from_raw_parts(l28.cast(), len30, len30);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l28 = *_ptr.add(8).cast::<*mut u8>();
+          let l29 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len30 = l29;
+          let bytes30 = _rt::Vec::from_raw_parts(l28.cast(), len30, len30);
 
-                                            _rt::string_lift(bytes30)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, user_id, no_cache))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get group member list
-            #[allow(async_fn_in_trait)]
-            pub async fn get_group_member_list(
-                group_id: i64,
-            ) -> Result<_rt::Vec<GroupMemberInfo>, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64);
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes30)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((group_id, user_id, no_cache,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get group member list
+#[allow(async_fn_in_trait)]
+pub async fn get_group_member_list(group_id: i64,) -> Result<_rt::Vec::<GroupMemberInfo>,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64,);
-                        type Results = Result<_rt::Vec<GroupMemberInfo>, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, );
+      type Results = Result<_rt::Vec::<GroupMemberInfo>,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-group-member-list"]
-                                fn call(_: i64, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-group-member-list"]
+          fn call(_: i64, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower(_rt::as_i64(_lower0),) }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base30 = l1;
+              let len30 = l2;
+              let mut result30 = _rt::Vec::with_capacity(len30);
+              for i in 0..len30 {
+                let base = base30.add(i * (48+12*::core::mem::size_of::<*const u8>()));
+                let e30 = {
+                  let l3 = *base.add(0).cast::<i64>();
+                  let l4 = *base.add(8).cast::<i64>();
+                  let l5 = *base.add(16).cast::<*mut u8>();
+                  let l6 = *base.add(16+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len7 = l6;
+                  let bytes7 = _rt::Vec::from_raw_parts(l5.cast(), len7, len7);
+                  let l8 = *base.add(16+2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l9 = *base.add(16+3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len10 = l9;
+                  let bytes10 = _rt::Vec::from_raw_parts(l8.cast(), len10, len10);
+                  let l11 = i32::from(*base.add(16+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  let l12 = *base.add(20+4*::core::mem::size_of::<*const u8>()).cast::<i32>();
+                  let l13 = i32::from(*base.add(24+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  let l17 = *base.add(24+7*::core::mem::size_of::<*const u8>()).cast::<i32>();
+                  let l18 = *base.add(28+7*::core::mem::size_of::<*const u8>()).cast::<i32>();
+                  let l19 = *base.add(32+7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l20 = *base.add(32+8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len21 = l20;
+                  let bytes21 = _rt::Vec::from_raw_parts(l19.cast(), len21, len21);
+                  let l22 = i32::from(*base.add(32+9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  let l23 = i32::from(*base.add(33+9*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  let l24 = i32::from(*base.add(32+10*::core::mem::size_of::<*const u8>()).cast::<u8>());
+                  let l28 = *base.add(32+13*::core::mem::size_of::<*const u8>()).cast::<i32>();
+                  let l29 = i32::from(*base.add(36+13*::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower(_rt::as_i64(_lower0)) }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let base30 = l1;
-                                            let len30 = l2;
-                                            let mut result30 = _rt::Vec::with_capacity(len30);
-                                            for i in 0..len30 {
-                                                let base = base30.add(
-                                                    i * (48
-                                                        + 12 * ::core::mem::size_of::<*const u8>()),
-                                                );
-                                                let e30 = {
-                                                    let l3 = *base.add(0).cast::<i64>();
-                                                    let l4 = *base.add(8).cast::<i64>();
-                                                    let l5 = *base.add(16).cast::<*mut u8>();
-                                                    let l6 = *base
-                                                        .add(
-                                                            16 + 1 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len7 = l6;
-                                                    let bytes7 = _rt::Vec::from_raw_parts(
-                                                        l5.cast(),
-                                                        len7,
-                                                        len7,
-                                                    );
-                                                    let l8 = *base
-                                                        .add(
-                                                            16 + 2 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<*mut u8>();
-                                                    let l9 = *base
-                                                        .add(
-                                                            16 + 3 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len10 = l9;
-                                                    let bytes10 = _rt::Vec::from_raw_parts(
-                                                        l8.cast(),
-                                                        len10,
-                                                        len10,
-                                                    );
-                                                    let l11 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                16 + 4 * ::core::mem::size_of::<
-                                                                    *const u8,
-                                                                >(
-                                                                ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-                                                    let l12 = *base
-                                                        .add(
-                                                            20 + 4 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<i32>();
-                                                    let l13 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                24 + 4 * ::core::mem::size_of::<
-                                                                    *const u8,
-                                                                >(
-                                                                ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-                                                    let l17 = *base
-                                                        .add(
-                                                            24 + 7 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<i32>();
-                                                    let l18 = *base
-                                                        .add(
-                                                            28 + 7 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<i32>();
-                                                    let l19 = *base
-                                                        .add(
-                                                            32 + 7 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<*mut u8>();
-                                                    let l20 = *base
-                                                        .add(
-                                                            32 + 8 * ::core::mem::size_of::<
-                                                                *const u8,
-                                                            >(
-                                                            ),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len21 = l20;
-                                                    let bytes21 = _rt::Vec::from_raw_parts(
-                                                        l19.cast(),
-                                                        len21,
-                                                        len21,
-                                                    );
-                                                    let l22 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                32 + 9 * ::core::mem::size_of::<
-                                                                    *const u8,
-                                                                >(
-                                                                ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-                                                    let l23 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                33 + 9 * ::core::mem::size_of::<
-                                                                    *const u8,
-                                                                >(
-                                                                ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-                                                    let l24 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                32 + 10
-                                                                    * ::core::mem::size_of::<
-                                                                        *const u8,
-                                                                    >(
-                                                                    ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-                                                    let l28 = *base
-                                                        .add(
-                                                            32 + 13
-                                                                * ::core::mem::size_of::<*const u8>(
-                                                                ),
-                                                        )
-                                                        .cast::<i32>();
-                                                    let l29 = i32::from(
-                                                        *base
-                                                            .add(
-                                                                36 + 13
-                                                                    * ::core::mem::size_of::<
-                                                                        *const u8,
-                                                                    >(
-                                                                    ),
-                                                            )
-                                                            .cast::<u8>(),
-                                                    );
-
-                                                    super::super::super::flow_bot::onebot11::types::GroupMemberInfo{
+                  super::super::super::flow_bot::onebot11::types::GroupMemberInfo{
                     group_id: l3,
                     user_id: l4,
                     nickname: _rt::string_lift(bytes7),
@@ -5135,170 +5105,101 @@ pub mod flow_bot {
                     title_expire_time: l28,
                     card_changeable: _rt::bool_lift(l29 as u8),
                   }
-                                                };
-                                                result30.push(e30);
-                                            }
-                                            _rt::cabi_dealloc(
-                                                base30,
-                                                len30
-                                                    * (48
-                                                        + 12 * ::core::mem::size_of::<*const u8>()),
-                                                8,
-                                            );
+                };
+                result30.push(e30);
+              }
+              _rt::cabi_dealloc(base30, len30 * (48+12*::core::mem::size_of::<*const u8>()), 8);
 
-                                            result30
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l31 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l32 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len33 = l32;
-                                            let bytes33 =
-                                                _rt::Vec::from_raw_parts(l31.cast(), len33, len33);
+              result30
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l31 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l32 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len33 = l32;
+              let bytes33 = _rt::Vec::from_raw_parts(l31.cast(), len33, len33);
 
-                                            _rt::string_lift(bytes33)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get group honor information
-            #[allow(async_fn_in_trait)]
-            pub async fn get_group_honor_info(
-                group_id: i64,
-                honor_type: GroupHonorType,
-            ) -> Result<GroupHonorInfo, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i64, i32);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes33)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call((group_id,)).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get group honor information
+#[allow(async_fn_in_trait)]
+pub async fn get_group_honor_info(group_id: i64,honor_type: GroupHonorType,) -> Result<GroupHonorInfo,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (i64, GroupHonorType);
-                        type Results = Result<GroupHonorInfo, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (48 + 18 * ::core::mem::size_of::<*const u8>()),
-                                    8,
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i64, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (i64, GroupHonorType, );
+      type Results = Result<GroupHonorInfo,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((48+18*::core::mem::size_of::<*const u8>()), 8)
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-group-honor-info"]
-                                fn call(_: i64, _: i32, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-group-honor-info"]
+          fn call(_: i64, _: i32, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i64, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i64, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower(_rt::as_i64(_lower0), _lower1.clone() as i32,) }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _params.1, _results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(8).cast::<i64>();
+              let l2 = i32::from(*_ptr.add(16).cast::<u8>());
+              let l11 = i32::from(*_ptr.add(40+4*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l25 = i32::from(*_ptr.add(40+7*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l39 = i32::from(*_ptr.add(40+10*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l53 = i32::from(*_ptr.add(40+13*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l67 = i32::from(*_ptr.add(40+16*::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower(_rt::as_i64(_lower0), _lower1.clone() as i32) }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr.add(8).cast::<i64>();
-                                            let l2 = i32::from(*_ptr.add(16).cast::<u8>());
-                                            let l11 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 4 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l25 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 7 * ::core::mem::size_of::<*const u8>(
-                                                        ),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l39 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 10
-                                                            * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l53 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 13
-                                                            * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l67 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        40 + 16
-                                                            * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::GroupHonorInfo{
+              super::super::super::flow_bot::onebot11::types::GroupHonorInfo{
                 group_id: l1,
                 current_talkative: match l2 {
                   0 => None,
@@ -5542,1088 +5443,781 @@ pub mod flow_bot {
                   _ => _rt::invalid_enum_discriminant(),
                 },
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l81 = *_ptr.add(8).cast::<*mut u8>();
-                                            let l82 = *_ptr
-                                                .add(8 + 1 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len83 = l82;
-                                            let bytes83 =
-                                                _rt::Vec::from_raw_parts(l81.cast(), len83, len83);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l81 = *_ptr.add(8).cast::<*mut u8>();
+              let l82 = *_ptr.add(8+1*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len83 = l82;
+              let bytes83 = _rt::Vec::from_raw_parts(l81.cast(), len83, len83);
 
-                                            _rt::string_lift(bytes83)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((group_id, honor_type))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get cookies for a domain
-            #[allow(async_fn_in_trait)]
-            pub async fn get_cookies(
-                domain: Option<_rt::String>,
-            ) -> Result<GetCookiesResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i32, *mut u8, usize);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes83)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call((group_id, honor_type,)).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get cookies for a domain
+#[allow(async_fn_in_trait)]
+pub async fn get_cookies(domain: Option<_rt::String>,) -> Result<GetCookiesResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (Option<_rt::String>,);
-                        type Results = Result<GetCookiesResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i32, *mut u8, usize, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (Option<_rt::String>, );
+      type Results = Result<GetCookiesResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-cookies"]
-                                fn call(_: i32, _: *mut u8, _: usize, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-cookies"]
+          fn call(_: i32, _: *mut u8, _: usize, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i32,
-                                _: *mut u8,
-                                _: usize,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i32, _: *mut u8, _: usize, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.0 {
+          0 => (),
+          _ => {
+            _rt::cabi_dealloc(_params.1, _params.2, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.0 {
+        0 => (),
+        _ => {
+          _rt::cabi_dealloc(_params.1, _params.2, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result1_0,result1_1,result1_2,) = match _lower0 {
+      Some(e) => {
+        let vec0 = (e.into_bytes()).into_boxed_slice();
+        let ptr0 = vec0.as_ptr().cast::<u8>();
+        let len0 = vec0.len();
+        ::core::mem::forget(vec0);
 
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
+        (1i32, ptr0.cast_mut(), len0)
+      },
+      None => {
+        (0i32, ::core::ptr::null_mut(), 0usize)
+      },
+    }; ParamsLower(result1_0, result1_1, result1_2,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => {
-                                        _rt::cabi_dealloc(_params.1, _params.2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => {
-                                        _rt::cabi_dealloc(_params.1, _params.2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result1_0, result1_1, result1_2) = match _lower0 {
-                                    Some(e) => {
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
 
-                                        (1i32, ptr0.cast_mut(), len0)
-                                    }
-                                    None => (0i32, ::core::ptr::null_mut(), 0usize),
-                                };
-                                ParamsLower(result1_0, result1_1, result1_2)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            super::super::super::flow_bot::onebot11::types::GetCookiesResponse{
+          super::super::super::flow_bot::onebot11::types::GetCookiesResponse{
             cookies: _rt::string_lift(bytes3),
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l4 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l4 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l5 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len6 = l5;
+          let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
 
-                                            _rt::string_lift(bytes6)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((domain,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get CSRF token
-            #[allow(async_fn_in_trait)]
-            pub async fn get_csrf_token() -> Result<GetCsrfTokenResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes6)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((domain,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get CSRF token
+#[allow(async_fn_in_trait)]
+pub async fn get_csrf_token() -> Result<GetCsrfTokenResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<GetCsrfTokenResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<GetCsrfTokenResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-csrf-token"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-csrf-token"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<i32>();
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-
-                                            super::super::super::flow_bot::onebot11::types::GetCsrfTokenResponse{
+              super::super::super::flow_bot::onebot11::types::GetCsrfTokenResponse{
                 token: l1,
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l2 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l2 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l3 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len4 = l3;
+              let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
 
-                                            _rt::string_lift(bytes4)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get credentials (cookies + CSRF token)
-            #[allow(async_fn_in_trait)]
-            pub async fn get_credentials(
-                domain: Option<_rt::String>,
-            ) -> Result<GetCredentialsResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i32, *mut u8, usize);
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes4)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get credentials (cookies + CSRF token)
+#[allow(async_fn_in_trait)]
+pub async fn get_credentials(domain: Option<_rt::String>,) -> Result<GetCredentialsResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (Option<_rt::String>,);
-                        type Results = Result<GetCredentialsResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (4 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i32, *mut u8, usize, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (Option<_rt::String>, );
+      type Results = Result<GetCredentialsResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((4*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-credentials"]
-                                fn call(_: i32, _: *mut u8, _: usize, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-credentials"]
+          fn call(_: i32, _: *mut u8, _: usize, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: i32,
-                                _: *mut u8,
-                                _: usize,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i32, _: *mut u8, _: usize, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.0 {
+          0 => (),
+          _ => {
+            _rt::cabi_dealloc(_params.1, _params.2, 1);
+          },
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.0 {
+        0 => (),
+        _ => {
+          _rt::cabi_dealloc(_params.1, _params.2, 1);
+        },
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result1_0,result1_1,result1_2,) = match _lower0 {
+      Some(e) => {
+        let vec0 = (e.into_bytes()).into_boxed_slice();
+        let ptr0 = vec0.as_ptr().cast::<u8>();
+        let len0 = vec0.len();
+        ::core::mem::forget(vec0);
 
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
+        (1i32, ptr0.cast_mut(), len0)
+      },
+      None => {
+        (0i32, ::core::ptr::null_mut(), 0usize)
+      },
+    }; ParamsLower(result1_0, result1_1, result1_2,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => {
-                                        _rt::cabi_dealloc(_params.1, _params.2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => {
-                                        _rt::cabi_dealloc(_params.1, _params.2, 1);
-                                    }
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result1_0, result1_1, result1_2) = match _lower0 {
-                                    Some(e) => {
-                                        let vec0 = (e.into_bytes()).into_boxed_slice();
-                                        let ptr0 = vec0.as_ptr().cast::<u8>();
-                                        let len0 = vec0.len();
-                                        ::core::mem::forget(vec0);
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+          let l4 = *_ptr.add(3*::core::mem::size_of::<*const u8>()).cast::<i32>();
 
-                                        (1i32, ptr0.cast_mut(), len0)
-                                    }
-                                    None => (0i32, ::core::ptr::null_mut(), 0usize),
-                                };
-                                ParamsLower(result1_0, result1_1, result1_2)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-                                            let l4 = *_ptr
-                                                .add(3 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<i32>();
-
-                                            super::super::super::flow_bot::onebot11::types::GetCredentialsResponse{
+          super::super::super::flow_bot::onebot11::types::GetCredentialsResponse{
             cookies: _rt::string_lift(bytes3),
             csrf_token: l4,
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l5 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l6 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len7 = l6;
-                                            let bytes7 =
-                                                _rt::Vec::from_raw_parts(l5.cast(), len7, len7);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l5 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l6 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len7 = l6;
+          let bytes7 = _rt::Vec::from_raw_parts(l5.cast(), len7, len7);
 
-                                            _rt::string_lift(bytes7)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((domain,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get a voice record file
-            #[allow(async_fn_in_trait)]
-            pub async fn get_record(
-                file: _rt::String,
-                out_format: RecordFormat,
-            ) -> Result<GetFileResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8, usize, i32);
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes7)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((domain,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get a voice record file
+#[allow(async_fn_in_trait)]
+pub async fn get_record(file: _rt::String,out_format: RecordFormat,) -> Result<GetFileResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (_rt::String, RecordFormat);
-                        type Results = Result<GetFileResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, usize, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (_rt::String, RecordFormat, );
+      type Results = Result<GetFileResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-record"]
-                                fn call(_: *mut u8, _: usize, _: i32, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-record"]
+          fn call(_: *mut u8, _: usize, _: i32, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(
-                                _: *mut u8,
-                                _: usize,
-                                _: i32,
-                                _: *mut u8,
-                            ) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: usize, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_params.2,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { _rt::cabi_dealloc(_params.0, _params.1, 1);
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { _rt::cabi_dealloc(_params.0, _params.1, 1);
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0, _lower1,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let vec0 = (_lower0.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    ParamsLower(ptr0.cast_mut(), len0, _lower1.clone() as i32,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _params.1, _params.2, _results) as u32 }
-                        }
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.0, _params.1, 1);
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.0, _params.1, 1);
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0, _lower1): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let vec0 = (_lower0.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                ParamsLower(ptr0.cast_mut(), len0, _lower1.clone() as i32)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            super::super::super::flow_bot::onebot11::types::GetFileResponse{
+          super::super::super::flow_bot::onebot11::types::GetFileResponse{
             file: _rt::string_lift(bytes3),
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l4 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l4 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l5 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len6 = l5;
+          let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
 
-                                            _rt::string_lift(bytes6)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((file, out_format))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get an image file
-            #[allow(async_fn_in_trait)]
-            pub async fn get_image(file: _rt::String) -> Result<GetFileResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(*mut u8, usize);
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes6)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((file, out_format,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get an image file
+#[allow(async_fn_in_trait)]
+pub async fn get_image(file: _rt::String,) -> Result<GetFileResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (_rt::String,);
-                        type Results = Result<GetFileResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    *mut u8, usize, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (_rt::String, );
+      type Results = Result<GetFileResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-image"]
-                                fn call(_: *mut u8, _: usize, _: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-image"]
+          fn call(_: *mut u8, _: usize, _: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8, _: usize, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, _: usize, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { _rt::cabi_dealloc(_params.0, _params.1, 1);
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { _rt::cabi_dealloc(_params.0, _params.1, 1);
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let vec0 = (_lower0.into_bytes()).into_boxed_slice();
+    let ptr0 = vec0.as_ptr().cast::<u8>();
+    let len0 = vec0.len();
+    ::core::mem::forget(vec0);
+    ParamsLower(ptr0.cast_mut(), len0,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_params.0, _params.1, _results) as u32 }
-                        }
+    match l0 {
+      0 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.0, _params.1, 1);
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                _rt::cabi_dealloc(_params.0, _params.1, 1);
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let vec0 = (_lower0.into_bytes()).into_boxed_slice();
-                                let ptr0 = vec0.as_ptr().cast::<u8>();
-                                let len0 = vec0.len();
-                                ::core::mem::forget(vec0);
-                                ParamsLower(ptr0.cast_mut(), len0)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            super::super::super::flow_bot::onebot11::types::GetFileResponse{
+          super::super::super::flow_bot::onebot11::types::GetFileResponse{
             file: _rt::string_lift(bytes3),
           }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l4 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+        };
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l4 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l5 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len6 = l5;
+          let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
 
-                                            _rt::string_lift(bytes6)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((file,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Check if the bot can send images
-            #[allow(async_fn_in_trait)]
-            pub async fn can_send_image() -> Result<CanSendResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+          _rt::string_lift(bytes6)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((file,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Check if the bot can send images
+#[allow(async_fn_in_trait)]
+pub async fn can_send_image() -> Result<CanSendResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<CanSendResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<CanSendResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]can-send-image"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]can-send-image"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = i32::from(*_ptr.add(::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = i32::from(
-                                                *_ptr
-                                                    .add(::core::mem::size_of::<*const u8>())
-                                                    .cast::<u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::CanSendResponse{
+              super::super::super::flow_bot::onebot11::types::CanSendResponse{
                 yes: _rt::bool_lift(l1 as u8),
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l2 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l2 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l3 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len4 = l3;
+              let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
 
-                                            _rt::string_lift(bytes4)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Check if the bot can send voice records
-            #[allow(async_fn_in_trait)]
-            pub async fn can_send_record() -> Result<CanSendResponse, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes4)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Check if the bot can send voice records
+#[allow(async_fn_in_trait)]
+pub async fn can_send_record() -> Result<CanSendResponse,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<CanSendResponse, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<CanSendResponse,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]can-send-record"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]can-send-record"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = i32::from(*_ptr.add(::core::mem::size_of::<*const u8>()).cast::<u8>());
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = i32::from(
-                                                *_ptr
-                                                    .add(::core::mem::size_of::<*const u8>())
-                                                    .cast::<u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::CanSendResponse{
+              super::super::super::flow_bot::onebot11::types::CanSendResponse{
                 yes: _rt::bool_lift(l1 as u8),
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l2 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l3 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len4 = l3;
-                                            let bytes4 =
-                                                _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l2 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l3 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len4 = l3;
+              let bytes4 = _rt::Vec::from_raw_parts(l2.cast(), len4, len4);
 
-                                            _rt::string_lift(bytes4)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get bot status
-            #[allow(async_fn_in_trait)]
-            pub async fn get_status() -> Result<BotStatus, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes4)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get bot status
+#[allow(async_fn_in_trait)]
+pub async fn get_status() -> Result<BotStatus,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<BotStatus, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (4 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<BotStatus,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((4*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-status"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-status"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = i32::from(*_ptr.add(::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l3 = i32::from(*_ptr.add(2+1*::core::mem::size_of::<*const u8>()).cast::<u8>());
+              let l4 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l5 = *_ptr.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base12 = l4;
+              let len12 = l5;
+              let mut result12 = _rt::Vec::with_capacity(len12);
+              for i in 0..len12 {
+                let base = base12.add(i * (4*::core::mem::size_of::<*const u8>()));
+                let e12 = {
+                  let l6 = *base.add(0).cast::<*mut u8>();
+                  let l7 = *base.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len8 = l7;
+                  let bytes8 = _rt::Vec::from_raw_parts(l6.cast(), len8, len8);
+                  let l9 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l10 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len11 = l10;
+                  let bytes11 = _rt::Vec::from_raw_parts(l9.cast(), len11, len11);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+                  (_rt::string_lift(bytes8), _rt::string_lift(bytes11))
+                };
+                result12.push(e12);
+              }
+              _rt::cabi_dealloc(base12, len12 * (4*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
 
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = i32::from(
-                                                *_ptr
-                                                    .add(::core::mem::size_of::<*const u8>())
-                                                    .cast::<u8>(),
-                                            );
-                                            let l3 = i32::from(
-                                                *_ptr
-                                                    .add(
-                                                        2 + 1 * ::core::mem::size_of::<*const u8>(),
-                                                    )
-                                                    .cast::<u8>(),
-                                            );
-                                            let l4 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(3 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let base12 = l4;
-                                            let len12 = l5;
-                                            let mut result12 = _rt::Vec::with_capacity(len12);
-                                            for i in 0..len12 {
-                                                let base = base12.add(
-                                                    i * (4 * ::core::mem::size_of::<*const u8>()),
-                                                );
-                                                let e12 = {
-                                                    let l6 = *base.add(0).cast::<*mut u8>();
-                                                    let l7 = *base
-                                                        .add(::core::mem::size_of::<*const u8>())
-                                                        .cast::<usize>();
-                                                    let len8 = l7;
-                                                    let bytes8 = _rt::Vec::from_raw_parts(
-                                                        l6.cast(),
-                                                        len8,
-                                                        len8,
-                                                    );
-                                                    let l9 = *base
-                                                        .add(
-                                                            2 * ::core::mem::size_of::<*const u8>(),
-                                                        )
-                                                        .cast::<*mut u8>();
-                                                    let l10 = *base
-                                                        .add(
-                                                            3 * ::core::mem::size_of::<*const u8>(),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len11 = l10;
-                                                    let bytes11 = _rt::Vec::from_raw_parts(
-                                                        l9.cast(),
-                                                        len11,
-                                                        len11,
-                                                    );
-
-                                                    (
-                                                        _rt::string_lift(bytes8),
-                                                        _rt::string_lift(bytes11),
-                                                    )
-                                                };
-                                                result12.push(e12);
-                                            }
-                                            _rt::cabi_dealloc(
-                                                base12,
-                                                len12 * (4 * ::core::mem::size_of::<*const u8>()),
-                                                ::core::mem::size_of::<*const u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::BotStatus{
+              super::super::super::flow_bot::onebot11::types::BotStatus{
                 online: match l1 {
                   0 => None,
                   1 => {
@@ -6639,656 +6233,590 @@ pub mod flow_bot {
                 good: _rt::bool_lift(l3 as u8),
                 extra_data: result12,
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l13 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l14 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len15 = l14;
-                                            let bytes15 =
-                                                _rt::Vec::from_raw_parts(l13.cast(), len15, len15);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l13 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l14 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len15 = l14;
+              let bytes15 = _rt::Vec::from_raw_parts(l13.cast(), len15, len15);
 
-                                            _rt::string_lift(bytes15)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Get version information
-            #[allow(async_fn_in_trait)]
-            pub async fn get_version_info() -> Result<VersionInfo, _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
+              _rt::string_lift(bytes15)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Get version information
+#[allow(async_fn_in_trait)]
+pub async fn get_version_info() -> Result<VersionInfo,_rt::String>{
+  unsafe {
 
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<VersionInfo, _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (9 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
 
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<VersionInfo,_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((9*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
 
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]get-version-info"]
-                                fn call(_: *mut u8) -> i32;
-                            }
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]get-version-info"]
+          fn call(_: *mut u8, ) -> i32;
+        }
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
 
-                            unsafe { call(_results) as u32 }
-                        }
+        match l0 {
+          0 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len3 = l2;
+              let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+              let l4 = *_ptr.add(3*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l5 = *_ptr.add(4*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len6 = l5;
+              let bytes6 = _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
+              let l7 = *_ptr.add(5*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l8 = *_ptr.add(6*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len9 = l8;
+              let bytes9 = _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
+              let l10 = *_ptr.add(7*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l11 = *_ptr.add(8*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let base18 = l10;
+              let len18 = l11;
+              let mut result18 = _rt::Vec::with_capacity(len18);
+              for i in 0..len18 {
+                let base = base18.add(i * (4*::core::mem::size_of::<*const u8>()));
+                let e18 = {
+                  let l12 = *base.add(0).cast::<*mut u8>();
+                  let l13 = *base.add(::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len14 = l13;
+                  let bytes14 = _rt::Vec::from_raw_parts(l12.cast(), len14, len14);
+                  let l15 = *base.add(2*::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+                  let l16 = *base.add(3*::core::mem::size_of::<*const u8>()).cast::<usize>();
+                  let len17 = l16;
+                  let bytes17 = _rt::Vec::from_raw_parts(l15.cast(), len17, len17);
 
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+                  (_rt::string_lift(bytes14), _rt::string_lift(bytes17))
+                };
+                result18.push(e18);
+              }
+              _rt::cabi_dealloc(base18, len18 * (4*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>());
 
-                                match l0 {
-                                    0 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-                                            let l4 = *_ptr
-                                                .add(3 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l5 = *_ptr
-                                                .add(4 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len6 = l5;
-                                            let bytes6 =
-                                                _rt::Vec::from_raw_parts(l4.cast(), len6, len6);
-                                            let l7 = *_ptr
-                                                .add(5 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l8 = *_ptr
-                                                .add(6 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len9 = l8;
-                                            let bytes9 =
-                                                _rt::Vec::from_raw_parts(l7.cast(), len9, len9);
-                                            let l10 = *_ptr
-                                                .add(7 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l11 = *_ptr
-                                                .add(8 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let base18 = l10;
-                                            let len18 = l11;
-                                            let mut result18 = _rt::Vec::with_capacity(len18);
-                                            for i in 0..len18 {
-                                                let base = base18.add(
-                                                    i * (4 * ::core::mem::size_of::<*const u8>()),
-                                                );
-                                                let e18 = {
-                                                    let l12 = *base.add(0).cast::<*mut u8>();
-                                                    let l13 = *base
-                                                        .add(::core::mem::size_of::<*const u8>())
-                                                        .cast::<usize>();
-                                                    let len14 = l13;
-                                                    let bytes14 = _rt::Vec::from_raw_parts(
-                                                        l12.cast(),
-                                                        len14,
-                                                        len14,
-                                                    );
-                                                    let l15 = *base
-                                                        .add(
-                                                            2 * ::core::mem::size_of::<*const u8>(),
-                                                        )
-                                                        .cast::<*mut u8>();
-                                                    let l16 = *base
-                                                        .add(
-                                                            3 * ::core::mem::size_of::<*const u8>(),
-                                                        )
-                                                        .cast::<usize>();
-                                                    let len17 = l16;
-                                                    let bytes17 = _rt::Vec::from_raw_parts(
-                                                        l15.cast(),
-                                                        len17,
-                                                        len17,
-                                                    );
-
-                                                    (
-                                                        _rt::string_lift(bytes14),
-                                                        _rt::string_lift(bytes17),
-                                                    )
-                                                };
-                                                result18.push(e18);
-                                            }
-                                            _rt::cabi_dealloc(
-                                                base18,
-                                                len18 * (4 * ::core::mem::size_of::<*const u8>()),
-                                                ::core::mem::size_of::<*const u8>(),
-                                            );
-
-                                            super::super::super::flow_bot::onebot11::types::VersionInfo{
+              super::super::super::flow_bot::onebot11::types::VersionInfo{
                 app_name: _rt::string_lift(bytes3),
                 app_version: _rt::string_lift(bytes6),
                 protocol_version: _rt::string_lift(bytes9),
                 extra_data: result18,
               }
-                                        };
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l19 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l20 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len21 = l20;
-                                            let bytes21 =
-                                                _rt::Vec::from_raw_parts(l19.cast(), len21, len21);
+            };
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l19 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l20 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len21 = l20;
+              let bytes21 = _rt::Vec::from_raw_parts(l19.cast(), len21, len21);
 
-                                            _rt::string_lift(bytes21)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Restart the bot with optional delay in milliseconds
-            #[allow(async_fn_in_trait)]
-            pub async fn set_restart(delay: Option<i32>) -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower(i32, i32);
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = (Option<i32>,);
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]set-restart"]
-                                fn call(_: i32, _: i32, _: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: i32, _: i32, _: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_params.0, _params.1, _results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {
-                                match _params.0 {
-                                    0 => (),
-                                    _ => (),
-                                }
-                            }
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (_lower0,): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe {
-                                let (result0_0, result0_1) = match _lower0 {
-                                    Some(e) => (1i32, _rt::as_i32(e)),
-                                    None => (0i32, 0i32),
-                                };
-                                ParamsLower(result0_0, result0_1)
-                            }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call((delay,))
-                    .await
-                }
-            }
-            #[allow(unused_unsafe, clippy::all)]
-            /// Clean cache
-            #[allow(async_fn_in_trait)]
-            pub async fn clean_cache() -> Result<(), _rt::String> {
-                unsafe {
-                    #[derive(Copy, Clone)]
-                    struct ParamsLower();
-                    unsafe impl Send for ParamsLower {}
-
-                    use wit_bindgen::rt::async_support::Subtask as _Subtask;
-                    struct _MySubtask<'a> {
-                        _unused: core::marker::PhantomData<&'a ()>,
-                    }
-                    #[allow(unused_parens)]
-                    unsafe impl<'a> _Subtask for _MySubtask<'a> {
-                        type Params = ();
-                        type Results = Result<(), _rt::String>;
-                        type ParamsLower = ParamsLower;
-                        fn abi_layout(&mut self) -> ::core::alloc::Layout {
-                            unsafe {
-                                ::core::alloc::Layout::from_size_align_unchecked(
-                                    (3 * ::core::mem::size_of::<*const u8>()),
-                                    ::core::mem::size_of::<*const u8>(),
-                                )
-                            }
-                        }
-
-                        fn results_offset(&mut self) -> usize {
-                            0
-                        }
-
-                        unsafe fn call_import(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                            _results: *mut u8,
-                        ) -> u32 {
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
-                            unsafe extern "C" {
-                                #[link_name = "[async-lower]clean-cache"]
-                                fn call(_: *mut u8) -> i32;
-                            }
-
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn call(_: *mut u8) -> i32 {
-                                unreachable!()
-                            }
-
-                            unsafe { call(_results) as u32 }
-                        }
-
-                        unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
-                            unsafe {}
-                        }
-                        unsafe fn params_dealloc_lists_and_own(
-                            &mut self,
-                            _params: Self::ParamsLower,
-                        ) {
-                            unsafe {}
-                        }
-                        unsafe fn params_lower(
-                            &mut self,
-                            (): Self::Params,
-                            _ptr: *mut u8,
-                        ) -> Self::ParamsLower {
-                            unsafe { ParamsLower() }
-                        }
-                        unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
-                            unsafe {
-                                let l0 = i32::from(*_ptr.add(0).cast::<u8>());
-
-                                match l0 {
-                                    0 => {
-                                        let e = ();
-                                        Ok(e)
-                                    }
-                                    1 => {
-                                        let e = {
-                                            let l1 = *_ptr
-                                                .add(::core::mem::size_of::<*const u8>())
-                                                .cast::<*mut u8>();
-                                            let l2 = *_ptr
-                                                .add(2 * ::core::mem::size_of::<*const u8>())
-                                                .cast::<usize>();
-                                            let len3 = l2;
-                                            let bytes3 =
-                                                _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
-
-                                            _rt::string_lift(bytes3)
-                                        };
-                                        Err(e)
-                                    }
-                                    _ => _rt::invalid_enum_discriminant(),
-                                }
-                            }
-                        }
-                    }
-                    _MySubtask {
-                        _unused: core::marker::PhantomData,
-                    }
-                    .call(())
-                    .await
-                }
-            }
-        }
+              _rt::string_lift(bytes21)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
     }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Restart the bot with optional delay in milliseconds
+#[allow(async_fn_in_trait)]
+pub async fn set_restart(delay: Option<i32>,) -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    i32, i32, 
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = (Option<i32>, );
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]set-restart"]
+          fn call(_: i32, _: i32, _: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: i32, _: i32, _: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_params.0,_params.1,_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe { match _params.0 {
+          0 => (),
+          _ => (),
+        }
+      }
+    }
+    unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+      unsafe { match _params.0 {
+        0 => (),
+        _ => (),
+      }
+    }
+  }
+  unsafe fn params_lower(&mut self, (_lower0,): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+    unsafe { let (result0_0,result0_1,) = match _lower0 {
+      Some(e) => (1i32, _rt::as_i32(e)),
+      None => {
+        (0i32, 0i32)
+      },
+    }; ParamsLower(result0_0, result0_1,) }
+  }
+  unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+    unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+    match l0 {
+      0 => {
+        let e = ();
+        Ok(e)
+      }
+      1 => {
+        let e = {
+          let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+          let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+          let len3 = l2;
+          let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+          _rt::string_lift(bytes3)
+        };
+        Err(e)
+      }
+      _ => _rt::invalid_enum_discriminant(),
+    } }
+  }
+}
+_MySubtask { _unused: core::marker::PhantomData }.call((delay,)).await
+}
+}
+#[allow(unused_unsafe, clippy::all)]
+/// Clean cache
+#[allow(async_fn_in_trait)]
+pub async fn clean_cache() -> Result<(),_rt::String>{
+  unsafe {
+
+    #[derive(Copy, Clone)]
+    struct ParamsLower(
+    
+    );
+    unsafe impl Send for ParamsLower {}
+    
+
+    use wit_bindgen::rt::async_support::Subtask as _Subtask;
+    struct _MySubtask<'a> { _unused: core::marker::PhantomData<&'a ()> }
+    #[allow(unused_parens)]
+    unsafe impl<'a> _Subtask for _MySubtask<'a> {
+      
+      type Params = ();
+      type Results = Result<(),_rt::String>;
+      type ParamsLower = ParamsLower;
+      fn abi_layout(&mut self) -> ::core::alloc::Layout {
+        unsafe {
+          ::core::alloc::Layout::from_size_align_unchecked((3*::core::mem::size_of::<*const u8>()), ::core::mem::size_of::<*const u8>())
+        }
+      }
+      
+      fn results_offset(&mut self) -> usize { 0 }
+
+      unsafe fn call_import(&mut self, _params: Self::ParamsLower, _results: *mut u8) -> u32 {
+        
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "flow-bot:onebot11/api@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[async-lower]clean-cache"]
+          fn call(_: *mut u8, ) -> i32;
+        }
+
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn call(_: *mut u8, ) -> i32 { unreachable!() }
+        
+        unsafe { call(_results) as u32 }
+      }
+      
+      unsafe fn params_dealloc_lists(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_dealloc_lists_and_own(&mut self, _params: Self::ParamsLower) {
+        unsafe {  }
+      }
+      unsafe fn params_lower(&mut self, (): Self::Params, _ptr: *mut u8) -> Self::ParamsLower {
+        unsafe {  ParamsLower() }
+      }
+      unsafe fn results_lift(&mut self, _ptr: *mut u8) -> Self::Results {
+        unsafe { let l0 = i32::from(*_ptr.add(0).cast::<u8>());
+
+        match l0 {
+          0 => {
+            let e = ();
+            Ok(e)
+          }
+          1 => {
+            let e = {
+              let l1 = *_ptr.add(::core::mem::size_of::<*const u8>()).cast::<*mut u8>();
+              let l2 = *_ptr.add(2*::core::mem::size_of::<*const u8>()).cast::<usize>();
+              let len3 = l2;
+              let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+
+              _rt::string_lift(bytes3)
+            };
+            Err(e)
+          }
+          _ => _rt::invalid_enum_discriminant(),
+        } }
+      }
+    }
+    _MySubtask { _unused: core::marker::PhantomData }.call(()).await
+  }
+}
+
+}
+
+}
 }
 #[allow(dead_code, clippy::all)]
 pub mod exports {
-    pub mod flow_bot {
-        pub mod onebot11 {
-            /// Event handler interface for plugins
-            #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
-            pub mod event_handler {
-                #[used]
-                #[doc(hidden)]
-                static __FORCE_SECTION_REF: fn() =
-                    super::super::super::super::__link_custom_section_describing_imports;
+  pub mod flow_bot {
+    pub mod onebot11 {
+      /// Event handler interface for plugins
+      #[allow(dead_code, async_fn_in_trait, unused_imports, clippy::all)]
+      pub mod event_handler {
+        #[used]
+        #[doc(hidden)]
+        static __FORCE_SECTION_REF: fn() =
+        super::super::super::super::__link_custom_section_describing_imports;
+        
+        use super::super::super::super::_rt;
+        #[doc(hidden)]
+        #[allow(non_snake_case, unused_unsafe)]
+        pub unsafe fn _export_init_cabi<T_: Guest>() -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+        _rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+          let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+          let result0 = &{
+            T_::init().await
+          };
+          let (result2_0,result2_1,result2_2,) = match result0 {
+            Ok(_) => { (0i32, ::core::ptr::null_mut(), 0usize) },
+            Err(e) => { {
+              let vec1 = e;
+              let ptr1 = vec1.as_ptr().cast::<u8>();
+              let len1 = vec1.len();
 
-                use super::super::super::super::_rt;
-                #[doc(hidden)]
-                #[allow(non_snake_case, unused_unsafe)]
-                pub unsafe fn _export_handle_event_cabi<T_: Guest>(
-                    arg0: *mut u8,
-                    arg1: usize,
-                ) -> i32 {
-                    unsafe {
-                        #[cfg(target_arch = "wasm32")]
-                        _rt::run_ctors_once();
-                        wit_bindgen::rt::async_support::start_task(async move {
-                            let _task_cancel =
-                                wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
-                            let result1 = &{
-                                let len0 = arg1;
-                                T_::handle_event(<_ as From<_rt::Vec<_>>>::from(
-                                    _rt::Vec::from_raw_parts(arg0.cast(), len0, len0),
-                                ))
-                                .await
-                            };
-                            let (result3_0, result3_1, result3_2) = match result1 {
-                                Ok(_) => (0i32, ::core::ptr::null_mut(), 0usize),
-                                Err(e) => {
-                                    let vec2 = e;
-                                    let ptr2 = vec2.as_ptr().cast::<u8>();
-                                    let len2 = vec2.len();
+              (1i32, ptr1.cast_mut(), len1)
+            } },
+          };
+          #[cfg(target_arch = "wasm32")]
+          #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+          unsafe extern "C" {
+            #[link_name = "[task-return]init"]
+            fn wit_import3(_: i32, _: *mut u8, _: usize, );
+          }
 
-                                    (1i32, ptr2.cast_mut(), len2)
-                                }
-                            };
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(
-                                wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0"
-                            )]
-                            unsafe extern "C" {
-                                #[link_name = "[task-return]handle-event"]
-                                fn wit_import4(_: i32, _: *mut u8, _: usize);
-                            }
+          #[cfg(not(target_arch = "wasm32"))]
+          unsafe extern "C" fn wit_import3(_: i32, _: *mut u8, _: usize, ) { unreachable!() }
+          _task_cancel.forget();
+          wit_import3(result2_0, result2_1, result2_2);
+        })
+      } }
+      #[doc(hidden)]
+      #[allow(non_snake_case)]
+      pub unsafe fn __callback_init(event0: u32, event1: u32, event2: u32) -> u32 {
+        unsafe {
+          wit_bindgen::rt::async_support::callback(event0, event1, event2)
+        }
+      }
+      #[doc(hidden)]
+      #[allow(non_snake_case, unused_unsafe)]
+      pub unsafe fn _export_cleanup_cabi<T_: Guest>() -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+      _rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+        let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+        let result0 = &{
+          T_::cleanup().await
+        };
+        let (result2_0,result2_1,result2_2,) = match result0 {
+          Ok(_) => { (0i32, ::core::ptr::null_mut(), 0usize) },
+          Err(e) => { {
+            let vec1 = e;
+            let ptr1 = vec1.as_ptr().cast::<u8>();
+            let len1 = vec1.len();
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn wit_import4(_: i32, _: *mut u8, _: usize) {
-                                unreachable!()
-                            }
-                            _task_cancel.forget();
-                            wit_import4(result3_0, result3_1, result3_2);
-                        })
-                    }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case)]
-                pub unsafe fn __callback_handle_event(
-                    event0: u32,
-                    event1: u32,
-                    event2: u32,
-                ) -> u32 {
-                    unsafe { wit_bindgen::rt::async_support::callback(event0, event1, event2) }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case, unused_unsafe)]
-                pub unsafe fn _export_plugin_name_cabi<T_: Guest>() -> i32 {
-                    unsafe {
-                        #[cfg(target_arch = "wasm32")]
-                        _rt::run_ctors_once();
-                        wit_bindgen::rt::async_support::start_task(async move {
-                            let _task_cancel =
-                                wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
-                            let result0 = &{ T_::plugin_name().await };
-                            let vec1 = result0;
-                            let ptr1 = vec1.as_ptr().cast::<u8>();
-                            let len1 = vec1.len();
+            (1i32, ptr1.cast_mut(), len1)
+          } },
+        };
+        #[cfg(target_arch = "wasm32")]
+        #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+        unsafe extern "C" {
+          #[link_name = "[task-return]cleanup"]
+          fn wit_import3(_: i32, _: *mut u8, _: usize, );
+        }
 
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(
-                                wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0"
-                            )]
-                            unsafe extern "C" {
-                                #[link_name = "[task-return]plugin-name"]
-                                fn wit_import2(_: *mut u8, _: usize);
-                            }
+        #[cfg(not(target_arch = "wasm32"))]
+        unsafe extern "C" fn wit_import3(_: i32, _: *mut u8, _: usize, ) { unreachable!() }
+        _task_cancel.forget();
+        wit_import3(result2_0, result2_1, result2_2);
+      })
+    } }
+    #[doc(hidden)]
+    #[allow(non_snake_case)]
+    pub unsafe fn __callback_cleanup(event0: u32, event1: u32, event2: u32) -> u32 {
+      unsafe {
+        wit_bindgen::rt::async_support::callback(event0, event1, event2)
+      }
+    }
+    #[doc(hidden)]
+    #[allow(non_snake_case, unused_unsafe)]
+    pub unsafe fn _export_handle_event_cabi<T_: Guest>(arg0: *mut u8,arg1: usize,) -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+    _rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+      let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+      let result1 = &{
+        let len0 = arg1;
+        T_::handle_event(<_ as From<_rt::Vec<_>>>::from(_rt::Vec::from_raw_parts(arg0.cast(), len0, len0))).await
+      };
+      let (result3_0,result3_1,result3_2,) = match result1 {
+        Ok(_) => { (0i32, ::core::ptr::null_mut(), 0usize) },
+        Err(e) => { {
+          let vec2 = e;
+          let ptr2 = vec2.as_ptr().cast::<u8>();
+          let len2 = vec2.len();
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn wit_import2(_: *mut u8, _: usize) {
-                                unreachable!()
-                            }
-                            _task_cancel.forget();
-                            wit_import2(ptr1.cast_mut(), len1);
-                        })
-                    }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case)]
-                pub unsafe fn __callback_plugin_name(event0: u32, event1: u32, event2: u32) -> u32 {
-                    unsafe { wit_bindgen::rt::async_support::callback(event0, event1, event2) }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case, unused_unsafe)]
-                pub unsafe fn _export_plugin_version_cabi<T_: Guest>() -> i32 {
-                    unsafe {
-                        #[cfg(target_arch = "wasm32")]
-                        _rt::run_ctors_once();
-                        wit_bindgen::rt::async_support::start_task(async move {
-                            let _task_cancel =
-                                wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
-                            let result0 = &{ T_::plugin_version().await };
-                            let vec1 = result0;
-                            let ptr1 = vec1.as_ptr().cast::<u8>();
-                            let len1 = vec1.len();
+          (1i32, ptr2.cast_mut(), len2)
+        } },
+      };
+      #[cfg(target_arch = "wasm32")]
+      #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+      unsafe extern "C" {
+        #[link_name = "[task-return]handle-event"]
+        fn wit_import4(_: i32, _: *mut u8, _: usize, );
+      }
 
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(
-                                wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0"
-                            )]
-                            unsafe extern "C" {
-                                #[link_name = "[task-return]plugin-version"]
-                                fn wit_import2(_: *mut u8, _: usize);
-                            }
+      #[cfg(not(target_arch = "wasm32"))]
+      unsafe extern "C" fn wit_import4(_: i32, _: *mut u8, _: usize, ) { unreachable!() }
+      _task_cancel.forget();
+      wit_import4(result3_0, result3_1, result3_2);
+    })
+  } }
+  #[doc(hidden)]
+  #[allow(non_snake_case)]
+  pub unsafe fn __callback_handle_event(event0: u32, event1: u32, event2: u32) -> u32 {
+    unsafe {
+      wit_bindgen::rt::async_support::callback(event0, event1, event2)
+    }
+  }
+  #[doc(hidden)]
+  #[allow(non_snake_case, unused_unsafe)]
+  pub unsafe fn _export_plugin_name_cabi<T_: Guest>() -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+  _rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+    let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+    let result0 = &{
+      T_::plugin_name().await
+    };
+    let vec1 = result0;
+    let ptr1 = vec1.as_ptr().cast::<u8>();
+    let len1 = vec1.len();
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn wit_import2(_: *mut u8, _: usize) {
-                                unreachable!()
-                            }
-                            _task_cancel.forget();
-                            wit_import2(ptr1.cast_mut(), len1);
-                        })
-                    }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case)]
-                pub unsafe fn __callback_plugin_version(
-                    event0: u32,
-                    event1: u32,
-                    event2: u32,
-                ) -> u32 {
-                    unsafe { wit_bindgen::rt::async_support::callback(event0, event1, event2) }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case, unused_unsafe)]
-                pub unsafe fn _export_plugin_desc_cabi<T_: Guest>() -> i32 {
-                    unsafe {
-                        #[cfg(target_arch = "wasm32")]
-                        _rt::run_ctors_once();
-                        wit_bindgen::rt::async_support::start_task(async move {
-                            let _task_cancel =
-                                wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
-                            let result0 = &{ T_::plugin_desc().await };
-                            let vec1 = result0;
-                            let ptr1 = vec1.as_ptr().cast::<u8>();
-                            let len1 = vec1.len();
+    #[cfg(target_arch = "wasm32")]
+    #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+    unsafe extern "C" {
+      #[link_name = "[task-return]plugin-name"]
+      fn wit_import2(_: *mut u8, _: usize, );
+    }
 
-                            #[cfg(target_arch = "wasm32")]
-                            #[link(
-                                wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0"
-                            )]
-                            unsafe extern "C" {
-                                #[link_name = "[task-return]plugin-desc"]
-                                fn wit_import2(_: *mut u8, _: usize);
-                            }
+    #[cfg(not(target_arch = "wasm32"))]
+    unsafe extern "C" fn wit_import2(_: *mut u8, _: usize, ) { unreachable!() }
+    _task_cancel.forget();
+    wit_import2(ptr1.cast_mut(), len1);
+  })
+} }
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub unsafe fn __callback_plugin_name(event0: u32, event1: u32, event2: u32) -> u32 {
+  unsafe {
+    wit_bindgen::rt::async_support::callback(event0, event1, event2)
+  }
+}
+#[doc(hidden)]
+#[allow(non_snake_case, unused_unsafe)]
+pub unsafe fn _export_plugin_version_cabi<T_: Guest>() -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+_rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+  let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+  let result0 = &{
+    T_::plugin_version().await
+  };
+  let vec1 = result0;
+  let ptr1 = vec1.as_ptr().cast::<u8>();
+  let len1 = vec1.len();
 
-                            #[cfg(not(target_arch = "wasm32"))]
-                            unsafe extern "C" fn wit_import2(_: *mut u8, _: usize) {
-                                unreachable!()
-                            }
-                            _task_cancel.forget();
-                            wit_import2(ptr1.cast_mut(), len1);
-                        })
-                    }
-                }
-                #[doc(hidden)]
-                #[allow(non_snake_case)]
-                pub unsafe fn __callback_plugin_desc(event0: u32, event1: u32, event2: u32) -> u32 {
-                    unsafe { wit_bindgen::rt::async_support::callback(event0, event1, event2) }
-                }
-                pub trait Guest {
-                    /// Handle an incoming OneBot event
-                    #[allow(async_fn_in_trait)]
-                    async fn handle_event(event: _rt::Vec<u8>) -> Result<(), _rt::String>;
-                    #[allow(async_fn_in_trait)]
-                    async fn plugin_name() -> _rt::String;
-                    #[allow(async_fn_in_trait)]
-                    async fn plugin_version() -> _rt::String;
-                    #[allow(async_fn_in_trait)]
-                    async fn plugin_desc() -> _rt::String;
-                }
-                #[doc(hidden)]
-                #[macro_export]
-                macro_rules! __export_flow_bot_onebot11_event_handler_0_1_0_cabi{
+  #[cfg(target_arch = "wasm32")]
+  #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+  unsafe extern "C" {
+    #[link_name = "[task-return]plugin-version"]
+    fn wit_import2(_: *mut u8, _: usize, );
+  }
+
+  #[cfg(not(target_arch = "wasm32"))]
+  unsafe extern "C" fn wit_import2(_: *mut u8, _: usize, ) { unreachable!() }
+  _task_cancel.forget();
+  wit_import2(ptr1.cast_mut(), len1);
+})
+} }
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub unsafe fn __callback_plugin_version(event0: u32, event1: u32, event2: u32) -> u32 {
+  unsafe {
+    wit_bindgen::rt::async_support::callback(event0, event1, event2)
+  }
+}
+#[doc(hidden)]
+#[allow(non_snake_case, unused_unsafe)]
+pub unsafe fn _export_plugin_desc_cabi<T_: Guest>() -> i32 { unsafe {#[cfg(target_arch="wasm32")]
+_rt::run_ctors_once();wit_bindgen::rt::async_support::start_task(async move {
+  let _task_cancel = wit_bindgen::rt::async_support::TaskCancelOnDrop::new();
+  let result0 = &{
+    T_::plugin_desc().await
+  };
+  let vec1 = result0;
+  let ptr1 = vec1.as_ptr().cast::<u8>();
+  let len1 = vec1.len();
+
+  #[cfg(target_arch = "wasm32")]
+  #[link(wasm_import_module = "[export]flow-bot:onebot11/event-handler@0.1.0")]
+  unsafe extern "C" {
+    #[link_name = "[task-return]plugin-desc"]
+    fn wit_import2(_: *mut u8, _: usize, );
+  }
+
+  #[cfg(not(target_arch = "wasm32"))]
+  unsafe extern "C" fn wit_import2(_: *mut u8, _: usize, ) { unreachable!() }
+  _task_cancel.forget();
+  wit_import2(ptr1.cast_mut(), len1);
+})
+} }
+#[doc(hidden)]
+#[allow(non_snake_case)]
+pub unsafe fn __callback_plugin_desc(event0: u32, event1: u32, event2: u32) -> u32 {
+  unsafe {
+    wit_bindgen::rt::async_support::callback(event0, event1, event2)
+  }
+}
+pub trait Guest {
+  /// Initializer for the plugin, called when the plugin is loaded
+  #[allow(async_fn_in_trait)]
+  async fn init() -> Result<(),_rt::String>;
+  /// Cleanup function for the plugin, called when the plugin is unloaded
+  #[allow(async_fn_in_trait)]
+  async fn cleanup() -> Result<(),_rt::String>;
+  /// Handle an incoming OneBot event
+  #[allow(async_fn_in_trait)]
+  async fn handle_event(event: _rt::Vec::<u8>,) -> Result<(),_rt::String>;
+  #[allow(async_fn_in_trait)]
+  async fn plugin_name() -> _rt::String;
+  #[allow(async_fn_in_trait)]
+  async fn plugin_version() -> _rt::String;
+  #[allow(async_fn_in_trait)]
+  async fn plugin_desc() -> _rt::String;
+}
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __export_flow_bot_onebot11_event_handler_0_1_0_cabi{
   ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
 
+    #[unsafe(export_name = "[async-lift]flow-bot:onebot11/event-handler@0.1.0#init")]
+    unsafe extern "C" fn export_init() -> i32 {
+      unsafe { $($path_to_types)*::_export_init_cabi::<$ty>() }
+    }
+    #[unsafe(export_name = "[callback][async-lift]flow-bot:onebot11/event-handler@0.1.0#init")]
+    unsafe extern "C" fn _callback_init(event0: u32, event1: u32, event2: u32) -> u32 {
+      unsafe {
+        $($path_to_types)*::__callback_init(event0, event1, event2)
+      }
+    }
+    #[unsafe(export_name = "[async-lift]flow-bot:onebot11/event-handler@0.1.0#cleanup")]
+    unsafe extern "C" fn export_cleanup() -> i32 {
+      unsafe { $($path_to_types)*::_export_cleanup_cabi::<$ty>() }
+    }
+    #[unsafe(export_name = "[callback][async-lift]flow-bot:onebot11/event-handler@0.1.0#cleanup")]
+    unsafe extern "C" fn _callback_cleanup(event0: u32, event1: u32, event2: u32) -> u32 {
+      unsafe {
+        $($path_to_types)*::__callback_cleanup(event0, event1, event2)
+      }
+    }
     #[unsafe(export_name = "[async-lift]flow-bot:onebot11/event-handler@0.1.0#handle-event")]
     unsafe extern "C" fn export_handle_event(arg0: *mut u8,arg1: usize,) -> i32 {
       unsafe { $($path_to_types)*::_export_handle_event_cabi::<$ty>(arg0, arg1) }
@@ -7331,155 +6859,157 @@ pub mod exports {
     }
   };);
 }
-                #[doc(hidden)]
-                pub use __export_flow_bot_onebot11_event_handler_0_1_0_cabi;
-            }
-        }
-    }
+#[doc(hidden)]
+pub use __export_flow_bot_onebot11_event_handler_0_1_0_cabi;
+
+}
+
+}
+}
 }
 mod _rt {
-    #![allow(dead_code, unused_imports, clippy::all)]
-    pub use alloc_crate::string::String;
-    pub use alloc_crate::vec::Vec;
-    pub unsafe fn cabi_dealloc(ptr: *mut u8, size: usize, align: usize) {
-        if size == 0 {
-            return;
-        }
-        unsafe {
-            let layout = alloc::Layout::from_size_align_unchecked(size, align);
-            alloc::dealloc(ptr, layout);
-        }
+  #![allow(dead_code, unused_imports, clippy::all)]
+  pub use alloc_crate::vec::Vec;
+  pub use alloc_crate::string::String;
+  pub unsafe fn cabi_dealloc(ptr: *mut u8, size: usize, align: usize) {
+    if size == 0 {
+      return;
     }
+    unsafe {
+      let layout = alloc::Layout::from_size_align_unchecked(size, align);
+      alloc::dealloc(ptr, layout);
+    }
+  }
+  
+  pub fn as_i64<T: AsI64>(t: T) -> i64 {
+    t.as_i64()
+  }
 
-    pub fn as_i64<T: AsI64>(t: T) -> i64 {
-        t.as_i64()
-    }
+  pub trait AsI64 {
+    fn as_i64(self) -> i64;
+  }
 
-    pub trait AsI64 {
-        fn as_i64(self) -> i64;
+  impl<'a, T: Copy + AsI64> AsI64 for &'a T {
+    fn as_i64(self) -> i64 {
+      (*self).as_i64()
     }
+  }
+  
+  impl AsI64 for i64 {
+    #[inline]
+    fn as_i64(self) -> i64 {
+      self as i64
+    }
+  }
+  
+  impl AsI64 for u64 {
+    #[inline]
+    fn as_i64(self) -> i64 {
+      self as i64
+    }
+  }
+  pub use alloc_crate::alloc;
+  pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
+    if cfg!(debug_assertions) {
+      String::from_utf8(bytes).unwrap()
+    } else {
+      unsafe { String::from_utf8_unchecked(bytes) }
+    }
+  }
+  pub unsafe fn invalid_enum_discriminant<T>() -> T {
+    if cfg!(debug_assertions) {
+      panic!("invalid enum discriminant")
+    } else {
+      unsafe { core::hint::unreachable_unchecked() }
+    }
+  }
+  
+  pub fn as_i32<T: AsI32>(t: T) -> i32 {
+    t.as_i32()
+  }
 
-    impl<'a, T: Copy + AsI64> AsI64 for &'a T {
-        fn as_i64(self) -> i64 {
-            (*self).as_i64()
-        }
-    }
+  pub trait AsI32 {
+    fn as_i32(self) -> i32;
+  }
 
-    impl AsI64 for i64 {
-        #[inline]
-        fn as_i64(self) -> i64 {
-            self as i64
-        }
+  impl<'a, T: Copy + AsI32> AsI32 for &'a T {
+    fn as_i32(self) -> i32 {
+      (*self).as_i32()
     }
-
-    impl AsI64 for u64 {
-        #[inline]
-        fn as_i64(self) -> i64 {
-            self as i64
-        }
+  }
+  
+  impl AsI32 for i32 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-    pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
-        if cfg!(debug_assertions) {
-            String::from_utf8(bytes).unwrap()
-        } else {
-            unsafe { String::from_utf8_unchecked(bytes) }
-        }
+  }
+  
+  impl AsI32 for u32 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-    pub unsafe fn invalid_enum_discriminant<T>() -> T {
-        if cfg!(debug_assertions) {
-            panic!("invalid enum discriminant")
-        } else {
-            unsafe { core::hint::unreachable_unchecked() }
-        }
+  }
+  
+  impl AsI32 for i16 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    pub fn as_i32<T: AsI32>(t: T) -> i32 {
-        t.as_i32()
+  }
+  
+  impl AsI32 for u16 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    pub trait AsI32 {
-        fn as_i32(self) -> i32;
+  }
+  
+  impl AsI32 for i8 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    impl<'a, T: Copy + AsI32> AsI32 for &'a T {
-        fn as_i32(self) -> i32 {
-            (*self).as_i32()
-        }
+  }
+  
+  impl AsI32 for u8 {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    impl AsI32 for i32 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
+  }
+  
+  impl AsI32 for char {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    impl AsI32 for u32 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
+  }
+  
+  impl AsI32 for usize {
+    #[inline]
+    fn as_i32(self) -> i32 {
+      self as i32
     }
-
-    impl AsI32 for i16 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
+  }
+  pub unsafe fn bool_lift(val: u8) -> bool {
+    if cfg!(debug_assertions) {
+      match val {
+        0 => false,
+        1 => true,
+        _ => panic!("invalid bool discriminant"),
+      }
+    } else {
+      val != 0
     }
-
-    impl AsI32 for u16 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
-    }
-
-    impl AsI32 for i8 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
-    }
-
-    impl AsI32 for u8 {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
-    }
-
-    impl AsI32 for char {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
-    }
-
-    impl AsI32 for usize {
-        #[inline]
-        fn as_i32(self) -> i32 {
-            self as i32
-        }
-    }
-    pub unsafe fn bool_lift(val: u8) -> bool {
-        if cfg!(debug_assertions) {
-            match val {
-                0 => false,
-                1 => true,
-                _ => panic!("invalid bool discriminant"),
-            }
-        } else {
-            val != 0
-        }
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    pub fn run_ctors_once() {
-        wit_bindgen::rt::run_ctors_once();
-    }
-    extern crate alloc as alloc_crate;
-    pub use alloc_crate::alloc;
+  }
+  
+  #[cfg(target_arch = "wasm32")]
+  pub fn run_ctors_once() {
+    wit_bindgen::rt::run_ctors_once();
+  }
+  extern crate alloc as alloc_crate;
 }
 
 /// Generates `#[unsafe(no_mangle)]` functions to export the specified type as
@@ -7511,9 +7041,9 @@ macro_rules! __export_onebot11_plugin_impl {
     #[unsafe(link_section = "component-type:wit-bindgen:0.53.1:flow-bot:onebot11@0.1.0:onebot11-plugin:imports and exports")]
     #[doc(hidden)]
     #[allow(clippy::octal_escapes)]
-    pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 4791] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xb1$\x01A\x02\x01A\x1a\
-\x01BE\x01m\x03\x02ok\x05async\x06failed\x04\0\x0eapi-ret-status\x03\0\0\x01ks\x01\
+    pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 5666] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x9c+\x01A\x02\x01A\x1b\
+\x01Bq\x01m\x03\x02ok\x05async\x06failed\x04\0\x0eapi-ret-status\x03\0\0\x01ks\x01\
 r\x03\x06status\x01\x07retcodez\x04echo\x02\x04\0\x0capi-response\x03\0\x03\x01k\
 \x7f\x01o\x02ss\x01p\x06\x01r\x03\x06online\x05\x04good\x7f\x0aextra-data\x07\x04\
 \0\x0abot-status\x03\0\x08\x01r\x01\x0amessage-idx\x04\0\x15send-message-respons\
@@ -7546,70 +7076,91 @@ se\x03\09\x01r\x01\x04files\x04\0\x11get-file-response\x03\0;\x01m\x08\x03mp3\x0
 amr\x03wma\x03m4a\x03spx\x03ogg\x03wav\x04flac\x04\0\x0drecord-format\x03\0=\x01\
 r\x01\x03yes\x7f\x04\0\x11can-send-response\x03\0?\x01r\x04\x08app-names\x0bapp-\
 versions\x10protocol-versions\x0aextra-data\x07\x04\0\x0cversion-info\x03\0A\x01\
-m\x02\x03add\x06invite\x04\0\x16group-request-sub-type\x03\0C\x03\0\x1dflow-bot:\
-onebot11/types@0.1.0\x05\0\x02\x03\0\0\x15send-message-response\x02\x03\0\0\x14g\
-et-message-response\x02\x03\0\0\x14get-forward-response\x02\x03\0\0\x0alogin-inf\
-o\x02\x03\0\0\x0dstranger-info\x02\x03\0\0\x0bfriend-info\x02\x03\0\0\x13group-i\
-nfo-response\x02\x03\0\0\x11group-member-info\x02\x03\0\0\x10group-honor-info\x02\
-\x03\0\0\x10group-honor-type\x02\x03\0\0\x14get-cookies-response\x02\x03\0\0\x17\
-get-csrf-token-response\x02\x03\0\0\x18get-credentials-response\x02\x03\0\0\x11g\
-et-file-response\x02\x03\0\0\x0drecord-format\x02\x03\0\0\x11can-send-response\x02\
-\x03\0\0\x0abot-status\x02\x03\0\0\x0cversion-info\x02\x03\0\0\x14group-anonymou\
-s-info\x02\x03\0\0\x16group-request-sub-type\x01B\x8b\x01\x02\x03\x02\x01\x01\x04\
-\0\x15send-message-response\x03\0\0\x02\x03\x02\x01\x02\x04\0\x14get-message-res\
-ponse\x03\0\x02\x02\x03\x02\x01\x03\x04\0\x14get-forward-response\x03\0\x04\x02\x03\
-\x02\x01\x04\x04\0\x0alogin-info\x03\0\x06\x02\x03\x02\x01\x05\x04\0\x0dstranger\
--info\x03\0\x08\x02\x03\x02\x01\x06\x04\0\x0bfriend-info\x03\0\x0a\x02\x03\x02\x01\
-\x07\x04\0\x13group-info-response\x03\0\x0c\x02\x03\x02\x01\x08\x04\0\x11group-m\
-ember-info\x03\0\x0e\x02\x03\x02\x01\x09\x04\0\x10group-honor-info\x03\0\x10\x02\
-\x03\x02\x01\x0a\x04\0\x10group-honor-type\x03\0\x12\x02\x03\x02\x01\x0b\x04\0\x14\
-get-cookies-response\x03\0\x14\x02\x03\x02\x01\x0c\x04\0\x17get-csrf-token-respo\
-nse\x03\0\x16\x02\x03\x02\x01\x0d\x04\0\x18get-credentials-response\x03\0\x18\x02\
-\x03\x02\x01\x0e\x04\0\x11get-file-response\x03\0\x1a\x02\x03\x02\x01\x0f\x04\0\x0d\
-record-format\x03\0\x1c\x02\x03\x02\x01\x10\x04\0\x11can-send-response\x03\0\x1e\
-\x02\x03\x02\x01\x11\x04\0\x0abot-status\x03\0\x20\x02\x03\x02\x01\x12\x04\0\x0c\
-version-info\x03\0\"\x02\x03\x02\x01\x13\x04\0\x14group-anonymous-info\x03\0$\x02\
-\x03\x02\x01\x14\x04\0\x16group-request-sub-type\x03\0&\x01k\x7f\x01j\x01\x01\x01\
-s\x01@\x03\x07user-idx\x07messages\x0bauto-escape(\0)\x04\0\x14send-private-mess\
-age\x01*\x01@\x03\x08group-idx\x07messages\x0bauto-escape(\0)\x04\0\x12send-grou\
-p-message\x01+\x01j\0\x01s\x01@\x01\x0amessage-idx\0,\x04\0\x0edelete-message\x01\
--\x01j\x01\x03\x01s\x01@\x01\x0amessage-idx\0.\x04\0\x0bget-message\x01/\x01j\x01\
-\x05\x01s\x01@\x01\x0amessage-idx\00\x04\0\x13get-forward-message\x011\x01kz\x01\
-@\x02\x07user-idx\x05times2\0,\x04\0\x09send-like\x013\x01@\x03\x08group-idx\x07\
-user-idx\x12reject-add-request(\0,\x04\0\x0eset-group-kick\x014\x01kx\x01@\x03\x08\
-group-idx\x07user-idx\x08duration5\0,\x04\0\x0dset-group-ban\x016\x01k%\x01ks\x01\
-@\x04\x08group-idx\x09anonymous7\x04flag8\x08duration5\0,\x04\0\x17set-group-ano\
-nymous-ban\x019\x01@\x02\x08group-idx\x06enable(\0,\x04\0\x13set-whole-group-ban\
-\x01:\x01@\x03\x08group-idx\x07user-idx\x06enable(\0,\x04\0\x0fset-group-admin\x01\
-;\x04\0\x13set-group-anonymous\x01:\x01@\x03\x08group-idx\x07user-idx\x04card8\0\
-,\x04\0\x0eset-group-card\x01<\x01@\x02\x08group-idx\x0agroup-names\0,\x04\0\x0e\
-set-group-name\x01=\x01@\x02\x08group-idx\x0ais-dismiss(\0,\x04\0\x0fset-group-l\
-eave\x01>\x01@\x04\x08group-idx\x07user-idx\x0dspecial-title8\x08duration5\0,\x04\
-\0\x17set-group-special-title\x01?\x01@\x03\x04flags\x07approve(\x06remark8\0,\x04\
-\0\x16set-friend-add-request\x01@\x01@\x04\x04flags\x08sub-type'\x07approve(\x06\
-reason8\0,\x04\0\x15set-group-add-request\x01A\x01j\x01\x07\x01s\x01@\0\0\xc2\0\x04\
-\0\x0eget-login-info\x01C\x01j\x01\x09\x01s\x01@\x02\x07user-idx\x08no-cache(\0\xc4\
-\0\x04\0\x11get-stranger-info\x01E\x01p\x0b\x01j\x01\xc6\0\x01s\x01@\0\0\xc7\0\x04\
-\0\x0fget-friend-list\x01H\x01j\x01\x0d\x01s\x01@\x02\x08group-idx\x08no-cache(\0\
-\xc9\0\x04\0\x0eget-group-info\x01J\x01p\x0d\x01j\x01\xcb\0\x01s\x01@\0\0\xcc\0\x04\
-\0\x0eget-group-list\x01M\x01j\x01\x0f\x01s\x01@\x03\x08group-idx\x07user-idx\x08\
-no-cache(\0\xce\0\x04\0\x15get-group-member-info\x01O\x01p\x0f\x01j\x01\xd0\0\x01\
-s\x01@\x01\x08group-idx\0\xd1\0\x04\0\x15get-group-member-list\x01R\x01j\x01\x11\
-\x01s\x01@\x02\x08group-idx\x0ahonor-type\x13\0\xd3\0\x04\0\x14get-group-honor-i\
-nfo\x01T\x01j\x01\x15\x01s\x01@\x01\x06domain8\0\xd5\0\x04\0\x0bget-cookies\x01V\
-\x01j\x01\x17\x01s\x01@\0\0\xd7\0\x04\0\x0eget-csrf-token\x01X\x01j\x01\x19\x01s\
-\x01@\x01\x06domain8\0\xd9\0\x04\0\x0fget-credentials\x01Z\x01j\x01\x1b\x01s\x01\
-@\x02\x04files\x0aout-format\x1d\0\xdb\0\x04\0\x0aget-record\x01\\\x01@\x01\x04f\
-iles\0\xdb\0\x04\0\x09get-image\x01]\x01j\x01\x1f\x01s\x01@\0\0\xde\0\x04\0\x0ec\
-an-send-image\x01_\x04\0\x0fcan-send-record\x01_\x01j\x01!\x01s\x01@\0\0\xe0\0\x04\
-\0\x0aget-status\x01a\x01j\x01#\x01s\x01@\0\0\xe2\0\x04\0\x10get-version-info\x01\
-c\x01@\x01\x05delay2\0,\x04\0\x0bset-restart\x01d\x01@\0\0,\x04\0\x0bclean-cache\
-\x01e\x03\0\x1bflow-bot:onebot11/api@0.1.0\x05\x15\x01B\x08\x01p}\x01j\0\x01s\x01\
-@\x01\x05event\0\0\x01\x04\0\x0chandle-event\x01\x02\x01@\0\0s\x04\0\x0bplugin-n\
-ame\x01\x03\x04\0\x0eplugin-version\x01\x03\x04\0\x0bplugin-desc\x01\x03\x04\0%f\
-low-bot:onebot11/event-handler@0.1.0\x05\x16\x04\0'flow-bot:onebot11/onebot11-pl\
-ugin@0.1.0\x04\0\x0b\x15\x01\0\x0fonebot11-plugin\x03\0\0\0G\x09producers\x01\x0c\
-processed-by\x02\x0dwit-component\x070.245.1\x10wit-bindgen-rust\x060.53.1";
+m\x02\x03add\x06invite\x04\0\x16group-request-sub-type\x03\0C\x01r\x01\x04texts\x04\
+\0\x0ctext-segment\x03\0E\x01r\x01\x02ids\x04\0\x0cface-segment\x03\0G\x01r\x01\x04\
+files\x04\0\x0dimage-segment\x03\0I\x01r\x01\x04files\x04\0\x0erecord-segment\x03\
+\0K\x01r\x01\x04files\x04\0\x0dvideo-segment\x03\0M\x01r\x01\x02qqs\x04\0\x0aat-\
+segment\x03\0O\x01r\0\x04\0\x0cdice-segment\x03\0Q\x01r\0\x04\0\x0dshake-segment\
+\x03\0S\x01r\x02\x02tys\x02ids\x04\0\x0cpoke-segment\x03\0U\x01r\0\x04\0\x11anon\
+ymous-segment\x03\0W\x01r\x02\x03urls\x05titles\x04\0\x0dshare-segment\x03\0Y\x01\
+m\x02\x02qq\x05group\x04\0\x0ccontact-type\x03\0[\x01r\x02\x02ty\xdc\0\x02ids\x04\
+\0\x0fcontact-segment\x03\0]\x01r\x04\x03lats\x03lons\x05title\x02\x07content\x02\
+\x04\0\x10location-segment\x03\0_\x01r\x05\x02tys\x02id\x02\x03url\x02\x05audio\x02\
+\x05title\x02\x04\0\x0dmusic-segment\x03\0a\x01r\x01\x02ids\x04\0\x0dreply-segme\
+nt\x03\0c\x01r\x01\x02ids\x04\0\x0fforward-segment\x03\0e\x01r\x01\x02ids\x04\0\x0c\
+node-segment\x03\0g\x01r\x01\x04datas\x04\0\x0bxml-segment\x03\0i\x01r\x01\x04da\
+tas\x04\0\x0cjson-segment\x03\0k\x01q\x13\x04text\x01\xc6\0\0\x04face\x01\xc8\0\0\
+\x05image\x01\xca\0\0\x06record\x01\xcc\0\0\x05video\x01\xce\0\0\x02at\x01\xd0\0\
+\0\x04dice\x01\xd2\0\0\x05shake\x01\xd4\0\0\x04poke\x01\xd6\0\0\x09anonymous\x01\
+\xd8\0\0\x05share\x01\xda\0\0\x07contact\x01\xde\0\0\x08location\x01\xe0\0\0\x05\
+music\x01\xe2\0\0\x05reply\x01\xe4\0\0\x07forward\x01\xe6\0\0\x04node\x01\xe8\0\0\
+\x03xml\x01\xea\0\0\x04json\x01\xec\0\0\x04\0\x0fmessage-segment\x03\0m\x01p\xee\
+\0\x04\0\x07message\x03\0o\x03\0\x1dflow-bot:onebot11/types@0.1.0\x05\0\x02\x03\0\
+\0\x15send-message-response\x02\x03\0\0\x14get-message-response\x02\x03\0\0\x14g\
+et-forward-response\x02\x03\0\0\x0alogin-info\x02\x03\0\0\x0dstranger-info\x02\x03\
+\0\0\x0bfriend-info\x02\x03\0\0\x13group-info-response\x02\x03\0\0\x11group-memb\
+er-info\x02\x03\0\0\x10group-honor-info\x02\x03\0\0\x10group-honor-type\x02\x03\0\
+\0\x14get-cookies-response\x02\x03\0\0\x17get-csrf-token-response\x02\x03\0\0\x18\
+get-credentials-response\x02\x03\0\0\x11get-file-response\x02\x03\0\0\x0drecord-\
+format\x02\x03\0\0\x11can-send-response\x02\x03\0\0\x0abot-status\x02\x03\0\0\x0c\
+version-info\x02\x03\0\0\x14group-anonymous-info\x02\x03\0\0\x16group-request-su\
+b-type\x02\x03\0\0\x07message\x01B\x8d\x01\x02\x03\x02\x01\x01\x04\0\x15send-mes\
+sage-response\x03\0\0\x02\x03\x02\x01\x02\x04\0\x14get-message-response\x03\0\x02\
+\x02\x03\x02\x01\x03\x04\0\x14get-forward-response\x03\0\x04\x02\x03\x02\x01\x04\
+\x04\0\x0alogin-info\x03\0\x06\x02\x03\x02\x01\x05\x04\0\x0dstranger-info\x03\0\x08\
+\x02\x03\x02\x01\x06\x04\0\x0bfriend-info\x03\0\x0a\x02\x03\x02\x01\x07\x04\0\x13\
+group-info-response\x03\0\x0c\x02\x03\x02\x01\x08\x04\0\x11group-member-info\x03\
+\0\x0e\x02\x03\x02\x01\x09\x04\0\x10group-honor-info\x03\0\x10\x02\x03\x02\x01\x0a\
+\x04\0\x10group-honor-type\x03\0\x12\x02\x03\x02\x01\x0b\x04\0\x14get-cookies-re\
+sponse\x03\0\x14\x02\x03\x02\x01\x0c\x04\0\x17get-csrf-token-response\x03\0\x16\x02\
+\x03\x02\x01\x0d\x04\0\x18get-credentials-response\x03\0\x18\x02\x03\x02\x01\x0e\
+\x04\0\x11get-file-response\x03\0\x1a\x02\x03\x02\x01\x0f\x04\0\x0drecord-format\
+\x03\0\x1c\x02\x03\x02\x01\x10\x04\0\x11can-send-response\x03\0\x1e\x02\x03\x02\x01\
+\x11\x04\0\x0abot-status\x03\0\x20\x02\x03\x02\x01\x12\x04\0\x0cversion-info\x03\
+\0\"\x02\x03\x02\x01\x13\x04\0\x14group-anonymous-info\x03\0$\x02\x03\x02\x01\x14\
+\x04\0\x16group-request-sub-type\x03\0&\x02\x03\x02\x01\x15\x04\0\x07message\x03\
+\0(\x01k\x7f\x01j\x01\x01\x01s\x01@\x03\x07user-idx\x07message)\x0bauto-escape*\0\
++\x04\0\x14send-private-message\x01,\x01@\x03\x08group-idx\x07message)\x0bauto-e\
+scape*\0+\x04\0\x12send-group-message\x01-\x01j\0\x01s\x01@\x01\x0amessage-idx\0\
+.\x04\0\x0edelete-message\x01/\x01j\x01\x03\x01s\x01@\x01\x0amessage-idx\00\x04\0\
+\x0bget-message\x011\x01j\x01\x05\x01s\x01@\x01\x0amessage-idx\02\x04\0\x13get-f\
+orward-message\x013\x01kz\x01@\x02\x07user-idx\x05times4\0.\x04\0\x09send-like\x01\
+5\x01@\x03\x08group-idx\x07user-idx\x12reject-add-request*\0.\x04\0\x0eset-group\
+-kick\x016\x01kx\x01@\x03\x08group-idx\x07user-idx\x08duration7\0.\x04\0\x0dset-\
+group-ban\x018\x01k%\x01ks\x01@\x04\x08group-idx\x09anonymous9\x04flag:\x08durat\
+ion7\0.\x04\0\x17set-group-anonymous-ban\x01;\x01@\x02\x08group-idx\x06enable*\0\
+.\x04\0\x13set-whole-group-ban\x01<\x01@\x03\x08group-idx\x07user-idx\x06enable*\
+\0.\x04\0\x0fset-group-admin\x01=\x04\0\x13set-group-anonymous\x01<\x01@\x03\x08\
+group-idx\x07user-idx\x04card:\0.\x04\0\x0eset-group-card\x01>\x01@\x02\x08group\
+-idx\x0agroup-names\0.\x04\0\x0eset-group-name\x01?\x01@\x02\x08group-idx\x0ais-\
+dismiss*\0.\x04\0\x0fset-group-leave\x01@\x01@\x04\x08group-idx\x07user-idx\x0ds\
+pecial-title:\x08duration7\0.\x04\0\x17set-group-special-title\x01A\x01@\x03\x04\
+flags\x07approve*\x06remark:\0.\x04\0\x16set-friend-add-request\x01B\x01@\x04\x04\
+flags\x08sub-type'\x07approve*\x06reason:\0.\x04\0\x15set-group-add-request\x01C\
+\x01j\x01\x07\x01s\x01@\0\0\xc4\0\x04\0\x0eget-login-info\x01E\x01j\x01\x09\x01s\
+\x01@\x02\x07user-idx\x08no-cache*\0\xc6\0\x04\0\x11get-stranger-info\x01G\x01p\x0b\
+\x01j\x01\xc8\0\x01s\x01@\0\0\xc9\0\x04\0\x0fget-friend-list\x01J\x01j\x01\x0d\x01\
+s\x01@\x02\x08group-idx\x08no-cache*\0\xcb\0\x04\0\x0eget-group-info\x01L\x01p\x0d\
+\x01j\x01\xcd\0\x01s\x01@\0\0\xce\0\x04\0\x0eget-group-list\x01O\x01j\x01\x0f\x01\
+s\x01@\x03\x08group-idx\x07user-idx\x08no-cache*\0\xd0\0\x04\0\x15get-group-memb\
+er-info\x01Q\x01p\x0f\x01j\x01\xd2\0\x01s\x01@\x01\x08group-idx\0\xd3\0\x04\0\x15\
+get-group-member-list\x01T\x01j\x01\x11\x01s\x01@\x02\x08group-idx\x0ahonor-type\
+\x13\0\xd5\0\x04\0\x14get-group-honor-info\x01V\x01j\x01\x15\x01s\x01@\x01\x06do\
+main:\0\xd7\0\x04\0\x0bget-cookies\x01X\x01j\x01\x17\x01s\x01@\0\0\xd9\0\x04\0\x0e\
+get-csrf-token\x01Z\x01j\x01\x19\x01s\x01@\x01\x06domain:\0\xdb\0\x04\0\x0fget-c\
+redentials\x01\\\x01j\x01\x1b\x01s\x01@\x02\x04files\x0aout-format\x1d\0\xdd\0\x04\
+\0\x0aget-record\x01^\x01@\x01\x04files\0\xdd\0\x04\0\x09get-image\x01_\x01j\x01\
+\x1f\x01s\x01@\0\0\xe0\0\x04\0\x0ecan-send-image\x01a\x04\0\x0fcan-send-record\x01\
+a\x01j\x01!\x01s\x01@\0\0\xe2\0\x04\0\x0aget-status\x01c\x01j\x01#\x01s\x01@\0\0\
+\xe4\0\x04\0\x10get-version-info\x01e\x01@\x01\x05delay4\0.\x04\0\x0bset-restart\
+\x01f\x01@\0\0.\x04\0\x0bclean-cache\x01g\x03\0\x1bflow-bot:onebot11/api@0.1.0\x05\
+\x16\x01B\x0b\x01j\0\x01s\x01@\0\0\0\x04\0\x04init\x01\x01\x04\0\x07cleanup\x01\x01\
+\x01p}\x01@\x01\x05event\x02\0\0\x04\0\x0chandle-event\x01\x03\x01@\0\0s\x04\0\x0b\
+plugin-name\x01\x04\x04\0\x0eplugin-version\x01\x04\x04\0\x0bplugin-desc\x01\x04\
+\x04\0%flow-bot:onebot11/event-handler@0.1.0\x05\x17\x04\0'flow-bot:onebot11/one\
+bot11-plugin@0.1.0\x04\0\x0b\x15\x01\0\x0fonebot11-plugin\x03\0\0\0G\x09producer\
+s\x01\x0cprocessed-by\x02\x0dwit-component\x070.245.1\x10wit-bindgen-rust\x060.5\
+3.1";
   };
   )
 }
@@ -7620,9 +7171,9 @@ pub use __export_onebot11_plugin_impl as export;
 #[unsafe(link_section = "component-type:wit-bindgen:0.53.1:flow-bot:onebot11@0.1.0:onebot11-plugin-with-all-of-its-exports-removed:encoded world")]
 #[doc(hidden)]
 #[allow(clippy::octal_escapes)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 4717] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xc7#\x01A\x02\x01A\x18\
-\x01BE\x01m\x03\x02ok\x05async\x06failed\x04\0\x0eapi-ret-status\x03\0\0\x01ks\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 5566] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x98*\x01A\x02\x01A\x19\
+\x01Bq\x01m\x03\x02ok\x05async\x06failed\x04\0\x0eapi-ret-status\x03\0\0\x01ks\x01\
 r\x03\x06status\x01\x07retcodez\x04echo\x02\x04\0\x0capi-response\x03\0\x03\x01k\
 \x7f\x01o\x02ss\x01p\x06\x01r\x03\x06online\x05\x04good\x7f\x0aextra-data\x07\x04\
 \0\x0abot-status\x03\0\x08\x01r\x01\x0amessage-idx\x04\0\x15send-message-respons\
@@ -7655,71 +7206,92 @@ se\x03\09\x01r\x01\x04files\x04\0\x11get-file-response\x03\0;\x01m\x08\x03mp3\x0
 amr\x03wma\x03m4a\x03spx\x03ogg\x03wav\x04flac\x04\0\x0drecord-format\x03\0=\x01\
 r\x01\x03yes\x7f\x04\0\x11can-send-response\x03\0?\x01r\x04\x08app-names\x0bapp-\
 versions\x10protocol-versions\x0aextra-data\x07\x04\0\x0cversion-info\x03\0A\x01\
-m\x02\x03add\x06invite\x04\0\x16group-request-sub-type\x03\0C\x03\0\x1dflow-bot:\
-onebot11/types@0.1.0\x05\0\x02\x03\0\0\x15send-message-response\x02\x03\0\0\x14g\
-et-message-response\x02\x03\0\0\x14get-forward-response\x02\x03\0\0\x0alogin-inf\
-o\x02\x03\0\0\x0dstranger-info\x02\x03\0\0\x0bfriend-info\x02\x03\0\0\x13group-i\
-nfo-response\x02\x03\0\0\x11group-member-info\x02\x03\0\0\x10group-honor-info\x02\
-\x03\0\0\x10group-honor-type\x02\x03\0\0\x14get-cookies-response\x02\x03\0\0\x17\
-get-csrf-token-response\x02\x03\0\0\x18get-credentials-response\x02\x03\0\0\x11g\
-et-file-response\x02\x03\0\0\x0drecord-format\x02\x03\0\0\x11can-send-response\x02\
-\x03\0\0\x0abot-status\x02\x03\0\0\x0cversion-info\x02\x03\0\0\x14group-anonymou\
-s-info\x02\x03\0\0\x16group-request-sub-type\x01B\x8b\x01\x02\x03\x02\x01\x01\x04\
-\0\x15send-message-response\x03\0\0\x02\x03\x02\x01\x02\x04\0\x14get-message-res\
-ponse\x03\0\x02\x02\x03\x02\x01\x03\x04\0\x14get-forward-response\x03\0\x04\x02\x03\
-\x02\x01\x04\x04\0\x0alogin-info\x03\0\x06\x02\x03\x02\x01\x05\x04\0\x0dstranger\
--info\x03\0\x08\x02\x03\x02\x01\x06\x04\0\x0bfriend-info\x03\0\x0a\x02\x03\x02\x01\
-\x07\x04\0\x13group-info-response\x03\0\x0c\x02\x03\x02\x01\x08\x04\0\x11group-m\
-ember-info\x03\0\x0e\x02\x03\x02\x01\x09\x04\0\x10group-honor-info\x03\0\x10\x02\
-\x03\x02\x01\x0a\x04\0\x10group-honor-type\x03\0\x12\x02\x03\x02\x01\x0b\x04\0\x14\
-get-cookies-response\x03\0\x14\x02\x03\x02\x01\x0c\x04\0\x17get-csrf-token-respo\
-nse\x03\0\x16\x02\x03\x02\x01\x0d\x04\0\x18get-credentials-response\x03\0\x18\x02\
-\x03\x02\x01\x0e\x04\0\x11get-file-response\x03\0\x1a\x02\x03\x02\x01\x0f\x04\0\x0d\
-record-format\x03\0\x1c\x02\x03\x02\x01\x10\x04\0\x11can-send-response\x03\0\x1e\
-\x02\x03\x02\x01\x11\x04\0\x0abot-status\x03\0\x20\x02\x03\x02\x01\x12\x04\0\x0c\
-version-info\x03\0\"\x02\x03\x02\x01\x13\x04\0\x14group-anonymous-info\x03\0$\x02\
-\x03\x02\x01\x14\x04\0\x16group-request-sub-type\x03\0&\x01k\x7f\x01j\x01\x01\x01\
-s\x01@\x03\x07user-idx\x07messages\x0bauto-escape(\0)\x04\0\x14send-private-mess\
-age\x01*\x01@\x03\x08group-idx\x07messages\x0bauto-escape(\0)\x04\0\x12send-grou\
-p-message\x01+\x01j\0\x01s\x01@\x01\x0amessage-idx\0,\x04\0\x0edelete-message\x01\
--\x01j\x01\x03\x01s\x01@\x01\x0amessage-idx\0.\x04\0\x0bget-message\x01/\x01j\x01\
-\x05\x01s\x01@\x01\x0amessage-idx\00\x04\0\x13get-forward-message\x011\x01kz\x01\
-@\x02\x07user-idx\x05times2\0,\x04\0\x09send-like\x013\x01@\x03\x08group-idx\x07\
-user-idx\x12reject-add-request(\0,\x04\0\x0eset-group-kick\x014\x01kx\x01@\x03\x08\
-group-idx\x07user-idx\x08duration5\0,\x04\0\x0dset-group-ban\x016\x01k%\x01ks\x01\
-@\x04\x08group-idx\x09anonymous7\x04flag8\x08duration5\0,\x04\0\x17set-group-ano\
-nymous-ban\x019\x01@\x02\x08group-idx\x06enable(\0,\x04\0\x13set-whole-group-ban\
-\x01:\x01@\x03\x08group-idx\x07user-idx\x06enable(\0,\x04\0\x0fset-group-admin\x01\
-;\x04\0\x13set-group-anonymous\x01:\x01@\x03\x08group-idx\x07user-idx\x04card8\0\
-,\x04\0\x0eset-group-card\x01<\x01@\x02\x08group-idx\x0agroup-names\0,\x04\0\x0e\
-set-group-name\x01=\x01@\x02\x08group-idx\x0ais-dismiss(\0,\x04\0\x0fset-group-l\
-eave\x01>\x01@\x04\x08group-idx\x07user-idx\x0dspecial-title8\x08duration5\0,\x04\
-\0\x17set-group-special-title\x01?\x01@\x03\x04flags\x07approve(\x06remark8\0,\x04\
-\0\x16set-friend-add-request\x01@\x01@\x04\x04flags\x08sub-type'\x07approve(\x06\
-reason8\0,\x04\0\x15set-group-add-request\x01A\x01j\x01\x07\x01s\x01@\0\0\xc2\0\x04\
-\0\x0eget-login-info\x01C\x01j\x01\x09\x01s\x01@\x02\x07user-idx\x08no-cache(\0\xc4\
-\0\x04\0\x11get-stranger-info\x01E\x01p\x0b\x01j\x01\xc6\0\x01s\x01@\0\0\xc7\0\x04\
-\0\x0fget-friend-list\x01H\x01j\x01\x0d\x01s\x01@\x02\x08group-idx\x08no-cache(\0\
-\xc9\0\x04\0\x0eget-group-info\x01J\x01p\x0d\x01j\x01\xcb\0\x01s\x01@\0\0\xcc\0\x04\
-\0\x0eget-group-list\x01M\x01j\x01\x0f\x01s\x01@\x03\x08group-idx\x07user-idx\x08\
-no-cache(\0\xce\0\x04\0\x15get-group-member-info\x01O\x01p\x0f\x01j\x01\xd0\0\x01\
-s\x01@\x01\x08group-idx\0\xd1\0\x04\0\x15get-group-member-list\x01R\x01j\x01\x11\
-\x01s\x01@\x02\x08group-idx\x0ahonor-type\x13\0\xd3\0\x04\0\x14get-group-honor-i\
-nfo\x01T\x01j\x01\x15\x01s\x01@\x01\x06domain8\0\xd5\0\x04\0\x0bget-cookies\x01V\
-\x01j\x01\x17\x01s\x01@\0\0\xd7\0\x04\0\x0eget-csrf-token\x01X\x01j\x01\x19\x01s\
-\x01@\x01\x06domain8\0\xd9\0\x04\0\x0fget-credentials\x01Z\x01j\x01\x1b\x01s\x01\
-@\x02\x04files\x0aout-format\x1d\0\xdb\0\x04\0\x0aget-record\x01\\\x01@\x01\x04f\
-iles\0\xdb\0\x04\0\x09get-image\x01]\x01j\x01\x1f\x01s\x01@\0\0\xde\0\x04\0\x0ec\
-an-send-image\x01_\x04\0\x0fcan-send-record\x01_\x01j\x01!\x01s\x01@\0\0\xe0\0\x04\
-\0\x0aget-status\x01a\x01j\x01#\x01s\x01@\0\0\xe2\0\x04\0\x10get-version-info\x01\
-c\x01@\x01\x05delay2\0,\x04\0\x0bset-restart\x01d\x01@\0\0,\x04\0\x0bclean-cache\
-\x01e\x03\0\x1bflow-bot:onebot11/api@0.1.0\x05\x15\x04\0Gflow-bot:onebot11/onebo\
-t11-plugin-with-all-of-its-exports-removed@0.1.0\x04\0\x0b5\x01\0/onebot11-plugi\
-n-with-all-of-its-exports-removed\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\
-\x0dwit-component\x070.245.1\x10wit-bindgen-rust\x060.53.1";
+m\x02\x03add\x06invite\x04\0\x16group-request-sub-type\x03\0C\x01r\x01\x04texts\x04\
+\0\x0ctext-segment\x03\0E\x01r\x01\x02ids\x04\0\x0cface-segment\x03\0G\x01r\x01\x04\
+files\x04\0\x0dimage-segment\x03\0I\x01r\x01\x04files\x04\0\x0erecord-segment\x03\
+\0K\x01r\x01\x04files\x04\0\x0dvideo-segment\x03\0M\x01r\x01\x02qqs\x04\0\x0aat-\
+segment\x03\0O\x01r\0\x04\0\x0cdice-segment\x03\0Q\x01r\0\x04\0\x0dshake-segment\
+\x03\0S\x01r\x02\x02tys\x02ids\x04\0\x0cpoke-segment\x03\0U\x01r\0\x04\0\x11anon\
+ymous-segment\x03\0W\x01r\x02\x03urls\x05titles\x04\0\x0dshare-segment\x03\0Y\x01\
+m\x02\x02qq\x05group\x04\0\x0ccontact-type\x03\0[\x01r\x02\x02ty\xdc\0\x02ids\x04\
+\0\x0fcontact-segment\x03\0]\x01r\x04\x03lats\x03lons\x05title\x02\x07content\x02\
+\x04\0\x10location-segment\x03\0_\x01r\x05\x02tys\x02id\x02\x03url\x02\x05audio\x02\
+\x05title\x02\x04\0\x0dmusic-segment\x03\0a\x01r\x01\x02ids\x04\0\x0dreply-segme\
+nt\x03\0c\x01r\x01\x02ids\x04\0\x0fforward-segment\x03\0e\x01r\x01\x02ids\x04\0\x0c\
+node-segment\x03\0g\x01r\x01\x04datas\x04\0\x0bxml-segment\x03\0i\x01r\x01\x04da\
+tas\x04\0\x0cjson-segment\x03\0k\x01q\x13\x04text\x01\xc6\0\0\x04face\x01\xc8\0\0\
+\x05image\x01\xca\0\0\x06record\x01\xcc\0\0\x05video\x01\xce\0\0\x02at\x01\xd0\0\
+\0\x04dice\x01\xd2\0\0\x05shake\x01\xd4\0\0\x04poke\x01\xd6\0\0\x09anonymous\x01\
+\xd8\0\0\x05share\x01\xda\0\0\x07contact\x01\xde\0\0\x08location\x01\xe0\0\0\x05\
+music\x01\xe2\0\0\x05reply\x01\xe4\0\0\x07forward\x01\xe6\0\0\x04node\x01\xe8\0\0\
+\x03xml\x01\xea\0\0\x04json\x01\xec\0\0\x04\0\x0fmessage-segment\x03\0m\x01p\xee\
+\0\x04\0\x07message\x03\0o\x03\0\x1dflow-bot:onebot11/types@0.1.0\x05\0\x02\x03\0\
+\0\x15send-message-response\x02\x03\0\0\x14get-message-response\x02\x03\0\0\x14g\
+et-forward-response\x02\x03\0\0\x0alogin-info\x02\x03\0\0\x0dstranger-info\x02\x03\
+\0\0\x0bfriend-info\x02\x03\0\0\x13group-info-response\x02\x03\0\0\x11group-memb\
+er-info\x02\x03\0\0\x10group-honor-info\x02\x03\0\0\x10group-honor-type\x02\x03\0\
+\0\x14get-cookies-response\x02\x03\0\0\x17get-csrf-token-response\x02\x03\0\0\x18\
+get-credentials-response\x02\x03\0\0\x11get-file-response\x02\x03\0\0\x0drecord-\
+format\x02\x03\0\0\x11can-send-response\x02\x03\0\0\x0abot-status\x02\x03\0\0\x0c\
+version-info\x02\x03\0\0\x14group-anonymous-info\x02\x03\0\0\x16group-request-su\
+b-type\x02\x03\0\0\x07message\x01B\x8d\x01\x02\x03\x02\x01\x01\x04\0\x15send-mes\
+sage-response\x03\0\0\x02\x03\x02\x01\x02\x04\0\x14get-message-response\x03\0\x02\
+\x02\x03\x02\x01\x03\x04\0\x14get-forward-response\x03\0\x04\x02\x03\x02\x01\x04\
+\x04\0\x0alogin-info\x03\0\x06\x02\x03\x02\x01\x05\x04\0\x0dstranger-info\x03\0\x08\
+\x02\x03\x02\x01\x06\x04\0\x0bfriend-info\x03\0\x0a\x02\x03\x02\x01\x07\x04\0\x13\
+group-info-response\x03\0\x0c\x02\x03\x02\x01\x08\x04\0\x11group-member-info\x03\
+\0\x0e\x02\x03\x02\x01\x09\x04\0\x10group-honor-info\x03\0\x10\x02\x03\x02\x01\x0a\
+\x04\0\x10group-honor-type\x03\0\x12\x02\x03\x02\x01\x0b\x04\0\x14get-cookies-re\
+sponse\x03\0\x14\x02\x03\x02\x01\x0c\x04\0\x17get-csrf-token-response\x03\0\x16\x02\
+\x03\x02\x01\x0d\x04\0\x18get-credentials-response\x03\0\x18\x02\x03\x02\x01\x0e\
+\x04\0\x11get-file-response\x03\0\x1a\x02\x03\x02\x01\x0f\x04\0\x0drecord-format\
+\x03\0\x1c\x02\x03\x02\x01\x10\x04\0\x11can-send-response\x03\0\x1e\x02\x03\x02\x01\
+\x11\x04\0\x0abot-status\x03\0\x20\x02\x03\x02\x01\x12\x04\0\x0cversion-info\x03\
+\0\"\x02\x03\x02\x01\x13\x04\0\x14group-anonymous-info\x03\0$\x02\x03\x02\x01\x14\
+\x04\0\x16group-request-sub-type\x03\0&\x02\x03\x02\x01\x15\x04\0\x07message\x03\
+\0(\x01k\x7f\x01j\x01\x01\x01s\x01@\x03\x07user-idx\x07message)\x0bauto-escape*\0\
++\x04\0\x14send-private-message\x01,\x01@\x03\x08group-idx\x07message)\x0bauto-e\
+scape*\0+\x04\0\x12send-group-message\x01-\x01j\0\x01s\x01@\x01\x0amessage-idx\0\
+.\x04\0\x0edelete-message\x01/\x01j\x01\x03\x01s\x01@\x01\x0amessage-idx\00\x04\0\
+\x0bget-message\x011\x01j\x01\x05\x01s\x01@\x01\x0amessage-idx\02\x04\0\x13get-f\
+orward-message\x013\x01kz\x01@\x02\x07user-idx\x05times4\0.\x04\0\x09send-like\x01\
+5\x01@\x03\x08group-idx\x07user-idx\x12reject-add-request*\0.\x04\0\x0eset-group\
+-kick\x016\x01kx\x01@\x03\x08group-idx\x07user-idx\x08duration7\0.\x04\0\x0dset-\
+group-ban\x018\x01k%\x01ks\x01@\x04\x08group-idx\x09anonymous9\x04flag:\x08durat\
+ion7\0.\x04\0\x17set-group-anonymous-ban\x01;\x01@\x02\x08group-idx\x06enable*\0\
+.\x04\0\x13set-whole-group-ban\x01<\x01@\x03\x08group-idx\x07user-idx\x06enable*\
+\0.\x04\0\x0fset-group-admin\x01=\x04\0\x13set-group-anonymous\x01<\x01@\x03\x08\
+group-idx\x07user-idx\x04card:\0.\x04\0\x0eset-group-card\x01>\x01@\x02\x08group\
+-idx\x0agroup-names\0.\x04\0\x0eset-group-name\x01?\x01@\x02\x08group-idx\x0ais-\
+dismiss*\0.\x04\0\x0fset-group-leave\x01@\x01@\x04\x08group-idx\x07user-idx\x0ds\
+pecial-title:\x08duration7\0.\x04\0\x17set-group-special-title\x01A\x01@\x03\x04\
+flags\x07approve*\x06remark:\0.\x04\0\x16set-friend-add-request\x01B\x01@\x04\x04\
+flags\x08sub-type'\x07approve*\x06reason:\0.\x04\0\x15set-group-add-request\x01C\
+\x01j\x01\x07\x01s\x01@\0\0\xc4\0\x04\0\x0eget-login-info\x01E\x01j\x01\x09\x01s\
+\x01@\x02\x07user-idx\x08no-cache*\0\xc6\0\x04\0\x11get-stranger-info\x01G\x01p\x0b\
+\x01j\x01\xc8\0\x01s\x01@\0\0\xc9\0\x04\0\x0fget-friend-list\x01J\x01j\x01\x0d\x01\
+s\x01@\x02\x08group-idx\x08no-cache*\0\xcb\0\x04\0\x0eget-group-info\x01L\x01p\x0d\
+\x01j\x01\xcd\0\x01s\x01@\0\0\xce\0\x04\0\x0eget-group-list\x01O\x01j\x01\x0f\x01\
+s\x01@\x03\x08group-idx\x07user-idx\x08no-cache*\0\xd0\0\x04\0\x15get-group-memb\
+er-info\x01Q\x01p\x0f\x01j\x01\xd2\0\x01s\x01@\x01\x08group-idx\0\xd3\0\x04\0\x15\
+get-group-member-list\x01T\x01j\x01\x11\x01s\x01@\x02\x08group-idx\x0ahonor-type\
+\x13\0\xd5\0\x04\0\x14get-group-honor-info\x01V\x01j\x01\x15\x01s\x01@\x01\x06do\
+main:\0\xd7\0\x04\0\x0bget-cookies\x01X\x01j\x01\x17\x01s\x01@\0\0\xd9\0\x04\0\x0e\
+get-csrf-token\x01Z\x01j\x01\x19\x01s\x01@\x01\x06domain:\0\xdb\0\x04\0\x0fget-c\
+redentials\x01\\\x01j\x01\x1b\x01s\x01@\x02\x04files\x0aout-format\x1d\0\xdd\0\x04\
+\0\x0aget-record\x01^\x01@\x01\x04files\0\xdd\0\x04\0\x09get-image\x01_\x01j\x01\
+\x1f\x01s\x01@\0\0\xe0\0\x04\0\x0ecan-send-image\x01a\x04\0\x0fcan-send-record\x01\
+a\x01j\x01!\x01s\x01@\0\0\xe2\0\x04\0\x0aget-status\x01c\x01j\x01#\x01s\x01@\0\0\
+\xe4\0\x04\0\x10get-version-info\x01e\x01@\x01\x05delay4\0.\x04\0\x0bset-restart\
+\x01f\x01@\0\0.\x04\0\x0bclean-cache\x01g\x03\0\x1bflow-bot:onebot11/api@0.1.0\x05\
+\x16\x04\0Gflow-bot:onebot11/onebot11-plugin-with-all-of-its-exports-removed@0.1\
+.0\x04\0\x0b5\x01\0/onebot11-plugin-with-all-of-its-exports-removed\x03\0\0\0G\x09\
+producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.245.1\x10wit-bindgen-rus\
+t\x060.53.1";
 
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
-    wit_bindgen::rt::maybe_link_cabi_realloc();
+  wit_bindgen::rt::maybe_link_cabi_realloc();
 }
+

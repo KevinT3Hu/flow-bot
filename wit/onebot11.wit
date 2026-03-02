@@ -226,6 +226,139 @@ interface types {
         add,
         invite,
     }
+
+    // ========== Message Segment Types ==========
+
+    /// Text segment
+    record text-segment {
+        text: string,
+    }
+
+    /// Face/emoji segment
+    record face-segment {
+        id: string,
+    }
+
+    /// Image segment
+    record image-segment {
+        file: string,
+    }
+
+    /// Record/voice segment
+    record record-segment {
+        file: string,
+    }
+
+    /// Video segment
+    record video-segment {
+        file: string,
+    }
+
+    /// At/mention segment
+    record at-segment {
+        qq: string,
+    }
+
+    /// Dice segment
+    record dice-segment {}
+
+    /// Shake segment
+    record shake-segment {}
+
+    /// Poke segment
+    record poke-segment {
+        ty: string,
+        id: string,
+    }
+
+    /// Anonymous segment
+    record anonymous-segment {}
+
+    /// Share segment
+    record share-segment {
+        url: string,
+        title: string,
+    }
+
+    /// Contact type
+    enum contact-type {
+        qq,
+        group,
+    }
+
+    /// Contact segment
+    record contact-segment {
+        ty: contact-type,
+        id: string,
+    }
+
+    /// Location segment
+    record location-segment {
+        lat: string,
+        lon: string,
+        title: option<string>,
+        content: option<string>,
+    }
+
+    /// Music segment
+    record music-segment {
+        ty: string,
+        id: option<string>,
+        url: option<string>,
+        audio: option<string>,
+        title: option<string>,
+    }
+
+    /// Reply segment
+    record reply-segment {
+        id: string,
+    }
+
+    /// Forward segment
+    record forward-segment {
+        id: string,
+    }
+
+    /// Node segment
+    record node-segment {
+        id: string,
+    }
+
+    /// XML segment
+    record xml-segment {
+        data: string,
+    }
+
+    /// JSON segment
+    record json-segment {
+        data: string,
+    }
+
+    /// Message segment - a single element in a message
+    variant message-segment {
+        text(text-segment),
+        face(face-segment),
+        image(image-segment),
+        %record(record-segment),
+        video(video-segment),
+        at(at-segment),
+        dice(dice-segment),
+        shake(shake-segment),
+        poke(poke-segment),
+        anonymous(anonymous-segment),
+        share(share-segment),
+        contact(contact-segment),
+        location(location-segment),
+        music(music-segment),
+        reply(reply-segment),
+        forward(forward-segment),
+        node(node-segment),
+        xml(xml-segment),
+        json(json-segment),
+    }
+
+    /// Message is a list of segments
+    type message = list<message-segment>;
 }
 
 /// OneBot-11 API interface for bot operations
@@ -251,19 +384,20 @@ interface api {
         version-info,
         group-anonymous-info,
         group-request-sub-type,
+        message,
     };
 
     /// Send a private message to a user
     send-private-message: func(
         user-id: s64,
-        message: string,
+        message: message,
         auto-escape: option<bool>,
     ) -> result<send-message-response, string>;
 
     /// Send a message to a group
     send-group-message: func(
         group-id: s64,
-        message: string,
+        message: message,
         auto-escape: option<bool>,
     ) -> result<send-message-response, string>;
 
@@ -440,6 +574,12 @@ interface api {
 
 /// Event handler interface for plugins
 interface event-handler {
+
+    /// Initializer for the plugin, called when the plugin is loaded
+    init: func() -> result<_, string>;
+
+    /// Cleanup function for the plugin, called when the plugin is unloaded
+    cleanup: func() -> result<_, string>;
 
     /// Handle an incoming OneBot event
     handle-event: func(event: list<u8>) -> result<_, string>;

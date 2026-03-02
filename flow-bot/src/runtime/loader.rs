@@ -115,6 +115,12 @@ impl PluginLoader {
             plugin_desc
         );
 
+        instance
+            .flow_bot_onebot11_event_handler()
+            .call_init(&mut store)
+            .await?
+            .map_err(|e| anyhow!("Plugin {} init failed: {}", plugin_name, e))?;
+
         Ok(LoadedPlugin {
             name: plugin_name,
             version: plugin_version,
@@ -218,6 +224,17 @@ impl LoadedPlugin {
             .await
             .map_err(|e| anyhow!(e).context("Failed to handle event with plugin"))?
             .map_err(|e| anyhow!("Plugin {} returned an error: {}", self.name, e))?;
+
+        Ok(())
+    }
+
+    pub async fn cleanup(&mut self) -> Result<()> {
+        self.instance
+            .flow_bot_onebot11_event_handler()
+            .call_cleanup(&mut self.store)
+            .await
+            .map_err(|e| anyhow!(e).context("Failed to call plugin cleanup"))?
+            .map_err(|e| anyhow!("Plugin {} cleanup returned an error: {}", self.name, e))?;
 
         Ok(())
     }
