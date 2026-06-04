@@ -4,12 +4,10 @@ use dashmap::DashMap;
 use turso::Database;
 
 use crate::{
-    base::{
-        context::BotContext,
-        extract::{FromEvent, State},
-    },
+    base::context::BotContext,
     error::FlowError,
     event::BotEvent,
+    extract::{FromEvent, State},
 };
 
 pub(crate) struct TursoDispatcher {

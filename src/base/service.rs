@@ -8,7 +8,7 @@ use super::{context::BotContext, handler::HandlerControl};
 pub trait Service: Send + Sync {
     /// Extractors are not possible to be used in services but you can call [`FromEvent::from_event`] manually.
     ///
-    /// [`FromEvent::from_event`]: crate::base::extract::FromEvent::from_event
+    /// [`FromEvent::from_event`]: crate::extract::FromEvent::from_event
     async fn serve(&self, context: BotContext, event: BotEvent) -> HandlerControl;
 
     #[allow(unused_variables)]

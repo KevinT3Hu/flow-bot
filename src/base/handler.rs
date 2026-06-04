@@ -1,4 +1,4 @@
-use crate::{base::extract::FromEvent, event::BotEvent};
+use crate::{extract::FromEvent, event::BotEvent};
 use async_trait::async_trait;
 use std::{convert::Infallible, future::Future, ops::FromResidual};
 

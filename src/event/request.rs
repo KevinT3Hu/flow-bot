@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::impl_from_event;
-
 #[derive(Deserialize, Debug, Clone)]
 pub struct FriendRequest {
     pub user_id: i64,
@@ -33,8 +31,4 @@ pub enum Request {
     Group(GroupRequest),
 }
 
-impl_from_event!(Request);
 
-impl_from_event!(Request, Friend, FriendRequest);
-
-impl_from_event!(Request, Group, GroupRequest);

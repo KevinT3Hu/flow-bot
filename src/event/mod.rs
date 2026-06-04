@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use serde::Deserialize;
-
-use crate::base::{context::BotContext, extract::FromEvent};
 
 pub mod message;
 pub mod meta_event;
@@ -44,49 +41,3 @@ pub struct Event {
 }
 
 pub type BotEvent = Arc<Event>;
-
-#[async_trait]
-impl FromEvent for BotEvent {
-    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
-        Some(event)
-    }
-}
-
-#[macro_export]
-macro_rules! impl_from_event {
-    ($event_type:ident) => {
-        #[::async_trait::async_trait]
-        impl $crate::base::extract::FromEvent for $event_type {
-            async fn from_event(
-                _: $crate::base::context::BotContext,
-                event: $crate::event::BotEvent,
-            ) -> Option<Self> {
-                match &event.event {
-                    $crate::event::TypedEvent::$event_type(inner) => Some(inner.clone()),
-                    _ => None,
-                }
-            }
-        }
-    };
-
-    ($event_type:ident,$variant:ident, $variant_type:ident) => {
-        #[::async_trait::async_trait]
-        impl $crate::base::extract::FromEvent for $variant_type {
-            async fn from_event(
-                _: $crate::base::context::BotContext,
-                event: $crate::event::BotEvent,
-            ) -> Option<Self> {
-                match &event.event {
-                    $crate::event::TypedEvent::$event_type($event_type::$variant(inner)) => {
-                        Some(inner.clone())
-                    }
-                    _ => None,
-                }
-            }
-        }
-    };
-
-    ($event_type:ident, $variant:ident) => {
-        impl_from_event!($event_type, $variant, $variant);
-    };
-}

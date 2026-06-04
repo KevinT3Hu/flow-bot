@@ -16,7 +16,11 @@
 //! ```no_run
 //! use flow_bot::{
 //!     FlowBotBuilder,
-//!     base::{connect::ReverseConnectionConfig, extract::Message, handler::HandlerControl},
+//!     base::{
+//!         connect::{ReconnectionStrategy, ReverseConnectionConfig},
+//!         handler::HandlerControl,
+//!     },
+//!     extract::Message,
 //! };
 //!
 //! async fn on_message(msg: Message) -> HandlerControl {
@@ -24,10 +28,12 @@
 //!     HandlerControl::Continue
 //! }
 //!
+//! #[tokio::main(flavor = "current_thread")]
 //! async fn main() {
 //!     let bot = FlowBotBuilder::new(ReverseConnectionConfig {
 //!         target: "ws://localhost:19999".to_string(),
 //!         auth: None,
+//!         reconnection: ReconnectionStrategy::None,
 //!     })
 //!     .with_state(())
 //!     .with_handler(on_message)
@@ -61,17 +67,18 @@
 //! Extractors work similarly to the extractors in axum. They are functions that can be registered to extract data from the event. They are to extract data from the context and event for the handler to use.
 //! To see a full list of predefined extractors, see the [`extract`] module.
 //!
-//! [`extract`]: crate::base::extract
+//! [`extract`]: crate::extract
 //!
 //! ## Using Extractors
 //!
 //! It is already shown in the example above how to use the predefined [`Message`] extractor which extracts the message from the event. It is also possible to use extractors to match event criteria.
 //!
-//! [`Message`]: crate::base::extract::Message
+//! [`Message`]: crate::extract::Message
 //!
 //! ```no_run
 //! use flow_bot::{
-//!    base::extract::MatchGroupId,handler::HandlerControl
+//!    extract::MatchGroupId,
+//!    base::handler::HandlerControl,
 //! };
 //!
 //! async fn on_group_msg(_: MatchGroupId<123>) -> HandlerControl {
@@ -90,7 +97,7 @@
 //! It is also possible to create custom extractors by implementing the [`FromEvent`] trait.
 //! This is an async trait that takes the context and event as arguments and returns a result of the extracted data.
 //!
-//! [`FromEvent`]: crate::base::extract::FromEvent
+//! [`FromEvent`]: crate::extract::FromEvent
 //!
 //! # States
 //!
@@ -102,7 +109,7 @@
 //!
 //! In a handler, a state is accessed by using the [`State`] extractor.
 //!
-//! [`State`]: crate::base::extract::State
+//! [`State`]: crate::extract::State
 //!
 //! There can be multiple states in the bot, each with a unique type.
 //! If the required state is not present in the context, the handler will be skipped.
@@ -146,6 +153,7 @@ pub mod api;
 pub mod base;
 pub mod error;
 pub mod event;
+pub mod extract;
 pub mod extensions;
 pub mod message;
 

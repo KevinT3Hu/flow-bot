@@ -4,7 +4,6 @@ use std::{
     sync::Arc,
 };
 
-use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{SinkExt, stream::SplitSink};
 use serde_json::json;
@@ -17,10 +16,8 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 use crate::{
     api::{ApiResponse, api_ext::ApiExt},
     error::FlowError,
-    event::BotEvent,
 };
 
-use super::extract::FromEvent;
 
 pub struct Context {
     pub(crate) sink: Mutex<Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
@@ -29,7 +26,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub(crate) fn new(mut states: StateMap) -> Self {
+    pub(crate) fn new(states: StateMap) -> Self {
         #[cfg(feature = "turso")]
         {
             use crate::extensions::turso::TursoDispatcher;
@@ -111,13 +108,6 @@ impl Context {
 }
 
 pub type BotContext = Arc<Context>;
-
-#[async_trait]
-impl FromEvent for BotContext {
-    async fn from_event(context: BotContext, _: BotEvent) -> Option<Self> {
-        Some(context)
-    }
-}
 
 pub(crate) struct StateMap {
     map: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,

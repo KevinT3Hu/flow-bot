@@ -2,9 +2,9 @@ use flow_bot::{
     FlowBotBuilder,
     base::{
         connect::{ReconnectionStrategy, ReverseConnectionConfig},
-        extract::MessageBody,
         handler::HandlerControl,
     },
+    extract::MessageBody,
 };
 
 async fn on_message(MessageBody(msg): MessageBody) -> HandlerControl {
