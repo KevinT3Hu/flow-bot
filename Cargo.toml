@@ -32,7 +32,8 @@ flow-bot-macros = { path = "./flow-bot-macros", version = "0.1.0", optional = tr
 tokio = { version = "1.49.0", features = ["rt"] }
 
 [features]
-command = ["clap/derive"]
+nightly = []
+command = ["clap/derive", "nightly"]
 macros = ["dep:flow-bot-macros"]
 turso = ["dep:turso"]
-default = ["command"]
+default = ["macros"]

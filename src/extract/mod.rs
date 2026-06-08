@@ -1,3 +1,4 @@
+#[cfg(feature = "command")]
 pub mod command;
 pub mod event;
 pub mod filters;
@@ -159,9 +160,11 @@ macro_rules! match_one {
     };
 }
 
+#[cfg(feature = "command")]
+pub use self::command::Command;
+
 // Re-exports for convenience
 pub use self::{
-    command::Command,
     message::{
         BasicSenderInfo, Font, GroupId, MatchGroupId, MessageBody, MessageId, RawMessage, Sender,
         SenderId, UserId,
