@@ -6,13 +6,9 @@ use std::{
 
 use async_trait::async_trait;
 use dashmap::DashMap;
-use futures::{SinkExt, stream::SplitSink};
 use serde_json::json;
-use tokio::{
-    net::TcpStream,
-    sync::{Mutex, oneshot},
-};
-use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
+use tokio::sync::{Mutex, oneshot};
+use tokio_tungstenite::tungstenite::Message;
 
 use crate::{
     api::{ApiResponse, api_ext::ApiExt},
@@ -22,7 +18,7 @@ use crate::{
 };
 
 pub struct Context {
-    pub(crate) sink: Mutex<Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,
+    pub(crate) sink: Mutex<Option<tokio::sync::mpsc::Sender<Message>>>,
     pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
     pub(crate) state: StateMap,
 }
@@ -71,12 +67,15 @@ impl Context {
         let text = serde_json::to_string(&msg)?;
         let msg = Message::Text(text.into());
 
-        // Send message and release lock immediately
-        {
-            let mut sink = self.sink.lock().await;
-            let sink = sink.as_mut().ok_or(FlowError::NoConnection)?;
-            sink.send(msg).await?;
-        }
+        // Send message via channel; clone sender so we don't hold the mutex across await
+        let sender = {
+            let sink = self.sink.lock().await;
+            sink.as_ref().ok_or(FlowError::NoConnection)?.clone()
+        };
+        sender
+            .send(msg)
+            .await
+            .map_err(|_| FlowError::NoConnection)?;
 
         // Wait for response with timeout
         let response = tokio::time::timeout(std::time::Duration::from_secs(30), rx).await;

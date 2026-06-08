@@ -4,7 +4,7 @@ use std::sync::{
 };
 
 use futures::{
-    StreamExt,
+    SinkExt, StreamExt,
     stream::{SplitSink, SplitStream},
 };
 use serde_json::Value;
@@ -155,9 +155,24 @@ impl FlowBot {
         Ok(ws_stream.split())
     }
 
-    async fn set_sink(&self, sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>) {
-        let mut ws_sink = self.context.sink.lock().await;
-        *ws_sink = Some(sink);
+    async fn set_sink(
+        &self,
+        mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+    ) {
+        let (tx, mut rx) = tokio::sync::mpsc::channel(128);
+
+        {
+            let mut ws_sink = self.context.sink.lock().await;
+            *ws_sink = Some(tx);
+        }
+
+        tokio::spawn(async move {
+            while let Some(msg) = rx.recv().await {
+                if sink.send(msg).await.is_err() {
+                    break;
+                }
+            }
+        });
     }
 
     async fn run_msg_loop(
