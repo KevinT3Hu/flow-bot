@@ -1,5 +1,5 @@
-#![feature(adt_const_params)]
-#![feature(unsized_const_params)]
+#![cfg_attr(feature = "nightly", feature(adt_const_params))]
+#![cfg_attr(feature = "nightly", feature(unsized_const_params))]
 
 //! An onebot-11 SDK that simplifies bot creation.
 //!
