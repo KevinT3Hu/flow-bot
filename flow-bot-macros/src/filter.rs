@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::{parse::Parse, parse_macro_input, FnArg, ItemFn, Type};
+use syn::{FnArg, ItemFn, Type, parse::Parse, parse_macro_input};
 
 struct FilterArg {
     guard: Type,

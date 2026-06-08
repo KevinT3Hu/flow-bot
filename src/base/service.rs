@@ -2,14 +2,21 @@ use async_trait::async_trait;
 
 use crate::event::BotEvent;
 
-use super::{context::BotContext, handler::HandlerControl};
+use super::{
+    context::BotContext,
+    control::{HandlerControl, HandlerError},
+};
 
 #[async_trait]
 pub trait Service: Send + Sync {
     /// Extractors are not possible to be used in services but you can call [`FromEvent::from_event`] manually.
     ///
     /// [`FromEvent::from_event`]: crate::extract::FromEvent::from_event
-    async fn serve(&self, context: BotContext, event: BotEvent) -> HandlerControl;
+    async fn serve(
+        &self,
+        context: BotContext,
+        event: BotEvent,
+    ) -> Result<HandlerControl, HandlerError>;
 
     #[allow(unused_variables)]
     async fn init(&self, bot: BotContext) {}

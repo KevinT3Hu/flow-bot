@@ -115,5 +115,3 @@ pub enum Notice {
         data: HashMap<String, Value>,
     },
 }
-
-

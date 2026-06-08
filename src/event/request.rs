@@ -30,5 +30,3 @@ pub enum Request {
     Friend(FriendRequest),
     Group(GroupRequest),
 }
-
-

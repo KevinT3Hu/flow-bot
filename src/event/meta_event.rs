@@ -27,5 +27,3 @@ pub enum MetaEvent {
     Lifecycle(Lifecycle),
     Heartbeat(Heartbeat),
 }
-
-

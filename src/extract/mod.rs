@@ -1,8 +1,8 @@
 pub mod command;
 pub mod event;
+pub mod filters;
 pub mod message;
 pub mod segment;
-pub mod filters;
 
 use std::{ops::Deref, sync::Arc};
 
@@ -160,15 +160,15 @@ macro_rules! match_one {
 }
 
 // Re-exports for convenience
-pub use crate::event::message::Message;
 pub use self::{
     command::Command,
     message::{
-        BasicSenderInfo, Font, GroupId, MatchGroupId, MessageBody, MessageId, RawMessage,
-        Sender, SenderId, UserId,
+        BasicSenderInfo, Font, GroupId, MatchGroupId, MessageBody, MessageId, RawMessage, Sender,
+        SenderId, UserId,
     },
     segment::{
         At, Dice, Face, Forward, Image, Json, Location, Music, Node, PlainText, Poke, Record,
         Reply, Shake, Share, Text, Video, Xml,
     },
 };
+pub use crate::event::message::Message;

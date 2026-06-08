@@ -1,4 +1,3 @@
-#![feature(try_trait_v2)]
 #![feature(adt_const_params)]
 #![feature(unsized_const_params)]
 
@@ -6,7 +5,7 @@
 //!
 //! Flow-bot is carefully crafted to provide a mechanism similar to that of axum so if you are familiar with axum, you will find it easy to use.
 //!
-//! The basic unit of event processing in flow-bot is a handler. A handler is a function that optionally takes [`BotContext`] and a [`BotEvent`] or any of the extractors as arguments and returns a [`HandlerControl`].
+//! The basic unit of event processing in flow-bot is a handler. A handler is a function that optionally takes [`BotContext`] and a [`BotEvent`] or any of the extractors as arguments and returns a [`Result<HandlerControl, HandlerError>`].
 //! Handlers can parse the incoming event and respond to it. The returned value serves as a control flow signal to determine the flow of the event processing which is where the name comes from.
 //!
 //! [`BotContext`]: crate::base::context::BotContext
@@ -18,14 +17,14 @@
 //!     FlowBotBuilder,
 //!     base::{
 //!         connect::{ReconnectionStrategy, ReverseConnectionConfig},
-//!         handler::HandlerControl,
+//!         handler::{HandlerControl, HandlerError},
 //!     },
 //!     extract::Message,
 //! };
 //!
-//! async fn on_message(msg: Message) -> HandlerControl {
+//! async fn on_message(msg: Message) -> Result<HandlerControl, HandlerError> {
 //!     println!("{:?}", msg.message);
-//!     HandlerControl::Continue
+//!     Ok(HandlerControl::Continue)
 //! }
 //!
 //! #[tokio::main(flavor = "current_thread")]
@@ -52,15 +51,15 @@
 //! [`ApiExt`]: crate::api::api_ext::ApiExt
 //! [`BotContext`]: crate::base::context::BotContext
 //!
-//! The returned value of a handler is a [`HandlerControl`] which determines the flow of the event processing.
+//! The returned value of a handler is a [`Result<HandlerControl, HandlerError>`] which determines the flow of the event processing.
 //! [`HandlerControl::Continue`] means the event will be passed to the next handler, [`HandlerControl::Block`] means the event will not be passed to the next handler.
-//! [`HandlerControl::Skip`] means the event will be passed to the next handler but the event will not be processed by the current handler, used in the case where the event criteria is not met within the handler.
+//! [`HandlerError`] means the event will be passed to the next handler but the current handler will not process it, used in the case where the event criteria is not met within the handler.
 //! It is a crucial difference from many other bot SDKs that we do not provide a matcher machenism to match the event, so that you need to implement the logic in the handler. However, a similar way is mimiced by the extractor mechanism. See the [Extractors] section below.
 //!
-//! [`HandlerControl`]: crate::base::handler::HandlerControl
-//! [`HandlerControl::Continue`]: crate::base::handler::HandlerControl::Continue
-//! [`HandlerControl::Block`]: crate::base::handler::HandlerControl::Block
-//! [`HandlerControl::Skip`]: crate::base::handler::HandlerControl::Skip
+//! [`HandlerControl`]: crate::base::control::HandlerControl
+//! [`HandlerControl::Continue`]: crate::base::control::HandlerControl::Continue
+//! [`HandlerControl::Block`]: crate::base::control::HandlerControl::Block
+//! [`HandlerError`]: crate::base::control::HandlerError
 //! [Extractors]: #extractors
 //!
 //! # Extractors
@@ -78,13 +77,13 @@
 //! ```no_run
 //! use flow_bot::{
 //!    extract::MatchGroupId,
-//!    base::handler::HandlerControl,
+//!    base::handler::{HandlerControl, HandlerError},
 //! };
 //!
-//! async fn on_group_msg(_: MatchGroupId<123>) -> HandlerControl {
+//! async fn on_group_msg(_: MatchGroupId<123>) -> Result<HandlerControl, HandlerError> {
 //!    // This handler will only be called when the event is a group message in group 123, otherwise it will be skipped.
 //!    println!("Received message in group 123");
-//!    HandlerControl::Continue
+//!    Ok(HandlerControl::Continue)
 //! }
 //! ```
 //!
@@ -134,7 +133,8 @@ use std::{
 use base::{
     connect::ReverseConnectionConfig,
     context::{BotContext, Context, StateMap},
-    handler::{ErasedHandler, HWrapped, Handler, HandlerControl},
+    control::HandlerControl,
+    handler::{ErasedHandler, HWrapped, Handler},
     service::Service,
 };
 use error::FlowError;
@@ -153,8 +153,8 @@ pub mod api;
 pub mod base;
 pub mod error;
 pub mod event;
-pub mod extract;
 pub mod extensions;
+pub mod extract;
 pub mod message;
 
 #[cfg(feature = "macros")]
@@ -392,7 +392,7 @@ impl FlowBot {
         let handlers = self.handlers.clone();
         tokio::spawn(async move {
             for handler in handlers.deref() {
-                let control = match handler {
+                let result = match handler {
                     HandlerOrService::Handler(handler) => {
                         handler.call(context.clone(), event.clone()).await
                     }
@@ -401,8 +401,13 @@ impl FlowBot {
                     }
                 };
 
-                if let HandlerControl::Block = control {
-                    break;
+                match result {
+                    Ok(HandlerControl::Block) => break,
+                    Ok(HandlerControl::Continue) => continue,
+                    Err(e) => {
+                        tracing::debug!("{}", e);
+                        continue;
+                    }
                 }
             }
         });

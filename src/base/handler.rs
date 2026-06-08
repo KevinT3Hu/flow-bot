@@ -1,34 +1,19 @@
-use crate::{extract::FromEvent, event::BotEvent};
+use crate::{event::BotEvent, extract::FromEvent};
 use async_trait::async_trait;
-use std::{convert::Infallible, future::Future, ops::FromResidual};
+use std::future::Future;
 
-use super::context::BotContext;
-
-pub enum HandlerControl {
-    Skip,
-    Continue,
-    Block,
-}
-
-impl<E> FromResidual<Result<Infallible, E>> for HandlerControl {
-    fn from_residual(residual: Result<Infallible, E>) -> Self {
-        match residual {
-            Err(_) => HandlerControl::Skip,
-        }
-    }
-}
-
-impl FromResidual<Option<Infallible>> for HandlerControl {
-    fn from_residual(residual: Option<Infallible>) -> Self {
-        match residual {
-            None => HandlerControl::Skip,
-        }
-    }
-}
+use super::{
+    context::BotContext,
+    control::{HandlerControl, HandlerError},
+};
 
 #[async_trait]
 pub trait Handler<T> {
-    async fn handle(&self, context: BotContext, event: BotEvent) -> HandlerControl;
+    async fn handle(
+        &self,
+        context: BotContext,
+        event: BotEvent,
+    ) -> Result<HandlerControl, HandlerError>;
 }
 
 macro_rules! impl_handler {
@@ -38,13 +23,13 @@ macro_rules! impl_handler {
         impl<F,Fut, $($ty),*> Handler<($($ty),*)> for F
         where
             F: Fn($($ty),*) -> Fut + Send + Sync + 'static,
-            Fut: Future<Output = HandlerControl> + Send + 'static,
+            Fut: Future<Output = Result<HandlerControl, HandlerError>> + Send + 'static,
             $($ty: FromEvent+Send),*
         {
-            async fn handle(&self, context: BotContext, event: BotEvent) -> HandlerControl {
+            async fn handle(&self, context: BotContext, event: BotEvent) -> Result<HandlerControl, HandlerError> {
                 match ($($ty::from_event(context.clone(), event.clone()).await,)*) {
                     ($(Some($ty),)*) => self($($ty),*).await,
-                    _ => HandlerControl::Skip,
+                    _ => Err(HandlerError::skip()),
                 }
             }
         }
@@ -53,7 +38,11 @@ macro_rules! impl_handler {
 
 #[async_trait]
 pub(crate) trait ErasedHandler: Send + Sync {
-    async fn call(&self, context: BotContext, event: BotEvent) -> HandlerControl;
+    async fn call(
+        &self,
+        context: BotContext,
+        event: BotEvent,
+    ) -> Result<HandlerControl, HandlerError>;
 }
 
 pub(crate) struct HWrapped<T, H> {
@@ -67,7 +56,11 @@ where
     H: Handler<T> + Send + Sync + 'static,
     T: Send + Sync + 'static,
 {
-    async fn call(&self, context: BotContext, event: BotEvent) -> HandlerControl {
+    async fn call(
+        &self,
+        context: BotContext,
+        event: BotEvent,
+    ) -> Result<HandlerControl, HandlerError> {
         self.handler.handle(context, event).await
     }
 }

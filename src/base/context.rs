@@ -16,9 +16,10 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 
 use crate::{
     api::{ApiResponse, api_ext::ApiExt},
-    error::FlowError, event::BotEvent, extract::FromEvent,
+    error::FlowError,
+    event::BotEvent,
+    extract::FromEvent,
 };
-
 
 pub struct Context {
     pub(crate) sink: Mutex<Option<SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>>>,

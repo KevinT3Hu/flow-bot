@@ -111,5 +111,3 @@ impl Message {
         ret
     }
 }
-
-

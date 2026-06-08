@@ -5,8 +5,8 @@ use crate::{
     event::{
         BotEvent, TypedEvent,
         message::{
-            GroupAnonymousInfo, GroupSenderInfo, GroupSenderRole, GroupSubType,
-            PrivateSenderInfo, PrivateSubType, SenderSex, TypedMessageInfo,
+            GroupAnonymousInfo, GroupSenderInfo, GroupSenderRole, GroupSubType, PrivateSenderInfo,
+            PrivateSubType, SenderSex, TypedMessageInfo,
         },
     },
     extract::FromEvent,

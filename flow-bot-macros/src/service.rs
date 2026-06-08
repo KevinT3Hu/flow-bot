@@ -57,20 +57,20 @@ pub fn flow_service_macro(item: TokenStream) -> TokenStream {
             let ty_ident = &type_path.path.segments.last()?.ident;
 
             Some(quote::quote! {
-                let #param_ident: #ty_ident = ::flow_bot::base::extract::FromEvent::from_event(context, event).await?;
+                let #param_ident: #ty_ident = ::flow_bot::base::extract::FromEvent::from_event(context.clone(), event.clone()).await.ok_or(::flow_bot::base::handler::HandlerError::skip())?;
             })
         });
 
         let func_body = &fn_item.block;
 
         Some(quote::quote! {
-            let controller_result = {
+            let controller_result = ({
                 #(#param_decls)*
                 #func_body
-            };
+            }).into_result();
 
-            if matches!(controller_result, ::flow_bot::base::handler::HandlerControl::Block) {
-                return ::flow_bot::base::handler::HandlerControl::Block;
+            if matches!(controller_result, Ok(::flow_bot::base::handler::HandlerControl::Block)) {
+                return Ok(::flow_bot::base::handler::HandlerControl::Block);
             }
         })
     });
@@ -80,9 +80,9 @@ pub fn flow_service_macro(item: TokenStream) -> TokenStream {
         impl #trt for #struct_name {
             #init_fn
 
-            async fn serve(&self, context: ::flow_bot::base::context::BotContext, event: ::flow_bot::event::BotEvent) -> ::flow_bot::base::handler::HandlerControl {
+            async fn serve(&self, context: ::flow_bot::base::context::BotContext, event: ::flow_bot::event::BotEvent) -> Result<::flow_bot::base::handler::HandlerControl, ::flow_bot::base::handler::HandlerError> {
                 #(#methods)*
-                ::flow_bot::base::handler::HandlerControl::Continue
+                Ok(::flow_bot::base::handler::HandlerControl::Continue)
             }
         }
     }

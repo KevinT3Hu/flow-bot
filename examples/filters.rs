@@ -2,28 +2,28 @@ use flow_bot::{
     FlowBotBuilder,
     base::{
         connect::{ReconnectionStrategy, ReverseConnectionConfig},
-        handler::HandlerControl,
+        control::{HandlerControl, HandlerError},
     },
     extract::Message,
     flow_filter, group_message, private_message,
 };
 
 #[group_message]
-async fn on_group_message(msg: Message) -> HandlerControl {
+async fn on_group_message(msg: Message) -> Result<HandlerControl, HandlerError> {
     println!("Group message: {:?}", msg.message);
-    HandlerControl::Continue
+    Ok(HandlerControl::Continue)
 }
 
 #[private_message]
-async fn on_private_message(msg: Message) -> HandlerControl {
+async fn on_private_message(msg: Message) -> Result<HandlerControl, HandlerError> {
     println!("Private message: {:?}", msg.message);
-    HandlerControl::Continue
+    Ok(HandlerControl::Continue)
 }
 
 #[flow_filter(guard = flow_bot::extract::filters::IsGroupMessage)]
-async fn on_group_with_filter(msg: Message) -> HandlerControl {
+async fn on_group_with_filter(msg: Message) -> Result<HandlerControl, HandlerError> {
     println!("Group message via #[filter]: {:?}", msg.message);
-    HandlerControl::Continue
+    Ok(HandlerControl::Continue)
 }
 
 #[tokio::main(flavor = "current_thread")]

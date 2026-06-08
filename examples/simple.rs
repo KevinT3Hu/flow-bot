@@ -2,14 +2,14 @@ use flow_bot::{
     FlowBotBuilder,
     base::{
         connect::{ReconnectionStrategy, ReverseConnectionConfig},
-        handler::HandlerControl,
+        control::{HandlerControl, HandlerError},
     },
     extract::MessageBody,
 };
 
-async fn on_message(MessageBody(msg): MessageBody) -> HandlerControl {
+async fn on_message(MessageBody(msg): MessageBody) -> Result<HandlerControl, HandlerError> {
     println!("{:?}", msg);
-    HandlerControl::Continue
+    Ok(HandlerControl::Continue)
 }
 
 #[tokio::main(flavor = "current_thread")]
