@@ -139,9 +139,9 @@ pub use base::{
     connect::{ReconnectionStrategy, ReverseConnectionConfig},
     context::{BotContext, BotContextExt},
     control::{HandlerControl, HandlerError, IntoHandlerResult},
-    handler::Handler,
-    service::Service,
-};
+    handler::{Handler, Service},
+    middleware::{from_fn, Middleware, Next},
+    };
 pub use error::FlowError;
 pub use event::{BotEvent, Event, TypedEvent};
 pub use extract::{FromEvent, State};

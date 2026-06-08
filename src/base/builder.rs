@@ -4,15 +4,15 @@ use std::{
 };
 
 use crate::base::{
-    bot::{FlowBot, HandlerOrService},
+    bot::FlowBot,
     connect::ReverseConnectionConfig,
     context::{BotContext, Context, StateMap},
-    handler::{HWrapped, Handler},
-    service::Service,
+    handler::{HWrapped, Handler, HandlerOrService, Service},
+    middleware::{EventProcessor, Leaf, Middleware, Node},
 };
 
 pub struct FlowBotBuilder {
-    handlers: Vec<HandlerOrService>,
+    processors: Vec<Arc<dyn EventProcessor>>,
     connection: ReverseConnectionConfig,
     states: StateMap,
 }
@@ -21,7 +21,7 @@ impl FlowBotBuilder {
     /// Create a new FlowBotBuilder with the given connection configuration.
     pub fn new(connection: ReverseConnectionConfig) -> Self {
         Self {
-            handlers: Vec::new(),
+            processors: Vec::new(),
             connection,
             states: StateMap::new(),
         }
@@ -45,8 +45,9 @@ impl FlowBotBuilder {
             handler,
             _phantom: std::marker::PhantomData,
         };
-        self.handlers
-            .push(HandlerOrService::Handler(Box::new(wrapped)));
+        self.processors.push(Arc::new(Leaf {
+            inner: HandlerOrService::Handler(Box::new(wrapped)),
+        }));
         self
     }
 
@@ -55,15 +56,50 @@ impl FlowBotBuilder {
     where
         Svc: Service + Send + Sync + 'static,
     {
-        self.handlers
-            .push(HandlerOrService::Service(Box::new(service)));
+        self.processors.push(Arc::new(Leaf {
+            inner: HandlerOrService::Service(Box::new(service)),
+        }));
+        self
+    }
+
+    /// Apply a middleware layer to **all handlers already added**.
+    ///
+    /// This works like axum's `.layer()`: it retroactively wraps every
+    /// existing handler/service with the given middleware.
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// FlowBotBuilder::new(...)
+    ///     .with_handler(help_cmd)       // bare help_cmd
+    ///     .layer(from_fn(log_all))      // help_cmd is now wrapped with log_all
+    ///     .with_handler(ban_cmd)        // bare ban_cmd
+    ///     .layer(from_fn(require_admin)) // ban_cmd is wrapped with require_admin;
+    ///                                   // help_cmd is wrapped with log_all → require_admin
+    ///     .build();
+    /// ```
+    pub fn layer<M>(mut self, middleware: M) -> Self
+    where
+        M: Middleware + 'static,
+    {
+        let middleware = Arc::new(middleware);
+        self.processors = self
+            .processors
+            .into_iter()
+            .map(|processor| {
+                Arc::new(Node {
+                    middleware: middleware.clone(),
+                    inner: processor,
+                }) as Arc<dyn EventProcessor>
+            })
+            .collect();
         self
     }
 
     /// Build the FlowBot.
     pub fn build(self) -> FlowBot {
         FlowBot {
-            handlers: Arc::new(self.handlers),
+            processors: Arc::new(self.processors),
             context: BotContext::new(Context::new(self.states)),
             connection: self.connection,
             reconnect_attempt: AtomicU32::new(0),

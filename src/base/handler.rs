@@ -88,3 +88,23 @@ macro_rules! all_tuples {
 }
 
 all_tuples!(impl_handler);
+
+#[async_trait]
+pub trait Service: Send + Sync {
+    /// Extractors are not possible to be used in services but you can call [`FromEvent::from_event`] manually.
+    ///
+    /// [`FromEvent::from_event`]: crate::extract::FromEvent::from_event
+    async fn serve(
+        &self,
+        context: BotContext,
+        event: BotEvent,
+    ) -> Result<HandlerControl, HandlerError>;
+
+    #[allow(unused_variables)]
+    async fn init(&self, bot: BotContext) {}
+}
+
+pub(crate) enum HandlerOrService {
+    Handler(Box<dyn ErasedHandler>),
+    Service(Box<dyn Service>),
+}

@@ -1,5 +1,4 @@
 use std::{
-    ops::Deref,
     sync::{
         Arc,
         atomic::{AtomicU32, Ordering},
@@ -21,20 +20,14 @@ use crate::{
         connect::{ReconnectionStrategy, ReverseConnectionConfig},
         context::BotContext,
         control::HandlerControl,
-        handler::ErasedHandler,
-        service::Service,
+        middleware::EventProcessor,
     },
     error::FlowError,
     event::Event,
 };
 
-pub(crate) enum HandlerOrService {
-    Handler(Box<dyn ErasedHandler>),
-    Service(Box<dyn Service>),
-}
-
 pub struct FlowBot {
-    pub(crate) handlers: Arc<Vec<HandlerOrService>>,
+    pub(crate) processors: Arc<Vec<Arc<dyn EventProcessor>>>,
     pub(crate) context: BotContext,
     pub(crate) connection: ReverseConnectionConfig,
     pub(crate) reconnect_attempt: AtomicU32,
@@ -184,10 +177,8 @@ impl FlowBot {
     }
 
     async fn init_services(&self) {
-        for handler in self.handlers.deref() {
-            if let HandlerOrService::Service(service) = handler {
-                service.init(self.context.clone()).await;
-            }
+        for processor in self.processors.iter() {
+            processor.init(self.context.clone()).await;
         }
     }
 
@@ -195,19 +186,10 @@ impl FlowBot {
         let event: Event = serde_json::from_slice(text.as_bytes())?;
         let event = Arc::new(event);
         let context = self.context.clone();
-        let handlers = self.handlers.clone();
+        let processors = self.processors.clone();
         tokio::spawn(async move {
-            for handler in handlers.deref() {
-                let result = match handler {
-                    HandlerOrService::Handler(handler) => {
-                        handler.call(context.clone(), event.clone()).await
-                    }
-                    HandlerOrService::Service(service) => {
-                        service.serve(context.clone(), event.clone()).await
-                    }
-                };
-
-                match result {
+            for processor in processors.iter() {
+                match processor.process(context.clone(), event.clone()).await {
                     Ok(HandlerControl::Block) => break,
                     Ok(HandlerControl::Continue) => continue,
                     Err(e) => {
