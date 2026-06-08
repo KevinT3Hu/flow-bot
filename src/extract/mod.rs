@@ -2,6 +2,7 @@ pub mod command;
 pub mod event;
 pub mod message;
 pub mod segment;
+pub mod filters;
 
 use std::{ops::Deref, sync::Arc};
 

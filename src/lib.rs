@@ -158,7 +158,7 @@ pub mod extensions;
 pub mod message;
 
 #[cfg(feature = "macros")]
-pub use flow_bot_macros::flow_service;
+pub use flow_bot_macros::{flow_filter, flow_service, group_message, private_message};
 
 enum HandlerOrService {
     Handler(Box<dyn ErasedHandler>),

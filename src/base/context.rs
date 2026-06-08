@@ -4,6 +4,7 @@ use std::{
     sync::Arc,
 };
 
+use async_trait::async_trait;
 use dashmap::DashMap;
 use futures::{SinkExt, stream::SplitSink};
 use serde_json::json;
@@ -15,7 +16,7 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 
 use crate::{
     api::{ApiResponse, api_ext::ApiExt},
-    error::FlowError,
+    error::FlowError, event::BotEvent, extract::FromEvent,
 };
 
 
@@ -108,6 +109,18 @@ impl Context {
 }
 
 pub type BotContext = Arc<Context>;
+
+#[async_trait]
+pub trait BotContextExt {
+    async fn extract<T: FromEvent>(&self, event: BotEvent) -> Option<T>;
+}
+
+#[async_trait]
+impl BotContextExt for BotContext {
+    async fn extract<T: FromEvent>(&self, event: BotEvent) -> Option<T> {
+        T::from_event(Arc::clone(self), event).await
+    }
+}
 
 pub(crate) struct StateMap {
     map: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,

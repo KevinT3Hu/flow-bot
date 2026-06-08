@@ -1,0 +1,43 @@
+use flow_bot::{
+    FlowBotBuilder,
+    base::{
+        connect::{ReconnectionStrategy, ReverseConnectionConfig},
+        handler::HandlerControl,
+    },
+    extract::Message,
+    flow_filter, group_message, private_message,
+};
+
+#[group_message]
+async fn on_group_message(msg: Message) -> HandlerControl {
+    println!("Group message: {:?}", msg.message);
+    HandlerControl::Continue
+}
+
+#[private_message]
+async fn on_private_message(msg: Message) -> HandlerControl {
+    println!("Private message: {:?}", msg.message);
+    HandlerControl::Continue
+}
+
+#[flow_filter(guard = flow_bot::extract::filters::IsGroupMessage)]
+async fn on_group_with_filter(msg: Message) -> HandlerControl {
+    println!("Group message via #[filter]: {:?}", msg.message);
+    HandlerControl::Continue
+}
+
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+    let bot = FlowBotBuilder::new(ReverseConnectionConfig {
+        target: "ws://localhost:19999".to_string(),
+        auth: None,
+        reconnection: ReconnectionStrategy::None,
+    })
+    .with_state(())
+    .with_handler(on_group_message)
+    .with_handler(on_private_message)
+    .with_handler(on_group_with_filter)
+    .build();
+
+    bot.run().await.unwrap();
+}
