@@ -1,6 +1,6 @@
 use std::sync::{
     Arc,
-    atomic::{AtomicU32, Ordering},
+    atomic::{AtomicBool, AtomicU32, Ordering},
 };
 
 use futures::{
@@ -8,7 +8,7 @@ use futures::{
     stream::{SplitSink, SplitStream},
 };
 use serde_json::Value;
-use tokio::{net::TcpStream, sync::Semaphore};
+use tokio::{net::TcpStream, sync::Notify, sync::Semaphore};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
     tungstenite::{Message, client::IntoClientRequest},
@@ -31,13 +31,18 @@ pub struct FlowBot {
     pub(crate) connection: ReverseConnectionConfig,
     pub(crate) reconnect_attempt: AtomicU32,
     pub(crate) concurrent_limit: Arc<Semaphore>,
+    pub(crate) shutdown: Notify,
+    pub(crate) shutdown_requested: AtomicBool,
 }
 
 impl FlowBot {
     /// Run the bot.
     /// This will connect to the server and start processing events.
-    /// This method will never return unless an error occurs or reconnection attempts are exhausted.
+    /// This method returns `Ok(())` when graceful shutdown is requested via [`shutdown`](Self::shutdown),
+    /// or when the connection closes and reconnection is not configured.
+    /// It returns `Err` on fatal errors or when reconnection attempts are exhausted.
     pub async fn run(&self) -> Result<(), FlowError> {
+        self.shutdown_requested.store(false, Ordering::Relaxed);
         match &self.connection.reconnection {
             ReconnectionStrategy::None => self.run_once().await,
             ReconnectionStrategy::Infinite {
@@ -56,6 +61,15 @@ impl FlowBot {
                     .await
             }
         }
+    }
+
+    /// Request graceful shutdown.
+    ///
+    /// The bot will stop accepting new events and return from [`run`](Self::run)
+    /// as soon as the current reconnection sleep or event loop iteration finishes.
+    pub fn shutdown(&self) {
+        self.shutdown_requested.store(true, Ordering::Relaxed);
+        self.shutdown.notify_waiters();
     }
 
     async fn run_once(&self) -> Result<(), FlowError> {
@@ -77,12 +91,19 @@ impl FlowBot {
         max_delay_ms: u64,
     ) -> Result<(), FlowError> {
         loop {
+            if self.shutdown_requested.load(Ordering::Relaxed) {
+                return Ok(());
+            }
+
             let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
             let current_delay =
                 (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
 
             match self.run_once().await {
-                Ok(_) => {
+                Ok(()) => {
+                    if self.shutdown_requested.load(Ordering::Relaxed) {
+                        return Ok(());
+                    }
                     eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
                 }
                 Err(e) => {
@@ -94,7 +115,16 @@ impl FlowBot {
             }
 
             self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
-            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+
+            if self.shutdown_requested.load(Ordering::Relaxed) {
+                return Ok(());
+            }
+            tokio::select! {
+                _ = tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)) => {}
+                _ = self.shutdown.notified() => {
+                    return Ok(());
+                }
+            }
         }
     }
 
@@ -105,18 +135,23 @@ impl FlowBot {
         max_delay_ms: u64,
     ) -> Result<(), FlowError> {
         loop {
+            if self.shutdown_requested.load(Ordering::Relaxed) {
+                return Ok(());
+            }
+
             let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
 
             if attempt >= max_attempts {
                 return Err(FlowError::ReconnectionFailed(max_attempts));
             }
 
-            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+            let current_delay = (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
 
             match self.run_once().await {
-                Ok(_) => {
-                    // Connection was successful and has now closed
-                    // Counter was already reset to 0 in run_once
+                Ok(()) => {
+                    if self.shutdown_requested.load(Ordering::Relaxed) {
+                        return Ok(());
+                    }
                     eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
                 }
                 Err(e) => {
@@ -131,7 +166,16 @@ impl FlowBot {
             }
 
             self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
-            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+
+            if self.shutdown_requested.load(Ordering::Relaxed) {
+                return Ok(());
+            }
+            tokio::select! {
+                _ = tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)) => {}
+                _ = self.shutdown.notified() => {
+                    return Ok(());
+                }
+            }
         }
     }
 
@@ -146,9 +190,8 @@ impl FlowBot {
     > {
         let mut request = self.connection.target.clone().into_client_request()?;
         if let Some(auth) = &self.connection.auth {
-            request
-                .headers_mut()
-                .append("Authorization", auth.parse().unwrap());
+            let value = auth.parse().map_err(|_| FlowError::InvalidAuth)?;
+            request.headers_mut().append("Authorization", value);
         }
 
         let (ws_stream, _) = connect_async(request).await?;
@@ -179,18 +222,33 @@ impl FlowBot {
         &self,
         mut read: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
     ) -> Result<(), FlowError> {
-        while let Some(msg) = read.next().await {
-            let msg = msg?;
-            if let Message::Text(text) = msg {
-                let text = serde_json::from_slice::<Value>(text.as_bytes())?;
-                if let Some(echo) = Self::check_is_echo(&text) {
-                    self.context.on_recv_echo(echo, text.to_string());
-                    continue;
+        loop {
+            if self.shutdown_requested.load(Ordering::Relaxed) {
+                return Ok(());
+            }
+
+            tokio::select! {
+                msg = read.next() => {
+                    match msg {
+                        Some(msg) => {
+                            let msg = msg?;
+                            if let Message::Text(text) = msg {
+                                let text = serde_json::from_slice::<Value>(text.as_bytes())?;
+                                if let Some(echo) = Self::check_is_echo(&text) {
+                                    self.context.on_recv_echo(echo, text.to_string());
+                                    continue;
+                                }
+                                self.handle_event(text)?;
+                            }
+                        }
+                        None => break Ok(()),
+                    }
                 }
-                self.handle_event(text)?;
+                _ = self.shutdown.notified() => {
+                    return Ok(());
+                }
             }
         }
-        Ok(())
     }
 
     async fn init_services(&self) {
@@ -206,7 +264,10 @@ impl FlowBot {
         let processors = self.processors.clone();
         let concurrent_limit = self.concurrent_limit.clone();
         tokio::spawn(async move {
-            let _permit = concurrent_limit.acquire().await.unwrap();
+            let _permit = concurrent_limit
+                .acquire()
+                .await
+                .expect("semaphore should not be closed");
             for processor in processors.iter() {
                 match processor.process(context.clone(), event.clone()).await {
                     Ok(HandlerControl::Block) => break,

@@ -25,6 +25,8 @@ pub struct Context {
 
 impl Context {
     pub(crate) fn new(states: StateMap) -> Self {
+        #[allow(unused_mut)]
+        let mut states = states;
         #[cfg(feature = "turso")]
         {
             use crate::extensions::turso::TursoDispatcher;

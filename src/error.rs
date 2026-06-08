@@ -5,6 +5,9 @@ pub enum FlowError {
     #[error("Cannot apply extractor {extractor} to event {event}")]
     ExtractorError { extractor: String, event: String },
 
+    #[error("Invalid authorization header")]
+    InvalidAuth,
+
     #[error("Websocket error: {0}")]
     WebSocketError(#[from] tokio_tungstenite::tungstenite::Error),
 

@@ -15,10 +15,8 @@
 //! ```no_run
 //! use flow_bot::{
 //!     FlowBotBuilder,
-//!     base::{
-//!         connect::{ReconnectionStrategy, ReverseConnectionConfig},
-//!         handler::{HandlerControl, HandlerError},
-//!     },
+//!     base::connect::{ReconnectionStrategy, ReverseConnectionConfig},
+//!     HandlerControl, HandlerError,
 //!     extract::Message,
 //! };
 //!
@@ -77,7 +75,7 @@
 //! ```no_run
 //! use flow_bot::{
 //!    extract::MatchGroupId,
-//!    base::handler::{HandlerControl, HandlerError},
+//!    HandlerControl, HandlerError,
 //! };
 //!
 //! async fn on_group_msg(_: MatchGroupId<123>) -> Result<HandlerControl, HandlerError> {
@@ -119,7 +117,7 @@
 //! It is made so that the bot can be extended to use services from other crates with ease.
 //! Services can be added to the bot using the [`with_service`] method.
 //!
-//! [`Service`]: crate::base::service::Service
+//! [`Service`]: crate::base::handler::Service
 //! [`with_service`]: crate::FlowBotBuilder::with_service
 pub mod api;
 pub mod base;

@@ -1,9 +1,9 @@
 use std::{
     any::Any,
-    sync::{Arc, atomic::AtomicU32},
+    sync::{Arc, atomic::AtomicBool, atomic::AtomicU32},
 };
 
-use tokio::sync::Semaphore;
+use tokio::sync::{Notify, Semaphore};
 
 use crate::base::{
     bot::FlowBot,
@@ -113,6 +113,8 @@ impl FlowBotBuilder {
             connection: self.connection,
             reconnect_attempt: AtomicU32::new(0),
             concurrent_limit: Arc::new(Semaphore::new(self.concurrent_limit)),
+            shutdown: Notify::new(),
+            shutdown_requested: AtomicBool::new(false),
         }
     }
 }
