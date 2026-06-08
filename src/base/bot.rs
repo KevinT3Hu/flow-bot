@@ -1,0 +1,232 @@
+use std::{
+    ops::Deref,
+    sync::{
+        Arc,
+        atomic::{AtomicU32, Ordering},
+    },
+};
+
+use futures::{
+    StreamExt,
+    stream::{SplitSink, SplitStream},
+};
+use tokio::net::TcpStream;
+use tokio_tungstenite::{
+    MaybeTlsStream, WebSocketStream, connect_async,
+    tungstenite::{Message, Utf8Bytes, client::IntoClientRequest},
+};
+
+use crate::{
+    base::{
+        connect::{ReconnectionStrategy, ReverseConnectionConfig},
+        context::BotContext,
+        control::HandlerControl,
+        handler::ErasedHandler,
+        service::Service,
+    },
+    error::FlowError,
+    event::Event,
+};
+
+pub(crate) enum HandlerOrService {
+    Handler(Box<dyn ErasedHandler>),
+    Service(Box<dyn Service>),
+}
+
+pub struct FlowBot {
+    pub(crate) handlers: Arc<Vec<HandlerOrService>>,
+    pub(crate) context: BotContext,
+    pub(crate) connection: ReverseConnectionConfig,
+    pub(crate) reconnect_attempt: AtomicU32,
+}
+
+impl FlowBot {
+    /// Run the bot.
+    /// This will connect to the server and start processing events.
+    /// This method will never return unless an error occurs or reconnection attempts are exhausted.
+    pub async fn run(&self) -> Result<(), FlowError> {
+        match &self.connection.reconnection {
+            ReconnectionStrategy::None => self.run_once().await,
+            ReconnectionStrategy::Infinite {
+                initial_delay_ms,
+                max_delay_ms,
+            } => {
+                self.run_with_infinite_reconnect(*initial_delay_ms, *max_delay_ms)
+                    .await
+            }
+            ReconnectionStrategy::Limited {
+                max_attempts,
+                initial_delay_ms,
+                max_delay_ms,
+            } => {
+                self.run_with_limited_reconnect(*max_attempts, *initial_delay_ms, *max_delay_ms)
+                    .await
+            }
+        }
+    }
+
+    async fn run_once(&self) -> Result<(), FlowError> {
+        let (write, read) = self.connect().await?;
+
+        // Connection established successfully, reset attempt counter
+        self.reconnect_attempt.store(0, Ordering::Relaxed);
+
+        self.set_sink(write).await;
+        self.init_services().await;
+        self.run_msg_loop(read).await?;
+
+        Ok(())
+    }
+
+    async fn run_with_infinite_reconnect(
+        &self,
+        initial_delay_ms: u64,
+        max_delay_ms: u64,
+    ) -> Result<(), FlowError> {
+        loop {
+            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
+            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+
+            match self.run_once().await {
+                Ok(_) => {
+                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Connection error: {}. Reconnecting in {}ms...",
+                        e, current_delay
+                    );
+                }
+            }
+
+            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
+            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+        }
+    }
+
+    async fn run_with_limited_reconnect(
+        &self,
+        max_attempts: u32,
+        initial_delay_ms: u64,
+        max_delay_ms: u64,
+    ) -> Result<(), FlowError> {
+        loop {
+            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
+
+            if attempt >= max_attempts {
+                return Err(FlowError::ReconnectionFailed(max_attempts));
+            }
+
+            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+
+            match self.run_once().await {
+                Ok(_) => {
+                    // Connection was successful and has now closed
+                    // Counter was already reset to 0 in run_once
+                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
+                }
+                Err(e) => {
+                    eprintln!(
+                        "Connection error: {}. Reconnecting in {}ms... (attempt {}/{})",
+                        e,
+                        current_delay,
+                        attempt + 1,
+                        max_attempts
+                    );
+                }
+            }
+
+            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
+            tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)).await;
+        }
+    }
+
+    async fn connect(
+        &self,
+    ) -> Result<
+        (
+            SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+            SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+        ),
+        FlowError,
+    > {
+        let mut request = self.connection.target.clone().into_client_request()?;
+        if let Some(auth) = &self.connection.auth {
+            request
+                .headers_mut()
+                .append("Authorization", auth.parse().unwrap());
+        }
+
+        let (ws_stream, _) = connect_async(request).await?;
+        Ok(ws_stream.split())
+    }
+
+    async fn set_sink(&self, sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>) {
+        let mut ws_sink = self.context.sink.lock().await;
+        *ws_sink = Some(sink);
+    }
+
+    async fn run_msg_loop(
+        &self,
+        mut read: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+    ) -> Result<(), FlowError> {
+        while let Some(msg) = read.next().await {
+            let msg = msg?;
+            if let Message::Text(text) = msg {
+                if let Some(echo) = Self::check_is_echo(&text) {
+                    self.context.on_recv_echo(echo, text.to_string());
+                    continue;
+                }
+                self.handle_event(text)?;
+            }
+        }
+        Ok(())
+    }
+
+    async fn init_services(&self) {
+        for handler in self.handlers.deref() {
+            if let HandlerOrService::Service(service) = handler {
+                service.init(self.context.clone()).await;
+            }
+        }
+    }
+
+    fn handle_event(&self, text: Utf8Bytes) -> Result<(), FlowError> {
+        let event: Event = serde_json::from_slice(text.as_bytes())?;
+        let event = Arc::new(event);
+        let context = self.context.clone();
+        let handlers = self.handlers.clone();
+        tokio::spawn(async move {
+            for handler in handlers.deref() {
+                let result = match handler {
+                    HandlerOrService::Handler(handler) => {
+                        handler.call(context.clone(), event.clone()).await
+                    }
+                    HandlerOrService::Service(service) => {
+                        service.serve(context.clone(), event.clone()).await
+                    }
+                };
+
+                match result {
+                    Ok(HandlerControl::Block) => break,
+                    Ok(HandlerControl::Continue) => continue,
+                    Err(e) => {
+                        tracing::debug!("{}", e);
+                        continue;
+                    }
+                }
+            }
+        });
+        Ok(())
+    }
+
+    fn check_is_echo(msg: &str) -> Option<String> {
+        let msg = serde_json::from_str::<serde_json::Value>(msg).unwrap();
+        if let serde_json::Value::Object(obj) = msg
+            && let Some(serde_json::Value::String(echo)) = obj.get("echo")
+        {
+            return Some(echo.clone());
+        }
+        None
+    }
+}
