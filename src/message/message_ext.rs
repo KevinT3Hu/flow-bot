@@ -21,8 +21,10 @@ impl MessageExt for Message {
                 Segment::Text(text) => Some(text.text.clone()),
                 _ => None,
             })
-            .collect::<Vec<String>>()
-            .join("")
+            .fold(String::new(), |mut acc, text| {
+                acc.push_str(&text);
+                acc
+            })
     }
 
     fn is_plain_text(&self) -> bool {

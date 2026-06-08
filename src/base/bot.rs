@@ -1,18 +1,17 @@
-use std::{
-    sync::{
-        Arc,
-        atomic::{AtomicU32, Ordering},
-    },
+use std::sync::{
+    Arc,
+    atomic::{AtomicU32, Ordering},
 };
 
 use futures::{
     StreamExt,
     stream::{SplitSink, SplitStream},
 };
-use tokio::net::TcpStream;
+use serde_json::Value;
+use tokio::{net::TcpStream, sync::Semaphore};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
-    tungstenite::{Message, Utf8Bytes, client::IntoClientRequest},
+    tungstenite::{Message, client::IntoClientRequest},
 };
 
 use crate::{
@@ -31,6 +30,7 @@ pub struct FlowBot {
     pub(crate) context: BotContext,
     pub(crate) connection: ReverseConnectionConfig,
     pub(crate) reconnect_attempt: AtomicU32,
+    pub(crate) concurrent_limit: Arc<Semaphore>,
 }
 
 impl FlowBot {
@@ -78,7 +78,8 @@ impl FlowBot {
     ) -> Result<(), FlowError> {
         loop {
             let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
-            let current_delay = (initial_delay_ms * 2_u64.pow(attempt)).min(max_delay_ms);
+            let current_delay =
+                (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
 
             match self.run_once().await {
                 Ok(_) => {
@@ -166,6 +167,7 @@ impl FlowBot {
         while let Some(msg) = read.next().await {
             let msg = msg?;
             if let Message::Text(text) = msg {
+                let text = serde_json::from_slice::<Value>(text.as_bytes())?;
                 if let Some(echo) = Self::check_is_echo(&text) {
                     self.context.on_recv_echo(echo, text.to_string());
                     continue;
@@ -182,12 +184,14 @@ impl FlowBot {
         }
     }
 
-    fn handle_event(&self, text: Utf8Bytes) -> Result<(), FlowError> {
-        let event: Event = serde_json::from_slice(text.as_bytes())?;
+    fn handle_event(&self, text: Value) -> Result<(), FlowError> {
+        let event: Event = serde_json::from_value(text)?;
         let event = Arc::new(event);
         let context = self.context.clone();
         let processors = self.processors.clone();
+        let concurrent_limit = self.concurrent_limit.clone();
         tokio::spawn(async move {
+            let _permit = concurrent_limit.acquire().await.unwrap();
             for processor in processors.iter() {
                 match processor.process(context.clone(), event.clone()).await {
                     Ok(HandlerControl::Block) => break,
@@ -202,8 +206,7 @@ impl FlowBot {
         Ok(())
     }
 
-    fn check_is_echo(msg: &str) -> Option<String> {
-        let msg = serde_json::from_str::<serde_json::Value>(msg).unwrap();
+    fn check_is_echo(msg: &Value) -> Option<String> {
         if let serde_json::Value::Object(obj) = msg
             && let Some(serde_json::Value::String(echo)) = obj.get("echo")
         {

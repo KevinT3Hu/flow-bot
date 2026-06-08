@@ -140,8 +140,8 @@ pub use base::{
     context::{BotContext, BotContextExt},
     control::{HandlerControl, HandlerError, IntoHandlerResult},
     handler::{Handler, Service},
-    middleware::{from_fn, Middleware, Next},
-    };
+    middleware::{Middleware, Next, from_fn},
+};
 pub use error::FlowError;
 pub use event::{BotEvent, Event, TypedEvent};
 pub use extract::{FromEvent, State};

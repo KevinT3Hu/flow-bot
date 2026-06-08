@@ -3,6 +3,8 @@ use std::{
     sync::{Arc, atomic::AtomicU32},
 };
 
+use tokio::sync::Semaphore;
+
 use crate::base::{
     bot::FlowBot,
     connect::ReverseConnectionConfig,
@@ -15,6 +17,7 @@ pub struct FlowBotBuilder {
     processors: Vec<Arc<dyn EventProcessor>>,
     connection: ReverseConnectionConfig,
     states: StateMap,
+    concurrent_limit: usize,
 }
 
 impl FlowBotBuilder {
@@ -24,6 +27,7 @@ impl FlowBotBuilder {
             processors: Vec::new(),
             connection,
             states: StateMap::new(),
+            concurrent_limit: 8, // default concurrent limit
         }
     }
 
@@ -96,6 +100,11 @@ impl FlowBotBuilder {
         self
     }
 
+    pub fn concurrent_limit(mut self, limit: usize) -> Self {
+        self.concurrent_limit = limit;
+        self
+    }
+
     /// Build the FlowBot.
     pub fn build(self) -> FlowBot {
         FlowBot {
@@ -103,6 +112,7 @@ impl FlowBotBuilder {
             context: BotContext::new(Context::new(self.states)),
             connection: self.connection,
             reconnect_attempt: AtomicU32::new(0),
+            concurrent_limit: Arc::new(Semaphore::new(self.concurrent_limit)),
         }
     }
 }

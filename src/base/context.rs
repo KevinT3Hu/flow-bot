@@ -93,14 +93,11 @@ impl Context {
     }
 
     pub(crate) fn on_recv_echo(&self, echo: String, data: String) {
-        let pending_requests = self.pending_requests.clone();
-        tokio::spawn(async move {
-            // DashMap::remove returns Option<(K, V)>, extract the sender
-            if let Some((_, tx)) = pending_requests.remove(&echo) {
-                let _ = tx.send(data); // Ignore error if receiver dropped
-            }
-            // If echo not found, response arrived after timeout - silently ignore
-        });
+        // DashMap::remove returns Option<(K, V)>, extract the sender
+        if let Some((_, tx)) = self.pending_requests.remove(&echo) {
+            let _ = tx.send(data); // Ignore error if receiver dropped
+        }
+        // If echo not found, response arrived after timeout - silently ignore
     }
 
     pub async fn get_self_id(&self) -> Result<i64, FlowError> {

@@ -1,7 +1,4 @@
-use std::{
-    future::Future,
-    sync::Arc,
-};
+use std::{future::Future, sync::Arc};
 
 use async_trait::async_trait;
 
