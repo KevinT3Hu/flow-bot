@@ -50,27 +50,24 @@ pub fn flow_service_macro(item: TokenStream) -> TokenStream {
 
         let param_decls = fn_item.sig.inputs.iter().filter_map(|arg| {
             let FnArg::Typed(pat_type) = arg else { return None };
-            let syn::Pat::Ident(ident) = &*pat_type.pat else { return None };
-            let syn::Type::Path(type_path) = &*pat_type.ty else { return None };
-
-            let param_ident = &ident.ident;
-            let ty_ident = &type_path.path.segments.last()?.ident;
+            let syn::Pat::Ident(pat_ident) = &*pat_type.pat else { return None };
+            let ty = &pat_type.ty;
 
             Some(quote::quote! {
-                let #param_ident: #ty_ident = ::flow_bot::base::extract::FromEvent::from_event(context.clone(), event.clone()).await.ok_or(::flow_bot::base::handler::HandlerError::skip())?;
+                let #pat_ident: #ty = <#ty as ::flow_bot::extract::FromEvent>::from_event(context.clone(), event.clone()).await.ok_or(::flow_bot::HandlerError::skip())?;
             })
         });
 
         let func_body = &fn_item.block;
 
         Some(quote::quote! {
-            let controller_result = ({
+            let controller_result = ::flow_bot::IntoHandlerResult::into_result({
                 #(#param_decls)*
                 #func_body
-            }).into_result();
+            });
 
-            if matches!(controller_result, Ok(::flow_bot::base::handler::HandlerControl::Block)) {
-                return Ok(::flow_bot::base::handler::HandlerControl::Block);
+            if matches!(controller_result, Ok(::flow_bot::HandlerControl::Block)) {
+                return Ok(::flow_bot::HandlerControl::Block);
             }
         })
     });
@@ -80,9 +77,10 @@ pub fn flow_service_macro(item: TokenStream) -> TokenStream {
         impl #trt for #struct_name {
             #init_fn
 
-            async fn serve(&self, context: ::flow_bot::base::context::BotContext, event: ::flow_bot::event::BotEvent) -> Result<::flow_bot::base::handler::HandlerControl, ::flow_bot::base::handler::HandlerError> {
+            #[allow(unused_variables)]
+            async fn serve(&self, context: ::flow_bot::base::context::BotContext, event: ::flow_bot::event::BotEvent) -> Result<::flow_bot::HandlerControl, ::flow_bot::HandlerError> {
                 #(#methods)*
-                Ok(::flow_bot::base::handler::HandlerControl::Continue)
+                Ok(::flow_bot::HandlerControl::Continue)
             }
         }
     }
