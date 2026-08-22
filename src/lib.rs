@@ -15,7 +15,7 @@
 //! ```no_run
 //! use flow_bot::{
 //!     FlowBotBuilder,
-//!     base::connect::{ReconnectionStrategy, ReverseConnectionConfig},
+//!     base::transport::{ConnectionConfig, ForwardWebSocketConfig, ReconnectionStrategy},
 //!     HandlerControl, HandlerError,
 //!     extract::Message,
 //! };
@@ -27,11 +27,11 @@
 //!
 //! #[tokio::main(flavor = "current_thread")]
 //! async fn main() {
-//!     let bot = FlowBotBuilder::new(ReverseConnectionConfig {
-//!         target: "ws://localhost:19999".to_string(),
-//!         auth: None,
+//!     let bot = FlowBotBuilder::new(ConnectionConfig::ForwardWebSocket(ForwardWebSocketConfig {
+//!         url: "ws://localhost:19999".to_string(),
+//!         access_token: None,
 //!         reconnection: ReconnectionStrategy::None,
-//!     })
+//!     }))
 //!     .with_state(())
 //!     .with_handler(on_message)
 //!     .build();
@@ -39,6 +39,29 @@
 //!     bot.run().await.unwrap();
 //! }
 //! ```
+//!
+//! # Connections
+//!
+//! All four OneBot 11 communication types are supported through
+//! [`ConnectionConfig`], behind one unified surface: handlers, extractors,
+//! services and [`ApiExt`] API calls work identically regardless of the
+//! transport.
+//!
+//! - [`ConnectionConfig::ForwardWebSocket`] — flow-bot connects, as a client,
+//!   to the implementation's WebSocket server (`/`, `/api` or `/event`
+//!   endpoint). Reconnection is configured per connection.
+//! - [`ConnectionConfig::ReverseWebSocket`] — flow-bot runs a WebSocket
+//!   server and the implementation connects to it (announcing itself with
+//!   `X-Self-ID`/`X-Client-Role` headers). The implementation is responsible
+//!   for reconnecting.
+//! - [`ConnectionConfig::Http`] — flow-bot calls the implementation's HTTP
+//!   API. This type receives no events.
+//! - [`ConnectionConfig::HttpPost`] — flow-bot runs an HTTP server receiving
+//!   event POSTs (with optional `X-Signature` verification); outbound API
+//!   calls optionally use a separate [`HttpConfig`] endpoint.
+//!
+//! [`ConnectionConfig`]: crate::base::transport::ConnectionConfig
+//! [`ApiExt`]: crate::api::api_ext::ApiExt
 //!
 //! # Handlers
 //!
@@ -60,6 +83,11 @@
 //! [`HandlerError`]: crate::base::control::HandlerError
 //! [Extractors]: #extractors
 //!
+//! By default events are dispatched to handlers strictly in arrival order; see
+//! [`DispatchMode`] if you need bounded concurrent processing instead.
+//!
+//! [`DispatchMode`]: crate::base::bot::DispatchMode
+//!
 //! # Extractors
 //! Extractors work similarly to the extractors in axum. They are functions that can be registered to extract data from the event. They are to extract data from the context and event for the handler to use.
 //! To see a full list of predefined extractors, see the [`extract`] module.
@@ -67,7 +95,6 @@
 //! [`extract`]: crate::extract
 //!
 //! ## Using Extractors
-//!
 //! It is already shown in the example above how to use the predefined [`Message`] extractor which extracts the message from the event. It is also possible to use extractors to match event criteria.
 //!
 //! [`Message`]: crate::extract::Message
@@ -86,11 +113,9 @@
 //! ```
 //!
 //! ## Optional Extraction
-//!
 //! Extractors can be optional by using the [`Option`] type. This is useful when the data is not always present in the event.
 //!
 //! ## Custom Extractors
-//!
 //! It is also possible to create custom extractors by implementing the [`FromEvent`] trait.
 //! This is an async trait that takes the context and event as arguments and returns a result of the extracted data.
 //!
@@ -116,6 +141,7 @@
 //! Services provide a way to make the bot extendable. They are similar to handlers but take the shape of a struct that implements the [`Service`] trait and have their own state.
 //! It is made so that the bot can be extended to use services from other crates with ease.
 //! Services can be added to the bot using the [`with_service`] method.
+//! `Service::init` runs exactly once per bot, no matter how often the connection is re-established.
 //!
 //! [`Service`]: crate::base::handler::Service
 //! [`with_service`]: crate::FlowBotBuilder::with_service
@@ -132,13 +158,16 @@ pub use flow_bot_macros::{flow_filter, flow_service, group_message, private_mess
 
 // Re-exports of commonly used types for convenience.
 pub use base::{
-    bot::FlowBot,
+    bot::{DispatchMode, FlowBot},
     builder::FlowBotBuilder,
-    connect::{ReconnectionStrategy, ReverseConnectionConfig},
     context::{BotContext, BotContextExt},
     control::{HandlerControl, HandlerError, IntoHandlerResult},
     handler::{Handler, Service},
     middleware::{Middleware, Next, from_fn},
+    transport::{
+        ConnectionConfig, ForwardWebSocketConfig, HttpConfig, HttpPostConfig, ReconnectionStrategy,
+        ReverseWebSocketConfig,
+    },
 };
 pub use error::FlowError;
 pub use event::{BotEvent, Event, TypedEvent};

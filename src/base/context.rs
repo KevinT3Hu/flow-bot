@@ -1,30 +1,29 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    sync::Arc,
+    sync::{Arc, RwLock},
+    time::Duration,
 };
 
 use async_trait::async_trait;
-use dashmap::DashMap;
-use serde_json::json;
-use tokio::sync::{Mutex, oneshot};
-use tokio_tungstenite::tungstenite::Message;
+use serde::de::DeserializeOwned;
 
 use crate::{
-    api::{ApiResponse, api_ext::ApiExt},
+    api::{ApiResponse, api_ext::ApiExt, parse_api_response},
+    base::transport::ApiTransport,
     error::FlowError,
     event::BotEvent,
     extract::FromEvent,
 };
 
 pub struct Context {
-    pub(crate) sink: Mutex<Option<tokio::sync::mpsc::Sender<Message>>>,
-    pending_requests: Arc<DashMap<String, oneshot::Sender<String>>>,
+    transport: RwLock<Option<Arc<dyn ApiTransport>>>,
+    api_timeout: Duration,
     pub(crate) state: StateMap,
 }
 
 impl Context {
-    pub(crate) fn new(states: StateMap) -> Self {
+    pub(crate) fn new(states: StateMap, api_timeout: Duration) -> Self {
         #[allow(unused_mut)]
         let mut states = states;
         #[cfg(feature = "turso")]
@@ -34,14 +33,34 @@ impl Context {
         }
 
         Self {
-            sink: Mutex::new(None),
-            pending_requests: Arc::new(DashMap::new()),
+            transport: RwLock::new(None),
+            api_timeout,
             state: states,
         }
     }
-}
 
-impl Context {
+    /// Install the transport used for outbound API calls (replaces any
+    /// previous one, e.g. on reconnection).
+    pub(crate) fn set_transport(&self, transport: Arc<dyn ApiTransport>) {
+        *self.transport.write().expect("transport lock poisoned") = Some(transport);
+    }
+
+    pub(crate) fn clear_transport(&self) {
+        *self.transport.write().expect("transport lock poisoned") = None;
+    }
+
+    /// Clear the transport only if it is still `transport` (a newer connection
+    /// may have taken over the slot in the meantime).
+    pub(crate) fn clear_transport_if(&self, transport: &Arc<dyn ApiTransport>) {
+        let mut guard = self.transport.write().expect("transport lock poisoned");
+        if guard
+            .as_ref()
+            .is_some_and(|current| Arc::ptr_eq(current, transport))
+        {
+            *guard = None;
+        }
+    }
+
     pub(crate) async fn send_obj<T, R>(
         &self,
         action: String,
@@ -49,56 +68,19 @@ impl Context {
     ) -> Result<ApiResponse<R>, FlowError>
     where
         T: serde::Serialize,
-        R: for<'de> serde::Deserialize<'de>,
+        R: DeserializeOwned,
     {
-        // Generate random echo string
-        let echo = uuid::Uuid::new_v4().to_string();
-
-        // Create oneshot channel for this specific request
-        let (tx, rx) = oneshot::channel();
-
-        // Register the request BEFORE sending (lock-free)
-        self.pending_requests.insert(echo.clone(), tx);
-
-        // Build and send the message
-        let msg = json!({
-            "action": action,
-            "params": obj,
-            "echo": echo,
-        });
-        let text = serde_json::to_string(&msg)?;
-        let msg = Message::Text(text.into());
-
-        // Send message via channel; clone sender so we don't hold the mutex across await
-        let sender = {
-            let sink = self.sink.lock().await;
-            sink.as_ref().ok_or(FlowError::NoConnection)?.clone()
-        };
-        sender
-            .send(msg)
-            .await
-            .map_err(|_| FlowError::NoConnection)?;
-
-        // Wait for response with timeout
-        let response = tokio::time::timeout(std::time::Duration::from_secs(30), rx).await;
-
-        match response {
-            Ok(Ok(data)) => Ok(serde_json::from_str(&data)?),
-            Ok(Err(_)) => Err(FlowError::NoResponse), // Sender dropped
-            Err(_) => {
-                // Timeout occurred, clean up the pending request (lock-free)
-                self.pending_requests.remove(&echo);
-                Err(FlowError::Timeout(30000))
-            }
-        }
-    }
-
-    pub(crate) fn on_recv_echo(&self, echo: String, data: String) {
-        // DashMap::remove returns Option<(K, V)>, extract the sender
-        if let Some((_, tx)) = self.pending_requests.remove(&echo) {
-            let _ = tx.send(data); // Ignore error if receiver dropped
-        }
-        // If echo not found, response arrived after timeout - silently ignore
+        let transport = self
+            .transport
+            .read()
+            .expect("transport lock poisoned")
+            .clone()
+            .ok_or(FlowError::NoConnection)?;
+        let params = serde_json::to_value(obj)?;
+        let raw = transport
+            .send_request(&action, params, self.api_timeout)
+            .await?;
+        parse_api_response(&raw)
     }
 
     pub async fn get_self_id(&self) -> Result<i64, FlowError> {

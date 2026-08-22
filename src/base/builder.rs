@@ -1,33 +1,41 @@
-use std::{
-    any::Any,
-    sync::{Arc, atomic::AtomicBool, atomic::AtomicU32},
-};
+use std::{any::Any, sync::Arc, time::Duration};
 
-use tokio::sync::{Notify, Semaphore};
+use tokio::sync::Semaphore;
 
 use crate::base::{
-    bot::FlowBot,
-    connect::ReverseConnectionConfig,
+    bot::{BotShared, DispatchMode, FlowBot},
     context::{BotContext, Context, StateMap},
     handler::{HWrapped, Handler, HandlerOrService, Service},
     middleware::{EventProcessor, Leaf, Middleware, Node},
+    transport::ConnectionConfig,
 };
 
 pub struct FlowBotBuilder {
     processors: Vec<Arc<dyn EventProcessor>>,
-    connection: ReverseConnectionConfig,
+    connection: ConnectionConfig,
     states: StateMap,
     concurrent_limit: usize,
+    dispatch_mode: DispatchMode,
+    event_queue_capacity: usize,
+    api_timeout: Duration,
 }
 
 impl FlowBotBuilder {
     /// Create a new FlowBotBuilder with the given connection configuration.
-    pub fn new(connection: ReverseConnectionConfig) -> Self {
+    ///
+    /// # Panics
+    /// Panics in [`build`](Self::build) if the configuration is invalid
+    /// (malformed URL, wrong scheme, unusable path, TLS URL without the `tls`
+    /// feature, ...). Use [`ConnectionConfig::validate`] to check ahead of time.
+    pub fn new(connection: ConnectionConfig) -> Self {
         Self {
             processors: Vec::new(),
             connection,
             states: StateMap::new(),
-            concurrent_limit: 8, // default concurrent limit
+            concurrent_limit: 8,
+            dispatch_mode: DispatchMode::default(),
+            event_queue_capacity: 256,
+            api_timeout: Duration::from_secs(30),
         }
     }
 
@@ -100,21 +108,71 @@ impl FlowBotBuilder {
         self
     }
 
+    /// Set how events are dispatched to handlers (see [`DispatchMode`]).
+    ///
+    /// Defaults to [`DispatchMode::Ordered`]: events are processed strictly in
+    /// arrival order.
+    pub fn dispatch_mode(mut self, mode: DispatchMode) -> Self {
+        self.dispatch_mode = mode;
+        self
+    }
+
+    /// Set the maximum number of events processed concurrently.
+    ///
+    /// Only takes effect with [`DispatchMode::Concurrent`].
+    ///
+    /// # Panics
+    /// Panics in [`build`](Self::build) if `limit` is 0 (a zero-permit
+    /// semaphore would stall every event forever).
     pub fn concurrent_limit(mut self, limit: usize) -> Self {
         self.concurrent_limit = limit;
         self
     }
 
+    /// Set the capacity of the bounded event queue connecting the connection
+    /// to the dispatcher. When handlers are slower than the incoming event
+    /// rate, the queue fills up and the connection experiences backpressure
+    /// instead of unbounded memory growth.
+    ///
+    /// # Panics
+    /// Panics in [`build`](Self::build) if `capacity` is 0.
+    pub fn event_queue_capacity(mut self, capacity: usize) -> Self {
+        self.event_queue_capacity = capacity;
+        self
+    }
+
+    /// Set the timeout for OneBot API calls (default: 30 seconds).
+    pub fn api_timeout(mut self, timeout: Duration) -> Self {
+        self.api_timeout = timeout;
+        self
+    }
+
     /// Build the FlowBot.
+    ///
+    /// # Panics
+    /// Panics if the connection configuration is invalid or a capacity/limit
+    /// was set to 0.
     pub fn build(self) -> FlowBot {
+        if let Err(err) = self.connection.validate() {
+            panic!("invalid connection configuration: {err}");
+        }
+        assert!(
+            self.concurrent_limit > 0,
+            "concurrent_limit must be greater than 0"
+        );
+        assert!(
+            self.event_queue_capacity > 0,
+            "event_queue_capacity must be greater than 0"
+        );
+
         FlowBot {
             processors: Arc::new(self.processors),
-            context: BotContext::new(Context::new(self.states)),
+            context: BotContext::new(Context::new(self.states, self.api_timeout)),
             connection: self.connection,
-            reconnect_attempt: AtomicU32::new(0),
             concurrent_limit: Arc::new(Semaphore::new(self.concurrent_limit)),
-            shutdown: Notify::new(),
-            shutdown_requested: AtomicBool::new(false),
+            dispatch_mode: self.dispatch_mode,
+            event_queue_capacity: self.event_queue_capacity,
+            shared: Arc::new(BotShared::new()),
         }
     }
 }

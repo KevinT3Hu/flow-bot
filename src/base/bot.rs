@@ -1,294 +1,234 @@
-use std::sync::{
-    Arc,
-    atomic::{AtomicBool, AtomicU32, Ordering},
+use std::{
+    future::Future,
+    pin::Pin,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
 };
 
-use futures::{
-    SinkExt, StreamExt,
-    stream::{SplitSink, SplitStream},
-};
 use serde_json::Value;
-use tokio::{net::TcpStream, sync::Notify, sync::Semaphore};
-use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, connect_async,
-    tungstenite::{Message, client::IntoClientRequest},
-};
+use tokio::sync::{Notify, Semaphore, mpsc};
 
 use crate::{
     base::{
-        connect::{ReconnectionStrategy, ReverseConnectionConfig},
-        context::BotContext,
-        control::HandlerControl,
-        middleware::EventProcessor,
+        context::BotContext, control::HandlerControl, middleware::EventProcessor,
+        transport::ConnectionConfig,
     },
     error::FlowError,
-    event::Event,
+    event::{BotEvent, Event, TypedEvent},
 };
 
-pub struct FlowBot {
-    pub(crate) processors: Arc<Vec<Arc<dyn EventProcessor>>>,
-    pub(crate) context: BotContext,
-    pub(crate) connection: ReverseConnectionConfig,
-    pub(crate) reconnect_attempt: AtomicU32,
-    pub(crate) concurrent_limit: Arc<Semaphore>,
-    pub(crate) shutdown: Notify,
-    pub(crate) shutdown_requested: AtomicBool,
+/// How events arriving from the connection are dispatched to handlers.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum DispatchMode {
+    /// Events are processed strictly in arrival order: the handler chain of
+    /// one event completes before the next event is dispatched. (Default.)
+    #[default]
+    Ordered,
+    /// Events are processed concurrently, bounded by the builder's
+    /// [`concurrent_limit`](crate::FlowBotBuilder::concurrent_limit);
+    /// ordering between events is not guaranteed.
+    Concurrent,
 }
 
-impl FlowBot {
-    /// Run the bot.
-    /// This will connect to the server and start processing events.
-    /// This method returns `Ok(())` when graceful shutdown is requested via [`shutdown`](Self::shutdown),
-    /// or when the connection closes and reconnection is not configured.
-    /// It returns `Err` on fatal errors or when reconnection attempts are exhausted.
-    pub async fn run(&self) -> Result<(), FlowError> {
-        self.shutdown_requested.store(false, Ordering::Relaxed);
-        match &self.connection.reconnection {
-            ReconnectionStrategy::None => self.run_once().await,
-            ReconnectionStrategy::Infinite {
-                initial_delay_ms,
-                max_delay_ms,
-            } => {
-                self.run_with_infinite_reconnect(*initial_delay_ms, *max_delay_ms)
-                    .await
-            }
-            ReconnectionStrategy::Limited {
-                max_attempts,
-                initial_delay_ms,
-                max_delay_ms,
-            } => {
-                self.run_with_limited_reconnect(*max_attempts, *initial_delay_ms, *max_delay_ms)
-                    .await
-            }
+/// State shared between the run loop, the transports and the dispatcher task.
+pub(crate) struct BotShared {
+    shutdown: Notify,
+    shutdown_requested: AtomicBool,
+    services_initialized: AtomicBool,
+}
+
+impl BotShared {
+    pub(crate) fn new() -> Self {
+        Self {
+            shutdown: Notify::new(),
+            shutdown_requested: AtomicBool::new(false),
+            services_initialized: AtomicBool::new(false),
         }
     }
 
-    /// Request graceful shutdown.
-    ///
-    /// The bot will stop accepting new events and return from [`run`](Self::run)
-    /// as soon as the current reconnection sleep or event loop iteration finishes.
-    pub fn shutdown(&self) {
+    pub(crate) fn request_shutdown(&self) {
         self.shutdown_requested.store(true, Ordering::Relaxed);
         self.shutdown.notify_waiters();
     }
 
-    async fn run_once(&self) -> Result<(), FlowError> {
-        let (write, read) = self.connect().await?;
-
-        // Connection established successfully, reset attempt counter
-        self.reconnect_attempt.store(0, Ordering::Relaxed);
-
-        self.set_sink(write).await;
-        self.init_services().await;
-        self.run_msg_loop(read).await?;
-
-        Ok(())
+    pub(crate) fn shutdown_requested(&self) -> bool {
+        self.shutdown_requested.load(Ordering::Relaxed)
     }
 
-    async fn run_with_infinite_reconnect(
-        &self,
-        initial_delay_ms: u64,
-        max_delay_ms: u64,
-    ) -> Result<(), FlowError> {
-        loop {
-            if self.shutdown_requested.load(Ordering::Relaxed) {
-                return Ok(());
-            }
-
-            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
-            let current_delay =
-                (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
-
-            match self.run_once().await {
-                Ok(()) => {
-                    if self.shutdown_requested.load(Ordering::Relaxed) {
-                        return Ok(());
-                    }
-                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
-                }
-                Err(e) => {
-                    eprintln!(
-                        "Connection error: {}. Reconnecting in {}ms...",
-                        e, current_delay
-                    );
-                }
-            }
-
-            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
-
-            if self.shutdown_requested.load(Ordering::Relaxed) {
-                return Ok(());
-            }
-            tokio::select! {
-                _ = tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)) => {}
-                _ = self.shutdown.notified() => {
-                    return Ok(());
-                }
-            }
+    /// Wait until shutdown is requested. The `notified()` future is created
+    /// *before* re-checking the flag, so a shutdown that races with this call
+    /// cannot be missed.
+    pub(crate) async fn wait_shutdown(&self) {
+        let notified = self.shutdown.notified();
+        if self.shutdown_requested() {
+            return;
         }
+        notified.await;
     }
 
-    async fn run_with_limited_reconnect(
+    /// Run `Service::init` for the processor chain exactly once per bot, no
+    /// matter how many (re)connections happen.
+    pub(crate) async fn init_services_once(
         &self,
-        max_attempts: u32,
-        initial_delay_ms: u64,
-        max_delay_ms: u64,
-    ) -> Result<(), FlowError> {
-        loop {
-            if self.shutdown_requested.load(Ordering::Relaxed) {
-                return Ok(());
-            }
-
-            let attempt = self.reconnect_attempt.load(Ordering::Relaxed);
-
-            if attempt >= max_attempts {
-                return Err(FlowError::ReconnectionFailed(max_attempts));
-            }
-
-            let current_delay =
-                (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
-
-            match self.run_once().await {
-                Ok(()) => {
-                    if self.shutdown_requested.load(Ordering::Relaxed) {
-                        return Ok(());
-                    }
-                    eprintln!("Connection closed. Reconnecting in {}ms...", current_delay);
-                }
-                Err(e) => {
-                    eprintln!(
-                        "Connection error: {}. Reconnecting in {}ms... (attempt {}/{})",
-                        e,
-                        current_delay,
-                        attempt + 1,
-                        max_attempts
-                    );
-                }
-            }
-
-            self.reconnect_attempt.fetch_add(1, Ordering::Relaxed);
-
-            if self.shutdown_requested.load(Ordering::Relaxed) {
-                return Ok(());
-            }
-            tokio::select! {
-                _ = tokio::time::sleep(tokio::time::Duration::from_millis(current_delay)) => {}
-                _ = self.shutdown.notified() => {
-                    return Ok(());
-                }
-            }
-        }
-    }
-
-    async fn connect(
-        &self,
-    ) -> Result<
-        (
-            SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
-            SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
-        ),
-        FlowError,
-    > {
-        let mut request = self.connection.target.clone().into_client_request()?;
-        if let Some(auth) = &self.connection.auth {
-            let value = auth.parse().map_err(|_| FlowError::InvalidAuth)?;
-            request.headers_mut().append("Authorization", value);
-        }
-
-        let (ws_stream, _) = connect_async(request).await?;
-        Ok(ws_stream.split())
-    }
-
-    async fn set_sink(
-        &self,
-        mut sink: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+        processors: &Arc<Vec<Arc<dyn EventProcessor>>>,
+        context: BotContext,
     ) {
-        let (tx, mut rx) = tokio::sync::mpsc::channel(128);
-
-        {
-            let mut ws_sink = self.context.sink.lock().await;
-            *ws_sink = Some(tx);
+        if self.services_initialized.swap(true, Ordering::Relaxed) {
+            return;
         }
-
-        tokio::spawn(async move {
-            while let Some(msg) = rx.recv().await {
-                if sink.send(msg).await.is_err() {
-                    break;
-                }
-            }
-        });
+        for processor in processors.iter() {
+            processor.init(context.clone()).await;
+        }
     }
+}
 
-    async fn run_msg_loop(
-        &self,
-        mut read: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
-    ) -> Result<(), FlowError> {
-        loop {
-            if self.shutdown_requested.load(Ordering::Relaxed) {
-                return Ok(());
-            }
+pub struct FlowBot {
+    pub(crate) processors: Arc<Vec<Arc<dyn EventProcessor>>>,
+    pub(crate) context: BotContext,
+    pub(crate) connection: ConnectionConfig,
+    pub(crate) concurrent_limit: Arc<Semaphore>,
+    pub(crate) dispatch_mode: DispatchMode,
+    pub(crate) event_queue_capacity: usize,
+    pub(crate) shared: Arc<BotShared>,
+}
 
-            tokio::select! {
-                msg = read.next() => {
-                    match msg {
-                        Some(msg) => {
-                            let msg = msg?;
-                            if let Message::Text(text) = msg {
-                                let text = serde_json::from_slice::<Value>(text.as_bytes())?;
-                                if let Some(echo) = Self::check_is_echo(&text) {
-                                    self.context.on_recv_echo(echo, text.to_string());
-                                    continue;
-                                }
-                                self.handle_event(text)?;
-                            }
+impl FlowBot {
+    /// Run the bot.
+    ///
+    /// This starts the configured connection (see [`ConnectionConfig`]),
+    /// dispatches incoming events to the handlers, and returns:
+    /// - `Ok(())` when graceful shutdown is requested via [`shutdown`](Self::shutdown),
+    ///   or when the connection closes and reconnection is not configured;
+    /// - `Err` on fatal errors (invalid configuration, bind failures, or
+    ///   exhausted reconnection attempts).
+    pub async fn run(&self) -> Result<(), FlowError> {
+        self.shared
+            .shutdown_requested
+            .store(false, Ordering::Relaxed);
+        self.connection
+            .validate()
+            .map_err(FlowError::InvalidConfig)?;
+
+        // Bounded event queue: connection frames wait here when handlers are
+        // slow, giving backpressure instead of unbounded task growth.
+        let (tx, mut rx) = mpsc::channel::<Value>(self.event_queue_capacity);
+        let dispatcher = {
+            let processors = self.processors.clone();
+            let context = self.context.clone();
+            let semaphore = self.concurrent_limit.clone();
+            let mode = self.dispatch_mode;
+            tokio::spawn(async move {
+                while let Some(value) = rx.recv().await {
+                    let event: BotEvent = match serde_json::from_value::<Event>(value) {
+                        Ok(event) => Arc::new(event),
+                        Err(e) => {
+                            tracing::warn!("dropping event that failed to deserialize: {e}");
+                            continue;
                         }
-                        None => break Ok(()),
+                    };
+                    if matches!(event.event, TypedEvent::Unknown(_)) {
+                        tracing::debug!(
+                            "event of unrecognized shape degraded to the Unknown variant"
+                        );
+                    }
+                    match mode {
+                        DispatchMode::Ordered => run_processors(&processors, &context, event).await,
+                        DispatchMode::Concurrent => {
+                            let permit = semaphore
+                                .clone()
+                                .acquire_owned()
+                                .await
+                                .expect("semaphore should not be closed");
+                            let processors = processors.clone();
+                            let context = context.clone();
+                            tokio::spawn(async move {
+                                let _permit = permit;
+                                run_processors(&processors, &context, event).await;
+                            });
+                        }
                     }
                 }
-                _ = self.shutdown.notified() => {
-                    return Ok(());
-                }
+            })
+        };
+
+        let result = match &self.connection {
+            ConnectionConfig::ForwardWebSocket(cfg) => {
+                crate::base::transport::forward_ws::run(self, cfg, tx.clone()).await
+            }
+            ConnectionConfig::ReverseWebSocket(cfg) => {
+                crate::base::transport::reverse_ws::run(self, cfg, tx.clone()).await
+            }
+            ConnectionConfig::Http(cfg) => {
+                crate::base::transport::http::run(self, cfg, tx.clone()).await
+            }
+            ConnectionConfig::HttpPost(cfg) => {
+                crate::base::transport::http_post::run(self, cfg, tx.clone()).await
+            }
+        };
+
+        // Close the queue so the dispatcher drains the remaining events and
+        // exits; a handler error never aborts the run loop itself.
+        drop(tx);
+        let _ = dispatcher.await;
+        self.context.clear_transport();
+        result
+    }
+
+    /// Request graceful shutdown.
+    ///
+    /// The bot stops accepting new events and returns from [`run`](Self::run)
+    /// as soon as the current reconnection sleep or event loop iteration
+    /// finishes.
+    pub fn shutdown(&self) {
+        self.shared.request_shutdown();
+    }
+
+    /// The shared context of this bot, for calling OneBot APIs (via
+    /// [`ApiExt`](crate::api::api_ext::ApiExt)) from outside the run loop.
+    pub fn context(&self) -> BotContext {
+        self.context.clone()
+    }
+
+    pub(crate) fn shutdown_requested(&self) -> bool {
+        self.shared.shutdown_requested()
+    }
+
+    pub(crate) async fn wait_shutdown(&self) {
+        self.shared.wait_shutdown().await
+    }
+
+    /// Owned shutdown future for server transports (graceful shutdown).
+    pub(crate) fn shutdown_signal(&self) -> Pin<Box<dyn Future<Output = ()> + Send>> {
+        let shared = self.shared.clone();
+        Box::pin(async move {
+            shared.wait_shutdown().await;
+        })
+    }
+
+    pub(crate) async fn init_services_once(&self) {
+        self.shared
+            .init_services_once(&self.processors, self.context.clone())
+            .await;
+    }
+}
+
+/// Run one event through the processor chain. Handler errors are logged and
+/// contained; they never terminate the bot.
+async fn run_processors(
+    processors: &[Arc<dyn EventProcessor>],
+    context: &BotContext,
+    event: BotEvent,
+) {
+    for processor in processors {
+        match processor.process(context.clone(), event.clone()).await {
+            Ok(HandlerControl::Block) => break,
+            Ok(HandlerControl::Continue) => continue,
+            Err(e) => {
+                tracing::debug!("handler error: {e}");
+                continue;
             }
         }
-    }
-
-    async fn init_services(&self) {
-        for processor in self.processors.iter() {
-            processor.init(self.context.clone()).await;
-        }
-    }
-
-    fn handle_event(&self, text: Value) -> Result<(), FlowError> {
-        let event: Event = serde_json::from_value(text)?;
-        let event = Arc::new(event);
-        let context = self.context.clone();
-        let processors = self.processors.clone();
-        let concurrent_limit = self.concurrent_limit.clone();
-        tokio::spawn(async move {
-            let _permit = concurrent_limit
-                .acquire()
-                .await
-                .expect("semaphore should not be closed");
-            for processor in processors.iter() {
-                match processor.process(context.clone(), event.clone()).await {
-                    Ok(HandlerControl::Block) => break,
-                    Ok(HandlerControl::Continue) => continue,
-                    Err(e) => {
-                        tracing::debug!("{}", e);
-                        continue;
-                    }
-                }
-            }
-        });
-        Ok(())
-    }
-
-    fn check_is_echo(msg: &Value) -> Option<String> {
-        if let serde_json::Value::Object(obj) = msg
-            && let Some(serde_json::Value::String(echo)) = obj.get("echo")
-        {
-            return Some(echo.clone());
-        }
-        None
     }
 }

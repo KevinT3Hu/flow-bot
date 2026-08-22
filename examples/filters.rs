@@ -1,8 +1,8 @@
 use flow_bot::{
     FlowBotBuilder,
     base::{
-        connect::{ReconnectionStrategy, ReverseConnectionConfig},
         control::{HandlerControl, HandlerError},
+        transport::{ConnectionConfig, ForwardWebSocketConfig, ReconnectionStrategy},
     },
     extract::Message,
     flow_filter, group_message, private_message,
@@ -28,11 +28,11 @@ async fn on_group_with_filter(msg: Message) -> Result<HandlerControl, HandlerErr
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    let bot = FlowBotBuilder::new(ReverseConnectionConfig {
-        target: "ws://localhost:19999".to_string(),
-        auth: None,
+    let bot = FlowBotBuilder::new(ConnectionConfig::ForwardWebSocket(ForwardWebSocketConfig {
+        url: "ws://localhost:19999".to_string(),
+        access_token: None,
         reconnection: ReconnectionStrategy::None,
-    })
+    }))
     .with_state(())
     .with_handler(on_group_message)
     .with_handler(on_private_message)

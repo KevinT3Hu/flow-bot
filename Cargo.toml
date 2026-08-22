@@ -1,6 +1,6 @@
 [package]
 name = "flow-bot"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 authors = ["KevinT3Hu"]
 description = "An onebot-11 SDK that simplifies bot creation."
@@ -13,27 +13,54 @@ members = ["flow-bot-macros"]
 
 [dependencies]
 async-trait = "0.1.89"
+axum = { version = "0.8.9", default-features = false, features = [
+    "http1",
+    "tokio",
+    "json",
+    "ws",
+] }
 clap = { version = "4.5.54", features = ["derive"], optional = true }
 dashmap = "6.1"
 futures = "0.3.31"
-reqwest = { version = "0.13.1", features = ["json"] }
+hmac = "0.12.1"
+reqwest = { version = "0.13.1", default-features = false, features = ["json"] }
+sha1 = "0.10"
 turso = { version = "0.4", optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 thiserror = "2.0.18"
-tokio = { version = "1.49.0", features = ["macros", "sync", "time"] }
-tokio-tungstenite = "0.28.0"
+tokio = { version = "1.49.0", features = ["macros", "net", "rt", "sync", "time"] }
+tokio-tungstenite = "0.29.0"
 tracing = "0.1.44"
 uuid = { version = "1.20.0", features = ["v4"] }
 
-flow-bot-macros = { path = "./flow-bot-macros", version = "0.3.0", optional = true }
+flow-bot-macros = { path = "./flow-bot-macros", version = "0.4.0", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.49.0", features = ["rt"] }
+async-trait = "0.1.89"
+axum = { version = "0.8.9", default-features = false, features = [
+    "http1",
+    "tokio",
+    "json",
+] }
+futures = "0.3.31"
+hmac = "0.12.1"
+reqwest = { version = "0.13.1", default-features = false, features = ["json"] }
+serde_json = "1.0.149"
+sha1 = "0.10"
+tokio = { version = "1.49.0", features = [
+    "rt",
+    "rt-multi-thread",
+    "net",
+    "macros",
+    "time",
+] }
+tokio-tungstenite = "0.29.0"
 
 [features]
 nightly = []
 command = ["clap/derive", "nightly"]
 macros = ["dep:flow-bot-macros"]
 turso = ["dep:turso", "nightly"]
-default = ["macros"]
+tls = ["tokio-tungstenite/rustls-tls-webpki-roots", "reqwest/rustls"]
+default = ["macros", "tls"]
