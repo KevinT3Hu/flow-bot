@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::{
     event::message::{GroupSenderInfo, GroupSenderRole, PrivateSenderInfo, SenderSex},
@@ -30,8 +31,9 @@ pub struct ApiResponse<T> {
 pub struct BotStatus {
     pub online: Option<bool>,
     pub good: bool,
+    /// Implementation-defined extra fields of arbitrary JSON types.
     #[serde(flatten)]
-    pub data: HashMap<String, String>,
+    pub data: HashMap<String, Value>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -99,14 +101,16 @@ pub struct GroupMemberInfo {
     pub sex: SenderSex,
     pub age: i32,
     pub area: Option<String>,
-    pub join_time: i32,
-    pub last_sent_time: i32,
+    /// The spec notes that list responses may omit several fields that are
+    /// present in single-member responses, hence `Option`.
+    pub join_time: Option<i32>,
+    pub last_sent_time: Option<i32>,
     pub level: String,
     pub role: GroupSenderRole,
-    pub unfriendly: bool,
+    pub unfriendly: Option<bool>,
     pub title: Option<String>,
-    pub title_expire_time: i32,
-    pub card_changeable: bool,
+    pub title_expire_time: Option<i32>,
+    pub card_changeable: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -191,6 +195,7 @@ pub struct VersionInfo {
     pub app_name: String,
     pub app_version: String,
     pub protocol_version: String,
+    /// Implementation-defined extra fields of arbitrary JSON types.
     #[serde(flatten)]
-    pub data: HashMap<String, String>,
+    pub data: HashMap<String, Value>,
 }

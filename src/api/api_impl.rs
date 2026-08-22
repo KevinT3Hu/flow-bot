@@ -11,8 +11,8 @@ use crate::{
 use super::{
     BotStatus, CanSendResponse, FriendInfo, GetCookiesResponse, GetCredentialsResponse,
     GetCsrfTokenResponse, GetFileResponse, GetForwardResponse, GetMessageResponse, GroupHonorInfo,
-    GroupHonorType, GroupInfoResponse, LoginInfo, RecordFormat, SendMessageResponse, VersionInfo,
-    api_ext::ApiExt,
+    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat,
+    SendMessageResponse, VersionInfo, api_ext::ApiExt,
 };
 
 macro_rules! impl_api {
@@ -87,11 +87,8 @@ impl ApiExt for Context {
         impl_api!(self, get_msg, message_id)
     }
 
-    async fn get_forward_message(
-        &self,
-        message_id: i64,
-    ) -> Result<GetForwardResponse, Self::Error> {
-        impl_api!(self, get_forward_msg, message_id)
+    async fn get_forward_message(&self, id: String) -> Result<GetForwardResponse, Self::Error> {
+        impl_api!(self, get_forward_msg, id)
     }
 
     async fn send_like(&self, user_id: i64, times: Option<i32>) -> Result<(), Self::Error> {
@@ -248,14 +245,14 @@ impl ApiExt for Context {
         group_id: i64,
         user_id: i64,
         no_cache: Option<bool>,
-    ) -> Result<crate::api::GroupInfoResponse, Self::Error> {
+    ) -> Result<GroupMemberInfo, Self::Error> {
         impl_api!(self, get_group_member_info, group_id, user_id, no_cache)
     }
 
     async fn get_group_member_list(
         &self,
         group_id: i64,
-    ) -> Result<Vec<crate::api::FriendInfo>, Self::Error> {
+    ) -> Result<Vec<GroupMemberInfo>, Self::Error> {
         impl_api!(self, get_group_member_list, group_id)
     }
 

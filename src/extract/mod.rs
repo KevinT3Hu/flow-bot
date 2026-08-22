@@ -171,7 +171,7 @@ pub use self::{
     },
     segment::{
         At, Dice, Face, Forward, Image, Json, Location, Music, Node, PlainText, Poke, Record,
-        Reply, Shake, Share, Text, Video, Xml,
+        Reply, Rps, Shake, Share, Text, Video, Xml,
     },
 };
 pub use crate::event::message::Message;

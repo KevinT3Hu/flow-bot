@@ -141,6 +141,23 @@ impl FromEvent for Dice {
     }
 }
 
+/// Extract if a rock-paper-scissors segment is present.
+pub struct Rps;
+
+#[async_trait]
+impl FromEvent for Rps {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        if let TypedEvent::Message(ref msg) = event.event {
+            msg.message.iter().find_map(|seg| match seg {
+                Segment::Rps(_) => Some(Self),
+                _ => None,
+            })
+        } else {
+            None
+        }
+    }
+}
+
 /// Extract if a shake segment is present.
 pub struct Shake;
 
@@ -300,7 +317,8 @@ impl FromEvent for Forward {
     }
 }
 
-/// Extract the first node segment's id.
+/// Extract the first node segment's id, if the node references an existing
+/// message (custom nodes carry `user_id`/`nickname`/`content` instead).
 pub struct Node(pub String);
 
 #[async_trait]
@@ -308,7 +326,7 @@ impl FromEvent for Node {
     async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
         if let TypedEvent::Message(ref msg) = event.event {
             msg.message.iter().find_map(|seg| match seg {
-                Segment::Node(n) => Some(Self(n.id.clone())),
+                Segment::Node(n) => n.id.clone().map(Self),
                 _ => None,
             })
         } else {

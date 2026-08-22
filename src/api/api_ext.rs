@@ -8,8 +8,8 @@ use crate::{
 use super::{
     BotStatus, CanSendResponse, FriendInfo, GetCookiesResponse, GetCredentialsResponse,
     GetCsrfTokenResponse, GetFileResponse, GetForwardResponse, GetMessageResponse, GroupHonorInfo,
-    GroupHonorType, GroupInfoResponse, LoginInfo, RecordFormat, SendMessageResponse, StrangerInfo,
-    VersionInfo,
+    GroupHonorType, GroupInfoResponse, GroupMemberInfo, LoginInfo, RecordFormat,
+    SendMessageResponse, StrangerInfo, VersionInfo,
 };
 
 #[async_trait]
@@ -38,8 +38,9 @@ pub trait ApiExt {
 
     async fn get_message(&self, message_id: i64) -> Result<GetMessageResponse, Self::Error>;
 
-    async fn get_forward_message(&self, message_id: i64)
-    -> Result<GetForwardResponse, Self::Error>;
+    /// Fetch a forwarded message's content by its forward id (the `id` of a
+    /// `forward` segment), per the spec parameter of `get_forward_msg`.
+    async fn get_forward_message(&self, id: String) -> Result<GetForwardResponse, Self::Error>;
 
     async fn send_like(&self, user_id: i64, times: Option<i32>) -> Result<(), Self::Error>;
 
@@ -145,9 +146,12 @@ pub trait ApiExt {
         group_id: i64,
         user_id: i64,
         no_cache: Option<bool>,
-    ) -> Result<GroupInfoResponse, Self::Error>;
+    ) -> Result<GroupMemberInfo, Self::Error>;
 
-    async fn get_group_member_list(&self, group_id: i64) -> Result<Vec<FriendInfo>, Self::Error>;
+    async fn get_group_member_list(
+        &self,
+        group_id: i64,
+    ) -> Result<Vec<GroupMemberInfo>, Self::Error>;
 
     async fn get_group_honor_info(
         &self,

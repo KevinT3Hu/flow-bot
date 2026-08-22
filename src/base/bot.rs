@@ -145,7 +145,8 @@ impl FlowBot {
                 return Err(FlowError::ReconnectionFailed(max_attempts));
             }
 
-            let current_delay = (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
+            let current_delay =
+                (initial_delay_ms * 2_u64.saturating_pow(attempt)).min(max_delay_ms);
 
             match self.run_once().await {
                 Ok(()) => {
