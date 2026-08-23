@@ -7,8 +7,9 @@ use crate::{
         message::{GroupMessageInfo, Message, PrivateMessageInfo, TypedMessageInfo},
         meta_event::{Heartbeat, Lifecycle, MetaEvent},
         notice::{
-            FriendAdd, FriendRecall, GroupAdmin, GroupBan, GroupDecrease, GroupIncrease,
-            GroupRecall, GroupUpload, Notice,
+            EssenceEvent, FriendAdd, FriendRecall, GroupAdmin, GroupBan, GroupDecrease,
+            GroupIncrease, GroupRecall, GroupUpload, HonorEvent, LuckyKingEvent, Notice,
+            NotifyEvent, PokeEvent,
         },
         request::{FriendRequest, GroupRequest, Request},
     },
@@ -84,6 +85,48 @@ crate::impl_from_event!(Notice, GroupBan);
 crate::impl_from_event!(Notice, FriendAdd);
 crate::impl_from_event!(Notice, GroupRecall);
 crate::impl_from_event!(Notice, FriendRecall);
+crate::impl_from_event!(Notice, Essence, EssenceEvent);
+
+// The notify sub-events sit one level deeper than `impl_from_event!` can
+// match (TypedEvent::Notice(Notice::Notify(NotifyEvent::..))), so they get
+// hand-written impls.
+#[async_trait]
+impl FromEvent for NotifyEvent {
+    async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+        match &event.event {
+            TypedEvent::Notice(Notice::Notify(notify)) => Some(notify.clone()),
+            _ => None,
+        }
+    }
+}
+
+macro_rules! impl_notify_sub_event {
+    ($($(#[$meta:meta])* $variant:ident, $ty:ident),* $(,)?) => {
+        $(
+            $(#[$meta])*
+            #[async_trait]
+            impl FromEvent for $ty {
+                async fn from_event(_: BotContext, event: BotEvent) -> Option<Self> {
+                    match &event.event {
+                        TypedEvent::Notice(Notice::Notify(NotifyEvent::$variant(inner))) => {
+                            Some(inner.clone())
+                        }
+                        _ => None,
+                    }
+                }
+            }
+        )*
+    };
+}
+
+impl_notify_sub_event! {
+    #[doc = "Extract a poke notify sub-event (`sub_type: poke`)."]
+    Poke, PokeEvent,
+    #[doc = "Extract a lucky-king notify sub-event (`sub_type: lucky_king`)."]
+    LuckyKing, LuckyKingEvent,
+    #[doc = "Extract a honor-change notify sub-event (`sub_type: honor`)."]
+    Honor, HonorEvent,
+}
 
 crate::impl_from_event!(Request);
 crate::impl_from_event!(Request, Friend, FriendRequest);

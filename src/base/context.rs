@@ -1,24 +1,38 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
-    sync::{Arc, RwLock},
+    sync::{Arc, Mutex, RwLock},
     time::Duration,
 };
 
 use async_trait::async_trait;
 use serde::de::DeserializeOwned;
+use tokio::sync::Notify;
 
 use crate::{
-    api::{ApiResponse, api_ext::ApiExt, parse_api_response},
+    api::{ApiResponse, QuickOperation, api_ext::ApiExt, parse_api_response},
     base::transport::ApiTransport,
     error::FlowError,
-    event::BotEvent,
+    event::{BotEvent, Event},
     extract::FromEvent,
 };
+
+/// A quick operation attached to an event whose HTTP-POST response is still
+/// pending: the operation accumulated by handlers so far, plus the
+/// completion signal the webhook response waits on.
+#[derive(Default)]
+pub(crate) struct QuickOpSlot {
+    pub(crate) operation: Mutex<Option<QuickOperation>>,
+    pub(crate) done: Notify,
+}
 
 pub struct Context {
     transport: RwLock<Option<Arc<dyn ApiTransport>>>,
     api_timeout: Duration,
+    /// Quick-op slots for events whose HTTP-POST response is still pending,
+    /// keyed by the event allocation's address (stable across `Arc` clones,
+    /// unique while the dispatched event is alive).
+    quick_ops: Mutex<HashMap<usize, Arc<QuickOpSlot>>>,
     pub(crate) state: StateMap,
 }
 
@@ -35,6 +49,7 @@ impl Context {
         Self {
             transport: RwLock::new(None),
             api_timeout,
+            quick_ops: Mutex::new(HashMap::new()),
             state: states,
         }
     }
@@ -87,6 +102,70 @@ impl Context {
         let info = self.get_login_info().await?;
         Ok(info.user_id)
     }
+
+    /// Register the quick-op slot for an event whose HTTP-POST response will
+    /// wait for the handler chain. Must be called before the event is
+    /// enqueued.
+    pub(crate) fn register_quick_op(&self, event: &Event) -> Arc<QuickOpSlot> {
+        let slot = Arc::new(QuickOpSlot::default());
+        self.quick_ops
+            .lock()
+            .expect("quick-op lock poisoned")
+            .insert(event_key(event), slot.clone());
+        slot
+    }
+
+    /// Attach a quick operation to an event with a pending response,
+    /// merging with any operation attached earlier. Returns `false` when no
+    /// response is pending (other transports, or the response already went
+    /// out), in which case the caller should fall back to the
+    /// `.handle_quick_operation` API action.
+    pub(crate) fn attach_quick_op(&self, event: &Event, operation: QuickOperation) -> bool {
+        let Some(slot) = self
+            .quick_ops
+            .lock()
+            .expect("quick-op lock poisoned")
+            .get(&event_key(event))
+            .cloned()
+        else {
+            return false;
+        };
+        let mut guard = slot.operation.lock().expect("quick-op lock poisoned");
+        match &mut *guard {
+            Some(existing) => existing.merge(operation),
+            slot @ None => *slot = Some(operation),
+        }
+        true
+    }
+
+    /// Drop the quick-op slot without signaling completion (used when the
+    /// response deadline expires or the event was never dispatched).
+    pub(crate) fn remove_quick_op(&self, event: &Event) {
+        self.quick_ops
+            .lock()
+            .expect("quick-op lock poisoned")
+            .remove(&event_key(event));
+    }
+
+    /// Signal that the handler chain finished with `event`, waking the
+    /// HTTP-POST response waiting to collect a quick operation.
+    pub(crate) fn finish_event(&self, event: &Event) {
+        if let Some(slot) = self
+            .quick_ops
+            .lock()
+            .expect("quick-op lock poisoned")
+            .remove(&event_key(event))
+        {
+            slot.done.notify_waiters();
+        }
+    }
+}
+
+/// Events are keyed by allocation address: the dispatched `Arc<Event>` (and
+/// every clone handed to handlers) shares one address, which stays unique
+/// for as long as the event is being processed.
+fn event_key(event: &Event) -> usize {
+    std::ptr::from_ref(event) as usize
 }
 
 pub type BotContext = Arc<Context>;

@@ -88,6 +88,21 @@
 //!
 //! [`DispatchMode`]: crate::base::bot::DispatchMode
 //!
+//! # Messages
+//!
+//! A [`Message`] is a sequence of message segments. On the wire the OneBot 11
+//! spec allows `message`-typed fields as a CQ-code string, a segment array,
+//! or a single segment object; [`Message`] deserializes from all three (so
+//! implementations configured with `event.message_format: string` work) and
+//! always serializes to the array form. `Display` renders the CQ-code string
+//! form (also available as [`message::cq::to_cq_string`]), and
+//! [`message::cq::parse_cq`] parses one by hand.
+//!
+//! Segment types not in the OneBot 11 standard set deserialize into
+//! [`Segment::Unknown`](message::segments::Segment::Unknown) instead of
+//! failing the surrounding message, and message events tolerate omitted
+//! optional fields (e.g. `font`).
+//!
 //! # Extractors
 //! Extractors work similarly to the extractors in axum. They are functions that can be registered to extract data from the event. They are to extract data from the context and event for the handler to use.
 //! To see a full list of predefined extractors, see the [`extract`] module.
@@ -157,6 +172,7 @@ pub mod message;
 pub use flow_bot_macros::{flow_filter, flow_service, group_message, private_message};
 
 // Re-exports of commonly used types for convenience.
+pub use api::{MessageTarget, QuickOperation};
 pub use base::{
     bot::{DispatchMode, FlowBot},
     builder::FlowBotBuilder,

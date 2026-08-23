@@ -143,7 +143,7 @@ mod tests {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BotStatus {
     pub online: Option<bool>,
     pub good: bool,
@@ -155,6 +155,126 @@ pub struct BotStatus {
 #[derive(Deserialize, Debug, Clone)]
 pub struct SendMessageResponse {
     pub message_id: i64,
+}
+
+/// Where [`send_msg`](crate::api::api_ext::ApiExt::send_message) delivers a
+/// message: a private chat or a group.
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum MessageTarget {
+    Private { user_id: i64 },
+    Group { group_id: i64 },
+}
+
+/// A quick operation on an event, delivered either through
+/// [`handle_quick_operation`](crate::api::api_ext::ApiExt::handle_quick_operation)
+/// or (for HTTP-POST webhooks) in the HTTP response body.
+///
+/// Which fields apply depends on the event: `reply`/`auto_escape` on message
+/// events (`at_sender`/`delete`/`kick`/`ban`/`ban_duration` additionally on
+/// group messages), `approve`/`remark` on friend-add requests and
+/// `approve`/`reason` on group-add requests. Absent fields are omitted from
+/// the wire and, per the spec, only present fields take effect.
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+pub struct QuickOperation {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reply: Option<message::Message>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub auto_escape: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub at_sender: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub delete: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kick: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ban: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ban_duration: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub approve: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub remark: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
+impl QuickOperation {
+    /// Merge `other` into `self`, with `other`'s set fields winning. Used
+    /// when several handlers attach quick operations to the same event.
+    pub fn merge(&mut self, other: QuickOperation) {
+        let QuickOperation {
+            reply,
+            auto_escape,
+            at_sender,
+            delete,
+            kick,
+            ban,
+            ban_duration,
+            approve,
+            remark,
+            reason,
+        } = other;
+        if reply.is_some() {
+            self.reply = reply;
+        }
+        if auto_escape.is_some() {
+            self.auto_escape = auto_escape;
+        }
+        if at_sender.is_some() {
+            self.at_sender = at_sender;
+        }
+        if delete.is_some() {
+            self.delete = delete;
+        }
+        if kick.is_some() {
+            self.kick = kick;
+        }
+        if ban.is_some() {
+            self.ban = ban;
+        }
+        if ban_duration.is_some() {
+            self.ban_duration = ban_duration;
+        }
+        if approve.is_some() {
+            self.approve = approve;
+        }
+        if remark.is_some() {
+            self.remark = remark;
+        }
+        if reason.is_some() {
+            self.reason = reason;
+        }
+    }
+}
+
+#[cfg(test)]
+mod quick_operation_tests {
+    use super::*;
+    use crate::message::IntoMessage;
+
+    #[test]
+    fn none_fields_are_omitted_and_merge_last_write_wins() {
+        let mut op = QuickOperation {
+            reply: Some("hi".to_string().into_message()),
+            ban: Some(true),
+            ..Default::default()
+        };
+        let wire = serde_json::to_value(&op).unwrap();
+        assert_eq!(
+            wire,
+            serde_json::json!({"reply": [{"type": "text", "data": {"text": "hi"}}], "ban": true})
+        );
+
+        op.merge(QuickOperation {
+            ban_duration: Some(600),
+            ban: Some(false),
+            ..Default::default()
+        });
+        assert_eq!(op.ban, Some(false));
+        assert_eq!(op.ban_duration, Some(600));
+        assert!(op.kick.is_none());
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -256,7 +376,7 @@ pub struct GroupHonorInfo {
     pub emotion_list: Option<Vec<HonorInfo>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum GroupHonorType {
     Talkative,

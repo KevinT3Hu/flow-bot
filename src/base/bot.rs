@@ -113,28 +113,19 @@ impl FlowBot {
 
         // Bounded event queue: connection frames wait here when handlers are
         // slow, giving backpressure instead of unbounded task growth.
-        let (tx, mut rx) = mpsc::channel::<Value>(self.event_queue_capacity);
+        let (tx, mut rx) = mpsc::channel::<BotEvent>(self.event_queue_capacity);
         let dispatcher = {
             let processors = self.processors.clone();
             let context = self.context.clone();
             let semaphore = self.concurrent_limit.clone();
             let mode = self.dispatch_mode;
             tokio::spawn(async move {
-                while let Some(value) = rx.recv().await {
-                    let event: BotEvent = match serde_json::from_value::<Event>(value) {
-                        Ok(event) => Arc::new(event),
-                        Err(e) => {
-                            tracing::warn!("dropping event that failed to deserialize: {e}");
-                            continue;
-                        }
-                    };
-                    if matches!(event.event, TypedEvent::Unknown(_)) {
-                        tracing::debug!(
-                            "event of unrecognized shape degraded to the Unknown variant"
-                        );
-                    }
+                while let Some(event) = rx.recv().await {
                     match mode {
-                        DispatchMode::Ordered => run_processors(&processors, &context, event).await,
+                        DispatchMode::Ordered => {
+                            run_processors(&processors, &context, Arc::clone(&event)).await;
+                            context.finish_event(&event);
+                        }
                         DispatchMode::Concurrent => {
                             let permit = semaphore
                                 .clone()
@@ -145,7 +136,8 @@ impl FlowBot {
                             let context = context.clone();
                             tokio::spawn(async move {
                                 let _permit = permit;
-                                run_processors(&processors, &context, event).await;
+                                run_processors(&processors, &context, Arc::clone(&event)).await;
+                                context.finish_event(&event);
                             });
                         }
                     }
@@ -211,6 +203,24 @@ impl FlowBot {
         self.shared
             .init_services_once(&self.processors, self.context.clone())
             .await;
+    }
+}
+
+/// Parse one raw event, logging and skipping anything that does not
+/// deserialize (a hard failure) and noting the `Unknown` fallback for
+/// events of unrecognized shape.
+pub(crate) fn parse_event(value: Value) -> Option<BotEvent> {
+    match serde_json::from_value::<Event>(value) {
+        Ok(event) => {
+            if matches!(event.event, TypedEvent::Unknown(_)) {
+                tracing::debug!("event of unrecognized shape degraded to the Unknown variant");
+            }
+            Some(Arc::new(event))
+        }
+        Err(e) => {
+            tracing::warn!("dropping event that failed to deserialize: {e}");
+            None
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct FriendRequest {
     pub user_id: i64,
     pub comment: String,
@@ -14,7 +14,7 @@ pub enum GroupRequestSubType {
     Invite,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GroupRequest {
     pub user_id: i64,
     pub sub_type: GroupRequestSubType,
@@ -23,7 +23,7 @@ pub struct GroupRequest {
     pub flag: String,
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "request_type")]
 #[serde(rename_all = "snake_case")]
 pub enum Request {

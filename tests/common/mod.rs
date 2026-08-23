@@ -62,20 +62,33 @@ pub async fn spawn_ws_server() -> (SocketAddr, mpsc::Receiver<ServerWs>) {
 }
 
 /// A fake OneBot implementation *client* (for reverse-WS tests): dials the
-/// SDK's WebSocket server with the spec's handshake headers.
+/// SDK's WebSocket server with the spec's handshake headers. Retries while
+/// the SDK's server is still starting up.
 pub async fn impl_dial(
     addr: SocketAddr,
     role: &str,
     token: Option<&str>,
 ) -> Result<ClientWs, tokio_tungstenite::tungstenite::Error> {
-    let mut request = format!("ws://{addr}/ws").into_client_request()?;
-    let headers = request.headers_mut();
-    headers.insert("X-Self-ID", "10000".parse().unwrap());
-    headers.insert("X-Client-Role", role.parse().unwrap());
-    if let Some(token) = token {
-        headers.insert("Authorization", format!("Bearer {token}").parse().unwrap());
+    let deadline = tokio::time::Instant::now() + TEST_TIMEOUT;
+    loop {
+        let mut request = format!("ws://{addr}/ws").into_client_request()?;
+        let headers = request.headers_mut();
+        headers.insert("X-Self-ID", "10000".parse().unwrap());
+        headers.insert("X-Client-Role", role.parse().unwrap());
+        if let Some(token) = token {
+            headers.insert("Authorization", format!("Bearer {token}").parse().unwrap());
+        }
+        match connect_async(request).await {
+            Ok((ws, _)) => return Ok(ws),
+            Err(tokio_tungstenite::tungstenite::Error::Io(e))
+                if e.kind() == std::io::ErrorKind::ConnectionRefused
+                    && tokio::time::Instant::now() < deadline =>
+            {
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+            Err(e) => return Err(e),
+        }
     }
-    Ok(connect_async(request).await?.0)
 }
 
 /// A fake OneBot HTTP API server answering every `/{action}` with a canned

@@ -5,6 +5,8 @@ use std::{sync::Arc, time::Duration};
 
 use async_trait::async_trait;
 use serde_json::Value;
+
+use crate::event::BotEvent;
 use tokio::sync::mpsc;
 
 use crate::{
@@ -98,7 +100,7 @@ impl ApiTransport for NoApiTransport {
 pub(crate) async fn run(
     bot: &FlowBot,
     cfg: &HttpConfig,
-    _events: mpsc::Sender<Value>,
+    _events: mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     let transport: Arc<dyn ApiTransport> = Arc::new(HttpClientTransport::new(cfg)?);
     bot.context().set_transport(transport);

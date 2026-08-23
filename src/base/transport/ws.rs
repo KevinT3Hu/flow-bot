@@ -13,7 +13,9 @@ use tokio::{
 };
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 
-use crate::{base::transport::ApiTransport, error::FlowError};
+use crate::{
+    base::bot::parse_event, base::transport::ApiTransport, error::FlowError, event::BotEvent,
+};
 
 /// Anything that can send one outbound text frame. Generalizes over the
 /// tokio-tungstenite (forward WS) and axum (reverse WS) sinks.
@@ -88,7 +90,7 @@ impl WsSession {
     /// A frame that is not valid JSON is logged and skipped instead of tearing
     /// down the connection, and blocks until the event queue has room
     /// (backpressure).
-    pub(crate) async fn handle_frame(&self, text: &str, events: &mpsc::Sender<Value>) {
+    pub(crate) async fn handle_frame(&self, text: &str, events: &mpsc::Sender<BotEvent>) {
         let value: Value = match serde_json::from_str(text) {
             Ok(value) => value,
             Err(e) => {
@@ -102,7 +104,9 @@ impl WsSession {
             let _ = tx.send(text.to_owned());
             return;
         }
-        if events.send(value).await.is_err() {
+        if let Some(event) = parse_event(value)
+            && events.send(event).await.is_err()
+        {
             tracing::debug!("event dropped: the dispatcher is no longer running");
         }
     }

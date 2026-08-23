@@ -45,6 +45,9 @@ pub enum FlowError {
     #[error("The active connection type cannot call OneBot APIs")]
     ApiUnavailable,
 
+    #[error("Operation requires a message event, got a {0} event")]
+    NotAMessageEvent(&'static str),
+
     #[error("Server error: {0}")]
     ServerError(#[from] std::io::Error),
 

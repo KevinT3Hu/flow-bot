@@ -2,6 +2,7 @@
 //! implementation POSTs events to it. Configure the implementation's
 //! `http_post.url` to point at this server; API calls go through the
 //! implementation's HTTP API endpoint configured below.
+use std::time::Duration;
 
 use flow_bot::{
     FlowBotBuilder,
@@ -29,6 +30,7 @@ async fn main() {
             base_url: "http://127.0.0.1:5700".to_string(),
             access_token: None,
         }),
+        response_timeout: Duration::from_secs(5),
     }))
     .with_state(())
     .with_handler(on_message)

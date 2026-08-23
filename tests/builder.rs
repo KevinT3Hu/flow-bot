@@ -1,4 +1,5 @@
 //! Builder validation tests (config-time panics) and config validation.
+use std::time::Duration;
 
 use flow_bot::{
     FlowBotBuilder,
@@ -66,6 +67,7 @@ fn webhook_path_must_start_with_slash() {
         path: "onebot".to_owned(),
         secret: None,
         api: None,
+        response_timeout: Duration::from_secs(5),
     });
     assert!(cfg.validate().unwrap_err().contains("must start with `/`"));
 }
@@ -90,6 +92,7 @@ fn valid_configs_validate() {
             base_url: "http://127.0.0.1:5700".to_owned(),
             access_token: None,
         }),
+        response_timeout: Duration::from_secs(5),
     })
     .validate()
     .unwrap();

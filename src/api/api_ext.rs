@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 
+use serde_json::Value;
+
 use crate::{
-    event::{message::GroupAnonymousInfo, request::GroupRequestSubType},
+    api::{MessageTarget, QuickOperation},
+    event::{BotEvent, message::GroupAnonymousInfo, request::GroupRequestSubType},
     message::IntoMessage,
 };
 
@@ -30,6 +33,58 @@ pub trait ApiExt {
         group_id: i64,
         message: M,
         auto_escape: Option<bool>,
+    ) -> Result<SendMessageResponse, Self::Error>
+    where
+        M: IntoMessage + Send;
+
+    /// Send a message through the spec's generic `send_msg` action, choosing
+    /// the chat with a [`MessageTarget`].
+    ///
+    /// `auto_escape` is not a parameter here: it only affects string-form
+    /// messages, while flow-bot always sends the array form. For `_async` or
+    /// `_rate_limited` delivery of any action (spec §异步调用/限速调用), use
+    /// [`call_action`](Self::call_action) with the suffixed action name,
+    /// e.g. `send_group_msg_rate_limited`.
+    async fn send_message<M>(
+        &self,
+        target: MessageTarget,
+        message: M,
+    ) -> Result<SendMessageResponse, Self::Error>
+    where
+        M: IntoMessage + Send;
+
+    /// Call an arbitrary OneBot action with raw JSON params, returning the
+    /// raw `data` field of the response.
+    ///
+    /// This is the escape hatch for implementation-specific actions and for
+    /// the spec's `_async` and `_rate_limited` action suffixes, which queue
+    /// the call on the implementation side and answer with
+    /// `status: "async"`.
+    async fn call_action(&self, action: &str, params: Value) -> Result<Value, Self::Error>;
+
+    /// Attach a quick operation to an event (spec: 快速操作).
+    ///
+    /// Over the HTTP-POST communication type, the operation is carried in
+    /// the pending webhook response body as long as the event's handlers are
+    /// still running (or until the configured
+    /// [`response_timeout`](crate::HttpPostConfig::response_timeout));
+    /// afterwards — and always on the other communication types — it is
+    /// delivered through the spec's hidden `.handle_quick_operation` API
+    /// action, which requires a working API connection.
+    async fn handle_quick_operation(
+        &self,
+        event: BotEvent,
+        operation: QuickOperation,
+    ) -> Result<(), Self::Error>;
+
+    /// Quote-reply `message` to the sender of a message event, using the
+    /// event's own message id and chat. Errors with
+    /// [`FlowError::NotAMessageEvent`](crate::error::FlowError::NotAMessageEvent)
+    /// on non-message events.
+    async fn reply<M>(
+        &self,
+        event: BotEvent,
+        message: M,
     ) -> Result<SendMessageResponse, Self::Error>
     where
         M: IntoMessage + Send;

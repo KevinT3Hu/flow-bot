@@ -1,10 +1,15 @@
 use async_trait::async_trait;
-use serde_json::json;
+use serde_json::{Value, json};
 
 use crate::{
+    api::{MessageTarget, QuickOperation},
     base::context::Context,
     error::FlowError,
-    event::{message::GroupAnonymousInfo, request::GroupRequestSubType},
+    event::{
+        BotEvent, TypedEvent,
+        message::{GroupAnonymousInfo, TypedMessageInfo},
+        request::GroupRequestSubType,
+    },
     message::IntoMessage,
 };
 
@@ -47,11 +52,13 @@ impl ApiExt for Context {
         M: IntoMessage + Send,
     {
         let message = message.into_message();
-        let params_json = json!({
+        let mut params_json = json!({
             "user_id": user_id,
             "message": message,
-            "auto_escape": auto_escape,
         });
+        if let Some(auto_escape) = auto_escape {
+            params_json["auto_escape"] = json!(auto_escape);
+        }
         let resp = self
             .send_obj("send_private_msg".to_string(), params_json)
             .await;
@@ -68,19 +75,102 @@ impl ApiExt for Context {
         M: IntoMessage + Send,
     {
         let message = message.into_message();
-        let params_json = json!({
+        let mut params_json = json!({
             "group_id": group_id,
             "message": message,
-            "auto_escape": auto_escape,
         });
+        if let Some(auto_escape) = auto_escape {
+            params_json["auto_escape"] = json!(auto_escape);
+        }
         let resp = self
             .send_obj("send_group_msg".to_string(), params_json)
             .await;
         resp.map(|r| r.data)
     }
 
+    async fn send_message<M>(
+        &self,
+        target: MessageTarget,
+        message: M,
+    ) -> Result<SendMessageResponse, Self::Error>
+    where
+        M: IntoMessage + Send,
+    {
+        let message = message.into_message();
+        let params_json = match target {
+            MessageTarget::Private { user_id } => json!({
+                "message_type": "private",
+                "user_id": user_id,
+                "message": message,
+            }),
+            MessageTarget::Group { group_id } => json!({
+                "message_type": "group",
+                "group_id": group_id,
+                "message": message,
+            }),
+        };
+        let resp = self.send_obj("send_msg".to_string(), params_json).await;
+        resp.map(|r| r.data)
+    }
+
+    async fn call_action(&self, action: &str, params: Value) -> Result<Value, Self::Error> {
+        let resp = self.send_obj(action.to_string(), params).await?;
+        Ok(resp.data)
+    }
+
+    async fn handle_quick_operation(
+        &self,
+        event: BotEvent,
+        operation: QuickOperation,
+    ) -> Result<(), Self::Error> {
+        // Events received over HTTP POST with a response still pending get
+        // the operation in the webhook response body instead of an API call.
+        if self.attach_quick_op(&event, operation.clone()) {
+            return Ok(());
+        }
+        let params = json!({
+            "context": &*event,
+            "operation": operation,
+        });
+        let resp = self
+            .send_obj::<_, Value>(".handle_quick_operation".to_string(), params)
+            .await?;
+        let _ = resp.data;
+        Ok(())
+    }
+
+    async fn reply<M>(
+        &self,
+        event: BotEvent,
+        message: M,
+    ) -> Result<SendMessageResponse, Self::Error>
+    where
+        M: IntoMessage + Send,
+    {
+        // Resolve the target and build the reply message before awaiting, so
+        // no borrow of `event` crosses the await point.
+        let reply = match &event.event {
+            TypedEvent::Message(msg) => {
+                let target = match &msg.info {
+                    TypedMessageInfo::Group(info) => MessageTarget::Group {
+                        group_id: info.group_id,
+                    },
+                    TypedMessageInfo::Private(_) => MessageTarget::Private {
+                        user_id: msg.user_id,
+                    },
+                };
+                Some((target, msg.reply(message)))
+            }
+            _ => None,
+        };
+        match reply {
+            Some((target, message)) => self.send_message(target, message).await,
+            None => Err(FlowError::NotAMessageEvent(event.event.get_type())),
+        }
+    }
+
     async fn delete_message(&self, message_id: i64) -> Result<(), Self::Error> {
-        impl_api!(self, delete_message, message_id)
+        impl_api!(self, delete_msg, message_id)
     }
 
     async fn get_message(&self, message_id: i64) -> Result<GetMessageResponse, Self::Error> {
@@ -135,7 +225,7 @@ impl ApiExt for Context {
         group_id: i64,
         enable: Option<bool>,
     ) -> Result<(), Self::Error> {
-        impl_api!(self, set_whole_group_ban, group_id, enable)
+        impl_api!(self, set_group_whole_ban, group_id, enable)
     }
 
     async fn set_group_admin(

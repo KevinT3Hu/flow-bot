@@ -3,8 +3,8 @@
 
 use std::sync::Arc;
 
+use crate::event::BotEvent;
 use futures::{StreamExt, stream::SplitSink, stream::SplitStream};
-use serde_json::Value;
 use tokio::{net::TcpStream, sync::mpsc};
 use tokio_tungstenite::{
     MaybeTlsStream, WebSocketStream, connect_async,
@@ -25,7 +25,7 @@ use crate::{
 pub(crate) async fn run(
     bot: &FlowBot,
     cfg: &ForwardWebSocketConfig,
-    events: mpsc::Sender<Value>,
+    events: mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     let url = validate_ws_url(&cfg.url).map_err(FlowError::InvalidConfig)?;
 
@@ -71,7 +71,7 @@ async fn cycle(
     bot: &FlowBot,
     cfg: &ForwardWebSocketConfig,
     url: &reqwest::Url,
-    events: &mpsc::Sender<Value>,
+    events: &mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     let (write, read) = connect(url, cfg.access_token.as_deref()).await?;
 
@@ -93,7 +93,7 @@ async fn run_with_reconnect(
     bot: &FlowBot,
     cfg: &ForwardWebSocketConfig,
     url: &reqwest::Url,
-    events: &mpsc::Sender<Value>,
+    events: &mpsc::Sender<BotEvent>,
     max_attempts: Option<u32>,
     initial_delay_ms: u64,
     max_delay_ms: u64,
@@ -165,7 +165,7 @@ async fn read_loop(
     bot: &FlowBot,
     session: &WsSession,
     mut read: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
-    events: &mpsc::Sender<Value>,
+    events: &mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     loop {
         tokio::select! {

@@ -121,6 +121,13 @@ pub struct HttpPostConfig {
     pub secret: Option<String>,
     /// Optional HTTP API endpoint used for outbound API calls.
     pub api: Option<HttpConfig>,
+    /// How long each event POST waits for the handler chain to finish before
+    /// answering, so that quick operations attached by handlers can travel
+    /// in the response body (the spec's HTTP-POST quick-operation channel).
+    /// Events whose handlers exceed it are answered with `204 No Content`;
+    /// handlers attaching operations after the deadline fall back to the
+    /// `.handle_quick_operation` API when [`api`](Self::api) is configured.
+    pub response_timeout: Duration,
 }
 
 /// The four OneBot 11 communication types.

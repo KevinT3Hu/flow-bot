@@ -2,7 +2,7 @@
 //! implementation POSTs events to it. Outbound API calls optionally travel
 //! over a separate HTTP connection.
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use axum::{
     Router,
@@ -18,14 +18,17 @@ use sha1::Sha1;
 use tokio::sync::mpsc;
 
 use crate::{
+    api::QuickOperation,
     base::{
-        bot::FlowBot,
+        bot::{FlowBot, parse_event},
+        context::BotContext,
         transport::{
             ApiTransport, HttpPostConfig,
             http::{HttpClientTransport, NoApiTransport},
         },
     },
     error::FlowError,
+    event::BotEvent,
 };
 
 type HmacSha1 = Hmac<Sha1>;
@@ -33,13 +36,15 @@ type HmacSha1 = Hmac<Sha1>;
 #[derive(Clone)]
 struct WebhookState {
     secret: Option<String>,
-    events: mpsc::Sender<Value>,
+    events: mpsc::Sender<BotEvent>,
+    context: BotContext,
+    response_timeout: Duration,
 }
 
 pub(crate) async fn run(
     bot: &FlowBot,
     cfg: &HttpPostConfig,
-    events: mpsc::Sender<Value>,
+    events: mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     // Outbound API calls go over a separate HTTP connection if configured;
     // otherwise they fail fast with `ApiUnavailable`.
@@ -58,6 +63,8 @@ pub(crate) async fn run(
     let state = WebhookState {
         secret: cfg.secret.clone(),
         events,
+        context: bot.context(),
+        response_timeout: cfg.response_timeout,
     };
     let app = Router::new()
         .route(&cfg.path, post(webhook))
@@ -88,13 +95,48 @@ async fn webhook(State(state): State<WebhookState>, headers: HeaderMap, body: By
             return StatusCode::BAD_REQUEST.into_response();
         }
     };
+    let Some(event) = parse_event(value) else {
+        return StatusCode::BAD_REQUEST.into_response();
+    };
 
+    // The response body is this communication type's quick-operation channel
+    // (spec: HTTP POST 快速操作): register a slot for the event, enqueue it,
+    // and answer with whatever quick operation handlers attached — or 204
+    // (no operation) when the chain finishes or the deadline expires
+    // without one.
+    let slot = state.context.register_quick_op(&event);
+    let finished = slot.done.notified();
     // Block until the event queue has room (backpressure). The OneBot 11 spec
     // requires the backend to always answer: 204 means "no quick operation".
-    if state.events.send(value).await.is_err() {
+    if state.events.send(Arc::clone(&event)).await.is_err() {
+        state.context.remove_quick_op(&event);
         return StatusCode::SERVICE_UNAVAILABLE.into_response();
     }
-    StatusCode::NO_CONTENT.into_response()
+
+    let operation: Option<QuickOperation> =
+        match tokio::time::timeout(state.response_timeout, finished).await {
+            Ok(()) => slot
+                .operation
+                .lock()
+                .expect("quick-op lock poisoned")
+                .clone(),
+            Err(_) => {
+                // Deadline exceeded: forget the slot so later attaches fall
+                // back to the `.handle_quick_operation` API (when configured).
+                state.context.remove_quick_op(&event);
+                tracing::debug!("event POST response deadline exceeded; answering 204");
+                None
+            }
+        };
+
+    match operation {
+        Some(operation) => (
+            StatusCode::OK,
+            axum::Json(serde_json::to_value(&operation).expect("quick operation serializes")),
+        )
+            .into_response(),
+        None => StatusCode::NO_CONTENT.into_response(),
+    }
 }
 
 /// Verify `X-Signature: sha1=<hex>` — HMAC-SHA1 of the raw body keyed with

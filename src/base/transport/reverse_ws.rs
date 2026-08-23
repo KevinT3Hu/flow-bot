@@ -4,6 +4,7 @@
 
 use std::sync::Arc;
 
+use crate::event::BotEvent;
 use axum::{
     Router,
     extract::{
@@ -14,7 +15,6 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use futures::StreamExt;
-use serde_json::Value;
 use tokio::sync::mpsc;
 
 use crate::{
@@ -32,7 +32,7 @@ struct WsState {
     context: BotContext,
     access_token: Option<String>,
     path: Option<String>,
-    events: mpsc::Sender<Value>,
+    events: mpsc::Sender<BotEvent>,
     processors: Arc<Vec<Arc<dyn EventProcessor>>>,
     shared: Arc<crate::base::bot::BotShared>,
 }
@@ -48,7 +48,7 @@ enum ClientRole {
 pub(crate) async fn run(
     bot: &FlowBot,
     cfg: &ReverseWebSocketConfig,
-    events: mpsc::Sender<Value>,
+    events: mpsc::Sender<BotEvent>,
 ) -> Result<(), FlowError> {
     let listener = tokio::net::TcpListener::bind(cfg.bind)
         .await

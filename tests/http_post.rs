@@ -3,16 +3,16 @@
 
 mod common;
 
-use std::{net::SocketAddr, time::Duration};
+use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use common::*;
 use flow_bot::{
-    FlowError,
+    BotContext, BotEvent, FlowBot, FlowBotBuilder, FlowError, HandlerControl, QuickOperation,
     api::api_ext::ApiExt,
     base::transport::{ConnectionConfig, HttpConfig, HttpPostConfig},
 };
 use hmac::{Hmac, Mac};
-use serde_json::json;
+use serde_json::{Value, json};
 use sha1::Sha1;
 
 fn webhook_cfg(
@@ -25,6 +25,7 @@ fn webhook_cfg(
         path: "/".to_owned(),
         secret,
         api,
+        response_timeout: Duration::from_secs(5),
     })
 }
 
@@ -141,5 +142,53 @@ async fn without_api_endpoint_api_calls_fail_fast() {
         .unwrap()
         .unwrap_err();
     assert!(matches!(err, FlowError::ApiUnavailable), "got {err:?}");
+    bot.shutdown();
+}
+
+/// Run a bot whose handler attaches `op(event)` to every message event.
+async fn spawn_quick_op_bot<F>(bind: SocketAddr, op: F) -> Arc<FlowBot>
+where
+    F: Fn(BotEvent) -> QuickOperation + Send + Sync + 'static + Clone,
+{
+    let bot = FlowBotBuilder::new(webhook_cfg(bind, None, None))
+        .with_state(())
+        .with_handler(move |ctx: BotContext, event: BotEvent| {
+            let op = op.clone();
+            async move {
+                ctx.handle_quick_operation(event.clone(), op(event)).await?;
+                Ok(HandlerControl::Continue)
+            }
+        })
+        .build();
+    let bot = Arc::new(bot);
+    let run_bot = bot.clone();
+    tokio::spawn(async move {
+        let _ = run_bot.run().await;
+    });
+    bot
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn quick_operation_travels_in_the_response_body() {
+    let bind = reserve_addr().await;
+    let bot = spawn_quick_op_bot(bind, |event| {
+        let _ = event;
+        QuickOperation {
+            reply: Some("pong".into()),
+            ..Default::default()
+        }
+    })
+    .await;
+
+    // The implementation POSTs an event and reads the quick operation from
+    // the HTTP response body (the spec's HTTP-POST quick-op channel).
+    let body = private_message_event("ping").to_string();
+    let response = post_event(bind, &body, None).await;
+    assert_eq!(response.status(), 200);
+    let operation: Value = response.json().await.unwrap();
+    assert_eq!(
+        operation,
+        json!({"reply": [{"type": "text", "data": {"text": "pong"}}]})
+    );
     bot.shutdown();
 }

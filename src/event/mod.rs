@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub mod message;
 pub mod meta_event;
 pub mod notice;
 pub mod request;
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "post_type")]
 #[serde(rename_all = "snake_case")]
 pub enum TypedEvent {
@@ -21,7 +21,7 @@ pub enum TypedEvent {
 }
 
 impl TypedEvent {
-    pub fn get_type(&self) -> &str {
+    pub fn get_type(&self) -> &'static str {
         match self {
             TypedEvent::Message(..) => "message",
             TypedEvent::Notice(..) => "notice",
@@ -32,7 +32,7 @@ impl TypedEvent {
     }
 }
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Event {
     pub time: i64,
     pub self_id: i64,

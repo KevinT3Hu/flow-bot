@@ -65,8 +65,9 @@ impl FromEvent for RawMessage {
     }
 }
 
-/// Extract the font field from a message event.
-pub struct Font(pub i32);
+/// Extract the font field from a message event (absent in some
+/// implementations, hence the `Option`).
+pub struct Font(pub Option<i32>);
 
 #[async_trait]
 impl FromEvent for Font {
